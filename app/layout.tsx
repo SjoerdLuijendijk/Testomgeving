@@ -1,4 +1,6 @@
-export const metadata = { title: "Notes" };
+import "./globals.css";
+
+export const metadata = { title: "Notities", description: "Bewaar notities en bijlagen op één plek." };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
