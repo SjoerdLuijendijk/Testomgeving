@@ -99,11 +99,51 @@ button:disabled {
 .page-main {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 70px 32px 120px;
+  padding: 42px 32px 120px;
+}
+
+.view-menu {
+  display: inline-flex;
+  gap: 5px;
+  margin-bottom: 58px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--paper);
+}
+
+.view-menu a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 16px;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.view-menu a:hover {
+  color: var(--green-dark);
+  background: #f5f8f5;
+}
+
+.view-menu a[aria-current="page"],
+.view-menu a[aria-current="page"]:hover {
+  color: white;
+  background: var(--green);
+}
+
+.view-menu a span {
+  font-size: 18px;
+  line-height: 1;
 }
 
 .page-intro {
-  margin-bottom: 58px;
+  margin-bottom: 42px;
 }
 
 .eyebrow {
@@ -135,11 +175,12 @@ button:disabled {
   line-height: 1.6;
 }
 
-.content-grid {
-  display: grid;
-  grid-template-columns: minmax(295px, 370px) minmax(0, 1fr);
-  align-items: start;
-  gap: 42px;
+.view-content {
+  max-width: 860px;
+}
+
+.view-content--new {
+  max-width: 640px;
 }
 
 .compose-panel,
@@ -151,8 +192,7 @@ button:disabled {
 }
 
 .compose-panel {
-  position: sticky;
-  top: 24px;
+  position: relative;
   overflow: hidden;
   border-radius: 20px;
   padding: 28px;
@@ -488,6 +528,11 @@ button:disabled {
   font-size: 13px;
 }
 
+.empty-state a {
+  color: var(--green);
+  font-weight: 700;
+}
+
 @media (max-width: 760px) {
   .site-header {
     min-height: 75px;
@@ -499,20 +544,20 @@ button:disabled {
   }
 
   .page-main {
-    padding: 48px 22px 80px;
+    padding: 28px 22px 80px;
+  }
+
+  .view-menu {
+    display: flex;
+    margin-bottom: 40px;
+  }
+
+  .view-menu a {
+    flex: 1;
   }
 
   .page-intro {
     margin-bottom: 38px;
-  }
-
-  .content-grid {
-    grid-template-columns: 1fr;
-    gap: 42px;
-  }
-
-  .compose-panel {
-    position: static;
   }
 }
 
