@@ -1,4 +1,6 @@
+import { formatPrice } from "../lib/price";
 import { CONDITION_LABELS, FLUE_OUTLET_LABELS, type Stove } from "../lib/stoves";
+import EditStoveDialog from "./EditStoveDialog";
 import PhotoCell from "./PhotoCell";
 import SoldToggle from "./SoldToggle";
 
@@ -14,7 +16,7 @@ function formatFlue({ flueOutlet, flueDiameterMm }: Stove) {
   return parts.length > 0 ? parts.join(", ") : MISSING;
 }
 
-export default function StoveRow({ stove }: { stove: Stove }) {
+export default function StoveRow({ stove, brands }: { stove: Stove; brands: string[] }) {
   return (
     <tr className={stove.soldAt ? "is-sold" : undefined}>
       <td data-label="Nr." className="cell-number">{stove.number}</td>
@@ -24,10 +26,12 @@ export default function StoveRow({ stove }: { stove: Stove }) {
       <td data-label="Staat">{stove.condition ? CONDITION_LABELS[stove.condition] : MISSING}</td>
       <td data-label="H × B × D" className="cell-nowrap">{formatDimensions(stove)}</td>
       <td data-label="Rookafvoer" className="cell-nowrap">{formatFlue(stove)}</td>
+      <td data-label="Prijs" className="cell-nowrap cell-price">{stove.priceCents ? formatPrice(stove.priceCents) : MISSING}</td>
       <td data-label="Status" className="cell-status"><SoldToggle stoveNumber={stove.number} sold={Boolean(stove.soldAt)} /></td>
       <td data-label="Toegevoegd" className="muted">
         <time dateTime={stove.createdAt}>{DATE_FORMAT.format(new Date(stove.createdAt))}</time>
       </td>
+      <td className="cell-actions"><EditStoveDialog stove={stove} brands={brands} /></td>
     </tr>
   );
 }

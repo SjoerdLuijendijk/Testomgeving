@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { formatPrice } from "../lib/price";
 import type { Stove } from "../lib/stoves";
 import StoveRow from "./StoveRow";
 
@@ -16,12 +17,25 @@ function matchesSearch(stove: Stove, query: string) {
 
 export default function StoveTable({ stoves }: { stoves: Stove[] }) {
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useState<Filter>("available");
 
-  const counts = useMemo(() => {
-    const sold = stoves.filter((stove) => stove.soldAt).length;
-    return { all: stoves.length, available: stoves.length - sold, sold };
+  // Count and total price (incl. VAT) per filter; stoves without a price count as zero.
+  const totals = useMemo(() => {
+    const result: Record<Filter, { count: number; cents: number }> = {
+      all: { count: 0, cents: 0 },
+      available: { count: 0, cents: 0 },
+      sold: { count: 0, cents: 0 },
+    };
+    for (const stove of stoves) {
+      for (const key of ["all", stove.soldAt ? "sold" : "available"] as const) {
+        result[key].count += 1;
+        result[key].cents += stove.priceCents ?? 0;
+      }
+    }
+    return result;
   }, [stoves]);
+
+  const brands = useMemo(() => [...new Set(stoves.map((stove) => stove.brand))].sort((a, b) => a.localeCompare(b, "nl")), [stoves]);
 
   const query = search.trim().toLowerCase();
   const visible = stoves.filter(
@@ -43,7 +57,8 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
         <div className="filter-group" role="group" aria-label="Filter op status">
           {(Object.keys(FILTER_LABELS) as Filter[]).map((key) => (
             <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}>
-              {FILTER_LABELS[key]} <span>{counts[key]}</span>
+              {FILTER_LABELS[key]} <span>{totals[key].count}</span>
+              <small>{formatPrice(totals[key].cents)} incl. btw</small>
             </button>
           ))}
         </div>
@@ -68,12 +83,14 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
                 <th scope="col">Staat</th>
                 <th scope="col">H × B × D</th>
                 <th scope="col">Rookafvoer</th>
+                <th scope="col">Prijs</th>
                 <th scope="col">Status</th>
                 <th scope="col">Toegevoegd</th>
+                <th scope="col"><span className="visually-hidden">Acties</span></th>
               </tr>
             </thead>
             <tbody>
-              {visible.map((stove) => <StoveRow key={stove.number} stove={stove} />)}
+              {visible.map((stove) => <StoveRow key={stove.number} stove={stove} brands={brands} />)}
             </tbody>
           </table>
         </div>
