@@ -118,6 +118,10 @@ a {
   padding: 24px 16px 64px;
 }
 
+.page-main--wide {
+  max-width: none;
+}
+
 @media (min-width: 720px) {
   .tabs {
     order: 0;
@@ -534,7 +538,7 @@ a {
   white-space: nowrap;
 }
 
-.cell-price {
+.stove-table .cell-numeric {
   font-variant-numeric: tabular-nums;
 }
 
@@ -609,8 +613,171 @@ a {
   background: #fdf1ec;
 }
 
+.sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+}
+
+.cell-numeric .sort-button {
+  justify-content: flex-end;
+}
+
+.sort-indicator {
+  color: #b9aca4;
+  font-size: 10px;
+}
+
+[aria-sort="ascending"] .sort-indicator,
+[aria-sort="descending"] .sort-indicator {
+  color: var(--accent);
+}
+
+/* Laptop and wider: a compact spreadsheet with a fixed header row and number column. */
+@media (min-width: 720px) {
+  .page-main--wide {
+    padding: 16px 24px 32px;
+  }
+
+  .table-wrap {
+    max-height: calc(100dvh - 190px);
+    overflow: auto;
+    border-radius: 8px;
+  }
+
+  .stove-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+  }
+
+  .stove-table .cell-numeric {
+    text-align: right;
+  }
+
+  .stove-table th,
+  .stove-table td {
+    padding: 5px 10px;
+    border-right: 1px solid var(--line);
+    background: var(--paper);
+    white-space: nowrap;
+  }
+
+  .stove-table th:last-child,
+  .stove-table td:last-child {
+    border-right: 0;
+  }
+
+  .stove-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding-block: 8px;
+    border-bottom: 2px solid var(--line);
+    background: #f8f5f2;
+    color: var(--ink);
+  }
+
+  .stove-table tbody tr:nth-child(even) td {
+    background: #fcfaf9;
+  }
+
+  .stove-table tbody tr:hover td {
+    background: #fdf1ec;
+  }
+
+  .stove-table th:first-child,
+  .stove-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    border-right: 2px solid var(--line);
+  }
+
+  .stove-table thead th:first-child {
+    z-index: 3;
+  }
+
+  .stove-table tfoot td {
+    position: sticky;
+    bottom: 0;
+    border-top: 2px solid var(--line);
+    border-bottom: 0;
+    background: #f8f5f2;
+    font-weight: 600;
+  }
+
+  .stove-table .status-pill {
+    width: 100%;
+    min-width: 88px;
+    min-height: 26px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  .stove-table .photo-cell {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .stove-table .thumb,
+  .stove-table .thumb img,
+  .stove-table .thumb-missing,
+  .stove-table .thumb-add {
+    width: 30px;
+    height: 30px;
+  }
+
+  .stove-table .thumb .remove-photo {
+    top: -5px;
+    right: -5px;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .stove-table .thumb-add {
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 720px) and (hover: hover) {
+  .stove-table .thumb .remove-photo {
+    opacity: 0;
+  }
+
+  .stove-table .thumb:hover .remove-photo,
+  .stove-table .thumb .remove-photo:focus-visible {
+    opacity: 1;
+  }
+}
+
 /* On phones every row becomes a card. */
 @media (max-width: 719px) {
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-group button {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 4px;
+  }
+
+  .filter-group button small {
+    font-size: 10px;
+    white-space: normal;
+  }
+
   .table-wrap {
     border: 0;
     background: none;
@@ -643,8 +810,13 @@ a {
     border: 0;
   }
 
-  .stove-table td.cell-actions::before {
+  .stove-table td.cell-actions::before,
+  .stove-table tfoot td::before {
     display: none;
+  }
+
+  .stove-table tfoot {
+    display: block;
   }
 
   .stove-table td::before {

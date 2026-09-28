@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { formatPrice } from "../lib/price";
+import { DEFAULT_SORT, nextSort, sortStoves, type SortKey } from "../lib/stove-sort";
 import type { Stove } from "../lib/stoves";
+import SortableHeader from "./SortableHeader";
 import StoveRow from "./StoveRow";
 
 type Filter = "all" | "available" | "sold";
@@ -18,6 +20,7 @@ function matchesSearch(stove: Stove, query: string) {
 export default function StoveTable({ stoves }: { stoves: Stove[] }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("available");
+  const [sort, setSort] = useState(DEFAULT_SORT);
 
   // Count and total price (incl. VAT) per filter; stoves without a price count as zero.
   const totals = useMemo(() => {
@@ -38,8 +41,14 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
   const brands = useMemo(() => [...new Set(stoves.map((stove) => stove.brand))].sort((a, b) => a.localeCompare(b, "nl")), [stoves]);
 
   const query = search.trim().toLowerCase();
-  const visible = stoves.filter(
-    (stove) => matchesSearch(stove, query) && (filter === "all" || (filter === "sold") === Boolean(stove.soldAt)),
+  const visible = sortStoves(
+    stoves.filter((stove) => matchesSearch(stove, query) && (filter === "all" || (filter === "sold") === Boolean(stove.soldAt))),
+    sort,
+  );
+  const visibleCents = visible.reduce((sum, stove) => sum + (stove.priceCents ?? 0), 0);
+
+  const header = (label: string, sortKey: SortKey, className?: string) => (
+    <SortableHeader label={label} sortKey={sortKey} sort={sort} onSort={(key) => setSort((current) => nextSort(current, key))} className={className} />
   );
 
   return (
@@ -76,22 +85,29 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
           <table className="stove-table">
             <thead>
               <tr>
-                <th scope="col">Nr.</th>
+                {header("Nr.", "number", "cell-number")}
                 <th scope="col">Foto&apos;s</th>
-                <th scope="col">Merk</th>
-                <th scope="col">Model</th>
-                <th scope="col">Staat</th>
-                <th scope="col">H × B × D</th>
+                {header("Merk", "brand")}
+                {header("Model", "model")}
+                {header("Staat", "condition")}
+                <th scope="col" className="cell-numeric">H × B × D</th>
                 <th scope="col">Rookafvoer</th>
-                <th scope="col">Prijs</th>
-                <th scope="col">Status</th>
-                <th scope="col">Toegevoegd</th>
+                {header("Prijs", "priceCents", "cell-numeric")}
+                {header("Status", "status")}
+                {header("Toegevoegd", "createdAt")}
                 <th scope="col"><span className="visually-hidden">Acties</span></th>
               </tr>
             </thead>
             <tbody>
               {visible.map((stove) => <StoveRow key={stove.number} stove={stove} brands={brands} />)}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={7}>{visible.length} {visible.length === 1 ? "kachel" : "kachels"}</td>
+                <td className="cell-numeric">{formatPrice(visibleCents)}</td>
+                <td colSpan={3} className="muted">incl. btw</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       )}

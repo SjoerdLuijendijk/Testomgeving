@@ -24,9 +24,9 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       <td data-label="Merk">{stove.brand}</td>
       <td data-label="Model">{stove.model}</td>
       <td data-label="Staat">{stove.condition ? CONDITION_LABELS[stove.condition] : MISSING}</td>
-      <td data-label="H × B × D" className="cell-nowrap">{formatDimensions(stove)}</td>
+      <td data-label="H × B × D" className="cell-nowrap cell-numeric">{formatDimensions(stove)}</td>
       <td data-label="Rookafvoer" className="cell-nowrap">{formatFlue(stove)}</td>
-      <td data-label="Prijs" className="cell-nowrap cell-price">{stove.priceCents ? formatPrice(stove.priceCents) : MISSING}</td>
+      <td data-label="Prijs" className="cell-nowrap cell-numeric">{stove.priceCents ? formatPrice(stove.priceCents) : MISSING}</td>
       <td data-label="Status" className="cell-status"><SoldToggle stoveNumber={stove.number} sold={Boolean(stove.soldAt)} /></td>
       <td data-label="Toegevoegd" className="muted">
         <time dateTime={stove.createdAt}>{DATE_FORMAT.format(new Date(stove.createdAt))}</time>

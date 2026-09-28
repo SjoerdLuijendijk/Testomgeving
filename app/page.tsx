@@ -31,7 +31,7 @@ export default async function Page({ searchParams }: PageProps) {
         </form>
       </header>
 
-      <main className="page-main">
+      <main className={activeTab === "voorraad" ? "page-main page-main--wide" : "page-main"}>
         {!isMember ? (
           <div className="notice" role="alert">
             <strong>Geen toegang</strong>
