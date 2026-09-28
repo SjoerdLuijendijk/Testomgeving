@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { MAX_PHOTOS_PER_UPLOAD } from "../lib/stoves";
 import { photosToFormData } from "../lib/photo-form-data";
 import { addStove } from "./actions";
-import CameraButton from "./CameraButton";
+import PhotoPickerButton from "./PhotoPickerButton";
 import StoveFields from "./StoveFields";
 
 type Photo = { blob: Blob; previewUrl: string };
@@ -88,10 +88,23 @@ export default function AddStoveForm({ brands }: { brands: string[] }) {
               ))}
             </ul>
           )}
-          <div className="button-row">
-            <CameraButton label="📷 Foto maken" onPhotos={addPhotos} className="camera-button" disabled={pending} />
-            <CameraButton label="Uit galerij" onPhotos={addPhotos} capture={false} disabled={pending} />
-          </div>
+          <PhotoPickerButton
+            className="photo-add-button"
+            onPhotos={addPhotos}
+            disabled={pending}
+            label={
+              <>
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
+                  <circle cx="12" cy="13" r="3.5" />
+                </svg>
+                <span className="photo-add-text">
+                  <strong>Foto&apos;s toevoegen</strong>
+                  <small>Maak een foto of kies uit je galerij</small>
+                </span>
+              </>
+            }
+          />
         </fieldset>
 
         <StoveFields brands={brands} />

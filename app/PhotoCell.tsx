@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import type { StovePhoto } from "../lib/stoves";
 import { photosToFormData } from "../lib/photo-form-data";
 import { addStovePhotos, deleteStovePhoto } from "./actions";
-import CameraButton from "./CameraButton";
+import PhotoPickerButton from "./PhotoPickerButton";
 import { useDialog } from "./DialogProvider";
 import PhotoViewer from "./PhotoViewer";
 
@@ -43,7 +43,7 @@ export default function PhotoCell({ stoveNumber, photos }: { stoveNumber: number
           <button type="button" className="remove-photo" onClick={() => remove(photo.id)} disabled={pending} aria-label={`Foto ${index + 1} verwijderen`}>×</button>
         </span>
       ))}
-      <CameraButton label={pending ? "…" : "＋📷"} onPhotos={upload} className="thumb-add" disabled={pending} />
+      <PhotoPickerButton label={pending ? "…" : "＋📷"} ariaLabel="Foto's toevoegen" onPhotos={upload} className="thumb-add" disabled={pending} />
       <PhotoViewer stoveNumber={stoveNumber} photos={photos} index={viewIndex} onIndexChange={setViewIndex} />
     </div>
   );

@@ -136,8 +136,7 @@ a {
 /* Buttons */
 
 .primary-button,
-.secondary-button,
-.camera-button {
+.secondary-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -171,12 +170,47 @@ a {
   color: var(--ink);
 }
 
-.camera-button {
-  flex: 1;
+.photo-add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 76px;
+  padding: 14px 20px;
   border: 2px dashed var(--accent);
+  border-radius: 14px;
   background: #fdf1ec;
   color: var(--accent-dark);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.photo-add-button:not([aria-disabled="true"]):hover {
+  border-style: solid;
+  background: #fbe4da;
+}
+
+.photo-add-button:focus-within,
+.thumb-add:focus-within {
+  outline: 3px solid #f0a37f;
+  outline-offset: 2px;
+}
+
+.photo-add-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.photo-add-text strong {
   font-size: 17px;
+}
+
+.photo-add-text small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .text-button {
