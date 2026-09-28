@@ -24,6 +24,11 @@ export async function sendMagicLink(_state: LoginState, formData: FormData): Pro
 
   // Same answer for unknown addresses, so the form does not reveal who has an account.
   if (error && error.status !== 422 && error.code !== "otp_disabled") {
+    // Code and status only; never log the e-mail address.
+    console.error("Magic link failed", { code: error.code, status: error.status });
+    if (error.status === 429) {
+      return { status: "error", message: "Er zijn te veel inlogmails verstuurd. Probeer het over een uur opnieuw." };
+    }
     return { status: "error", message: "De e-mail kon niet worden verstuurd. Probeer het later opnieuw." };
   }
   return { status: "sent", message: email };
