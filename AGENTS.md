@@ -122,15 +122,49 @@ If correct authorization requires authentication, ownership information, roles, 
 
 ## Secrets and Environment Variables
 
-- Never commit secrets, passwords, private API keys, tokens, service-role keys, signing keys, certificates, or credentials.
-- `.env` and environment-specific secret files must remain gitignored.
+### Sources of Truth
+
+- Vercel is the only source of truth for environment variables used by the Next.js app.
+- Supabase Secrets is the source of truth for secrets used by Supabase Edge Functions.
+- Secrets used only by Edge Functions belong only in Supabase Secrets; do not duplicate them to Vercel unless the Next.js app actually needs them.
+- Do not manage environment values manually on a local machine. Add or change values in Vercel or Supabase Secrets, then pull or redeploy.
+- A new computer must be able to obtain all required Next.js variables from Vercel; values must never need to be copied manually between computers.
+
+### Local Environment Files
+
+- `.env.local` may only exist as a temporary, gitignored local copy generated from Vercel with `vercel env pull`. Do not hand-edit it; regenerate it instead.
+- `.env` and all other environment-specific files must remain gitignored.
 - Maintain `.env.example` when environment variables are required by the project.
-- `.env.example` must contain placeholders only, never real secrets.
-- Server-only secrets must stay server-side.
-- Never expose server-only secrets through `NEXT_PUBLIC_*`.
-- Production secrets belong in the appropriate secret store, such as Vercel environment variables or Supabase secrets.
+- `.env.example` must contain variable names and placeholders only, never real values.
+
+### Environments
+
+- Keep Vercel's Development, Preview, and Production environments clearly separated.
+- Local development uses the Development environment (`vercel env pull .env.local --environment=development`).
+- Never pull Production (or Preview) configuration to a local development machine without an explicit reason and user approval.
+
+### Client and Server Exposure
+
+- Supabase publishable keys are not secret and may be stored as normal Vercel environment variables, including `NEXT_PUBLIC_*` variables.
+- Privileged credentials, such as the Supabase `service_role` key, must never be available client-side.
+- Server-only secrets must stay server-side and must never be exposed through `NEXT_PUBLIC_*`.
+
+### Handling Secret Values
+
+- Never commit secrets, passwords, private API keys, tokens, service-role keys, signing keys, certificates, or credentials. GitHub must never contain real credentials, tokens, or secrets.
+- Never print or display secret values in terminal output, logs, chat, or documentation.
+- When verification is needed, check only presence or format (for example, that a variable is set or has the expected prefix/length), never the value itself.
 - Before committing changes involving configuration, inspect the diff for accidental secrets.
 - If a secret may already have been committed or exposed, stop and report it. Treat rotation as required unless it is clearly a non-secret public credential.
+
+### New Development Computer Setup
+
+1. Clone the repository from GitHub.
+2. Install dependencies with `npm install`.
+3. Link the existing Vercel project with `vercel link` (do not create a new project); the Vercel CLI requires `vercel login` first.
+4. Pull the Development environment with `vercel env pull .env.local --environment=development`.
+5. Perform the remaining CLI/MCP authentication (for example `supabase login` and the Supabase MCP connection) through their own interactive login flows; never paste tokens into files, chat, or the repository.
+6. Verify the configuration safely: confirm that the variables listed in `.env.example` are present in `.env.local` without printing their values, confirm `.env.local` is gitignored (`git check-ignore .env.local`), and start the app to check it runs.
 
 ## External APIs and Integrations
 
