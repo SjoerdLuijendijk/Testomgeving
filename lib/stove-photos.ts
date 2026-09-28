@@ -1,0 +1,54 @@
+import { randomUUID } from "node:crypto";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { MAX_PHOTO_BYTES, MAX_PHOTOS_PER_UPLOAD, MAX_UPLOAD_BYTES, PHOTOS_BUCKET } from "./stoves";
+
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+// A validation failure whose message is safe to show to the user.
+export class UserError extends Error {}
+
+function isJpeg(bytes: Uint8Array) {
+  return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+}
+
+// Validates untrusted uploads by size and content, not by the browser-supplied name or type.
+export async function readPhotos(formData: FormData) {
+  const files = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length > MAX_PHOTOS_PER_UPLOAD) throw new UserError(`Maximaal ${MAX_PHOTOS_PER_UPLOAD} foto's per keer.`);
+  if (files.reduce((sum, file) => sum + file.size, 0) > MAX_UPLOAD_BYTES) {
+    throw new UserError("De foto's zijn samen te groot. Voeg er minder tegelijk toe.");
+  }
+
+  return Promise.all(
+    files.map(async (file) => {
+      if (file.size > MAX_PHOTO_BYTES) throw new UserError("Een foto is te groot.");
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      if (!isJpeg(bytes)) throw new UserError("Alleen foto's (JPEG) zijn toegestaan.");
+      return bytes;
+    }),
+  );
+}
+
+export async function storePhotos(supabase: SupabaseClient, stoveNumber: number, photos: Uint8Array[]) {
+  for (const bytes of photos) {
+    const path = `${stoveNumber}/${randomUUID()}.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from(PHOTOS_BUCKET)
+      .upload(path, bytes, { contentType: "image/jpeg" });
+    if (uploadError) throw uploadError;
+
+    const { error: rowError } = await supabase.from("stove_photos").insert({ stove_number: stoveNumber, path });
+    if (rowError) {
+      await supabase.storage.from(PHOTOS_BUCKET).remove([path]);
+      throw rowError;
+    }
+  }
+}
+
+// Private bucket: hand out short-lived links for display.
+export async function signPhotoUrls(supabase: SupabaseClient, paths: string[]) {
+  if (paths.length === 0) return new Map<string, string>();
+  const { data, error } = await supabase.storage.from(PHOTOS_BUCKET).createSignedUrls(paths, SIGNED_URL_TTL_SECONDS);
+  if (error) throw error;
+  return new Map(data.flatMap((item) => (item.path && item.signedUrl ? [[item.path, item.signedUrl] as const] : [])));
+}
