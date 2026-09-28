@@ -2,12 +2,27 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { MAX_PHOTOS_PER_UPLOAD, MAX_TEXT_LENGTH } from "../lib/stoves";
+import {
+  COMMON_FLUE_DIAMETERS_MM,
+  CONDITION_LABELS,
+  DIMENSION_CM,
+  FLUE_DIAMETER_MM,
+  FLUE_OUTLET_LABELS,
+  MAX_PHOTOS_PER_UPLOAD,
+  MAX_TEXT_LENGTH,
+} from "../lib/stoves";
 import { photosToFormData } from "../lib/photo-form-data";
 import { addStove } from "./actions";
 import CameraButton from "./CameraButton";
+import ChoiceGroup from "./ChoiceGroup";
 
 type Photo = { blob: Blob; previewUrl: string };
+
+const DIMENSION_FIELDS = [
+  { name: "height", label: "Hoogte" },
+  { name: "width", label: "Breedte" },
+  { name: "depth", label: "Diepte" },
+];
 
 export default function AddStoveForm({ brands }: { brands: string[] }) {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -101,6 +116,38 @@ export default function AddStoveForm({ brands }: { brands: string[] }) {
 
         <label htmlFor="model">Model</label>
         <input id="model" name="model" maxLength={MAX_TEXT_LENGTH} required autoComplete="off" />
+
+        <ChoiceGroup legend="Staat" name="condition" options={CONDITION_LABELS} />
+
+        <fieldset className="dimension-group">
+          <legend>Afmetingen <span className="muted">(cm)</span></legend>
+          <div className="dimension-fields">
+            {DIMENSION_FIELDS.map(({ name, label }) => (
+              <label key={name}>
+                <span>{label}</span>
+                <input name={name} type="number" inputMode="numeric" min={DIMENSION_CM.min} max={DIMENSION_CM.max} step={1} required />
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <ChoiceGroup legend="Rookafvoer" name="flueOutlet" options={FLUE_OUTLET_LABELS} />
+
+        <label htmlFor="flue-diameter">Maat afvoer <span className="muted">(Ø mm)</span></label>
+        <input
+          id="flue-diameter"
+          name="flueDiameter"
+          type="number"
+          inputMode="numeric"
+          list="common-flue-diameters"
+          min={FLUE_DIAMETER_MM.min}
+          max={FLUE_DIAMETER_MM.max}
+          step={1}
+          required
+        />
+        <datalist id="common-flue-diameters">
+          {COMMON_FLUE_DIAMETERS_MM.map((diameter) => <option key={diameter} value={diameter} />)}
+        </datalist>
 
         {error && <p className="field-error" role="alert">{error}</p>}
         <button className="primary-button primary-button--large" type="submit" disabled={pending}>

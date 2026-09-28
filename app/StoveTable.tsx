@@ -65,6 +65,9 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
                 <th scope="col">Foto&apos;s</th>
                 <th scope="col">Merk</th>
                 <th scope="col">Model</th>
+                <th scope="col">Staat</th>
+                <th scope="col">H × B × D</th>
+                <th scope="col">Rookafvoer</th>
                 <th scope="col">Status</th>
                 <th scope="col">Toegevoegd</th>
               </tr>
