@@ -1,37 +1,36 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
 
-export type LoginState = { status: "idle" | "sent" | "error"; message?: string };
+export type LoginState = { error?: string; email?: string };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_PASSWORD_LENGTH = 72;
 
-export async function sendMagicLink(_state: LoginState, formData: FormData): Promise<LoginState> {
+export async function signIn(_state: LoginState, formData: FormData): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!EMAIL_PATTERN.test(email) || email.length > 320) {
-    return { status: "error", message: "Vul een geldig e-mailadres in." };
+  const password = String(formData.get("password") ?? "");
+  if (!EMAIL_PATTERN.test(email) || email.length > 320 || !password || password.length > MAX_PASSWORD_LENGTH) {
+    return { error: "Vul je e-mailadres en wachtwoord in.", email };
   }
 
-  const origin = (await headers()).get("origin");
   const supabase = await createClient();
-  // Only existing (invited) users get a link; no accounts are created from this form.
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: false, emailRedirectTo: `${origin}/auth/confirm` },
-  });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  // Same answer for unknown addresses, so the form does not reveal who has an account.
-  if (error && error.status !== 422 && error.code !== "otp_disabled") {
-    // Code and status only; never log the e-mail address.
-    console.error("Magic link failed", { code: error.code, status: error.status });
+  if (error) {
     if (error.status === 429) {
-      return { status: "error", message: "Er zijn te veel inlogmails verstuurd. Probeer het over een uur opnieuw." };
+      return { error: "Te veel inlogpogingen. Wacht een paar minuten en probeer het opnieuw.", email };
     }
-    return { status: "error", message: "De e-mail kon niet worden verstuurd. Probeer het later opnieuw." };
+    if (error.code !== "invalid_credentials") {
+      // Code and status only; never log the e-mail address or password.
+      console.error("Sign-in failed", { code: error.code, status: error.status });
+    }
+    // Same answer for unknown addresses and wrong passwords, so the form does not reveal who has an account.
+    return { error: "E-mailadres of wachtwoord klopt niet.", email };
   }
-  return { status: "sent", message: email };
+
+  redirect("/");
 }
 
 export async function signOut() {

@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/auth/"];
+const PUBLIC_PATHS = ["/login"];
 
 // Refreshes the auth session cookie and sends signed-out visitors to /login.
 // This is only an optimistic check; pages and Server Actions verify access themselves.

@@ -16,19 +16,16 @@ Built with Next.js (App Router) and Supabase (Auth, Postgres, Storage).
 ## Supabase setup
 
 1. Apply the migrations in `supabase/migrations` to the project.
-2. Auth → URL Configuration: add `http://localhost:3000/auth/confirm` and the production
-   `https://<domain>/auth/confirm` to the redirect URLs, and set the Site URL.
-3. Recommended: disable public sign-ups (Auth → Providers → Email). The login form never
-   creates accounts itself.
-4. Optional: to let a magic link work when it is opened in a different browser than the one
-   that requested it, change the "Magic Link" email template link to
-   `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`.
+2. Auth → Providers → Email: keep e-mail/password enabled, disable "Allow new users to sign up"
+   and set a minimum password length of at least 12 characters.
 
 ## Access control
 
-Only team members can use the app. Adding a team member takes two steps:
+Users sign in with e-mail and password. There is no self sign-up and no password reset in the
+app yet. Adding a team member takes two steps:
 
-1. Auth → Users → "Invite user" with their e-mail address.
+1. Auth → Users → "Add user" → "Create new user" with their e-mail address and a password,
+   with "Auto Confirm User" enabled.
 2. In the SQL editor: `insert into public.team_members (email) values ('name@example.com');`
    (lowercase e-mail).
 
