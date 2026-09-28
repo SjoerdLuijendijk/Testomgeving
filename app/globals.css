@@ -430,6 +430,7 @@ a {
 .photo-viewer {
   width: min(1100px, calc(100vw - 32px));
   max-width: none;
+  max-height: calc(100vh - 32px);
   max-height: calc(100dvh - 32px);
   padding: 0;
   border: 0;
@@ -443,11 +444,16 @@ a {
   background: rgb(0 0 0 / 80%);
 }
 
+/* Max sizes instead of a fixed height, so every browser scales the photo down to fit.
+   The vh line is a fallback for browsers without dvh support. */
 .photo-viewer img {
   display: block;
-  width: 100%;
-  height: calc(100dvh - 104px);
-  object-fit: contain;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 120px);
+  max-height: calc(100dvh - 120px);
+  margin: 0 auto 16px;
 }
 
 .photo-viewer-bar {
