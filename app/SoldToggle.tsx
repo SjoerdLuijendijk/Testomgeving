@@ -2,17 +2,22 @@
 
 import { useOptimistic, useTransition } from "react";
 import { setStoveSold } from "./actions";
+import { useDialog } from "./DialogProvider";
 
 export default function SoldToggle({ stoveNumber, sold }: { stoveNumber: number; sold: boolean }) {
   const [optimisticSold, setOptimisticSold] = useOptimistic(sold);
   const [pending, startTransition] = useTransition();
+  const { confirm, notify } = useDialog();
 
-  function toggle() {
-    if (optimisticSold && !confirm(`Kachel ${stoveNumber} weer op "te koop" zetten?`)) return;
+  async function toggle() {
+    if (optimisticSold) {
+      const confirmed = await confirm({ title: `Kachel ${stoveNumber} weer te koop zetten?`, confirmLabel: "Te koop zetten" });
+      if (!confirmed) return;
+    }
     startTransition(async () => {
       setOptimisticSold(!optimisticSold);
       const result = await setStoveSold(stoveNumber, !optimisticSold);
-      if (!result.ok) alert(result.error);
+      if (!result.ok) await notify(result.error);
     });
   }
 

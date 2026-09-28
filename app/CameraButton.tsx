@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { resizePhoto } from "../lib/resize-photo";
+import { useDialog } from "./DialogProvider";
 
 type CameraButtonProps = {
   label: string;
@@ -16,6 +17,7 @@ type CameraButtonProps = {
 export default function CameraButton({ label, onPhotos, className = "secondary-button", disabled, capture = true }: CameraButtonProps) {
   const id = useId();
   const [busy, setBusy] = useState(false);
+  const { notify } = useDialog();
 
   async function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const files = [...(event.target.files ?? [])];
@@ -26,7 +28,7 @@ export default function CameraButton({ label, onPhotos, className = "secondary-b
     try {
       onPhotos(await Promise.all(files.map(resizePhoto)));
     } catch {
-      alert("Een foto kon niet worden verwerkt. Probeer het opnieuw.");
+      await notify("Een foto kon niet worden verwerkt. Probeer het opnieuw.");
     } finally {
       setBusy(false);
     }

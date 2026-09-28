@@ -1,26 +1,31 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import type { StovePhoto } from "../lib/stoves";
 import { photosToFormData } from "../lib/photo-form-data";
 import { addStovePhotos, deleteStovePhoto } from "./actions";
 import CameraButton from "./CameraButton";
+import { useDialog } from "./DialogProvider";
+import PhotoViewer from "./PhotoViewer";
 
 export default function PhotoCell({ stoveNumber, photos }: { stoveNumber: number; photos: StovePhoto[] }) {
   const [pending, startTransition] = useTransition();
+  const [viewIndex, setViewIndex] = useState<number | null>(null);
+  const { confirm, notify } = useDialog();
 
   function upload(blobs: Blob[]) {
     startTransition(async () => {
       const result = await addStovePhotos(stoveNumber, photosToFormData(blobs));
-      if (!result.ok) alert(result.error);
+      if (!result.ok) await notify(result.error);
     });
   }
 
-  function remove(photoId: number) {
-    if (!confirm("Deze foto verwijderen?")) return;
+  async function remove(photoId: number) {
+    const confirmed = await confirm({ title: "Foto verwijderen?", message: "Dit kan niet ongedaan worden gemaakt.", confirmLabel: "Verwijderen", danger: true });
+    if (!confirmed) return;
     startTransition(async () => {
       const result = await deleteStovePhoto(photoId);
-      if (!result.ok) alert(result.error);
+      if (!result.ok) await notify(result.error);
     });
   }
 
@@ -29,9 +34,9 @@ export default function PhotoCell({ stoveNumber, photos }: { stoveNumber: number
       {photos.map((photo, index) => (
         <span key={photo.id} className="thumb">
           {photo.url ? (
-            <a href={photo.url} target="_blank" rel="noopener noreferrer">
-              <img src={photo.url} alt={`Kachel ${stoveNumber}, foto ${index + 1}`} loading="lazy" />
-            </a>
+            <button type="button" className="thumb-open" onClick={() => setViewIndex(index)} aria-label={`Foto ${index + 1} bekijken`}>
+              <img src={photo.url} alt="" loading="lazy" />
+            </button>
           ) : (
             <span className="thumb-missing" aria-label="Foto niet beschikbaar">?</span>
           )}
@@ -39,6 +44,7 @@ export default function PhotoCell({ stoveNumber, photos }: { stoveNumber: number
         </span>
       ))}
       <CameraButton label={pending ? "…" : "＋📷"} onPhotos={upload} className="thumb-add" disabled={pending} />
+      <PhotoViewer stoveNumber={stoveNumber} photos={photos} index={viewIndex} onIndexChange={setViewIndex} />
     </div>
   );
 }
