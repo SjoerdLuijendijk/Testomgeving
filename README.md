@@ -33,6 +33,17 @@ Row Level Security on `stoves`, `stove_photos` and the private `stove-photos` st
 allows access only to signed-in users whose e-mail is in `team_members`. After creation only
 `sold_at` of a stove can be changed. Photos are served through short-lived signed URLs.
 
+## Invoices
+
+Each stove has a "Factuur" button that opens a dialog for customer details and invoice lines
+(unit prices incl. VAT, 21 %, 9 % or 0 % per line) with a live draft PDF preview. "Factuur maken"
+calls the `create_invoice()` database function, which stores the invoice and its lines in one
+transaction and assigns the next number of the year (2026-0001, 2026-0002, ...). The seller
+details from Instellingen are copied onto the invoice.
+
+Invoices cannot be changed or deleted after creation; corrections need a credit invoice. PDFs are
+generated in the browser with `pdf-lib` and can be downloaded again from the inventory.
+
 ## Photos
 
 Photos are resized in the browser to JPEG (max. 1600 px) before upload. The server accepts

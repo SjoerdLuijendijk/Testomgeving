@@ -1,8 +1,10 @@
 import { formatPrice } from "../lib/price";
 import { CONDITION_LABELS, FLUE_OUTLET_LABELS, type Stove } from "../lib/stoves";
 import EditStoveDialog from "./EditStoveDialog";
+import InvoiceDialog from "./InvoiceDialog";
 import PhotoCell from "./PhotoCell";
 import SoldToggle from "./SoldToggle";
+import StoveInvoiceLinks from "./StoveInvoiceLinks";
 
 const DATE_FORMAT = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short", year: "numeric" });
 const MISSING = "—";
@@ -31,7 +33,13 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       <td data-label="Toegevoegd" className="muted">
         <time dateTime={stove.createdAt}>{DATE_FORMAT.format(new Date(stove.createdAt))}</time>
       </td>
-      <td className="cell-actions"><EditStoveDialog stove={stove} brands={brands} /></td>
+      <td className="cell-actions">
+        <span className="row-actions">
+          <EditStoveDialog stove={stove} brands={brands} />
+          <InvoiceDialog stove={stove} />
+          <StoveInvoiceLinks invoices={stove.invoices} />
+        </span>
+      </td>
     </tr>
   );
 }

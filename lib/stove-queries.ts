@@ -6,10 +6,11 @@ export async function getStoves(supabase: SupabaseClient): Promise<Stove[]> {
   const { data, error } = await supabase
     .from("stoves")
     .select(
-      "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, sold_at, created_at, stove_photos (id, path)",
+      "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, sold_at, created_at, stove_photos (id, path), invoices (id, invoice_number)",
     )
     .order("number", { ascending: false })
-    .order("id", { referencedTable: "stove_photos", ascending: true });
+    .order("id", { referencedTable: "stove_photos", ascending: true })
+    .order("id", { referencedTable: "invoices", ascending: true });
   if (error) throw error;
 
   const urlByPath = await signPhotoUrls(supabase, data.flatMap((stove) => stove.stove_photos.map((photo) => photo.path)));
@@ -27,6 +28,7 @@ export async function getStoves(supabase: SupabaseClient): Promise<Stove[]> {
     priceCents: stove.price_cents,
     soldAt: stove.sold_at,
     createdAt: stove.created_at,
+    invoices: stove.invoices.map((invoice) => ({ id: invoice.id, number: invoice.invoice_number })),
     photos: stove.stove_photos.map((photo) => ({ id: photo.id, url: urlByPath.get(photo.path) ?? null })),
   }));
 }

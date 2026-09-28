@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { requireTeamMember } from "../lib/auth";
+import { getCompany } from "../lib/invoice-queries";
 import { getKnownBrands, getStoves } from "../lib/stove-queries";
 import { signOut } from "./auth/actions";
 import AddStoveForm from "./AddStoveForm";
+import CompanySettingsForm from "./CompanySettingsForm";
 import StoveTable from "./StoveTable";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +15,8 @@ type PageProps = {
 
 export default async function Page({ searchParams }: PageProps) {
   const { supabase, user, isMember } = await requireTeamMember();
-  const activeTab = (await searchParams).tab === "voorraad" ? "voorraad" : "toevoegen";
+  const requestedTab = (await searchParams).tab;
+  const activeTab = requestedTab === "voorraad" || requestedTab === "instellingen" ? requestedTab : "toevoegen";
 
   return (
     <div className="app-shell">
@@ -23,6 +26,7 @@ export default async function Page({ searchParams }: PageProps) {
           <nav className="tabs" aria-label="Hoofdmenu">
             <Link href="/" aria-current={activeTab === "toevoegen" ? "page" : undefined}>Kachel toevoegen</Link>
             <Link href="/?tab=voorraad" aria-current={activeTab === "voorraad" ? "page" : undefined}>Voorraad</Link>
+            <Link href="/?tab=instellingen" aria-current={activeTab === "instellingen" ? "page" : undefined}>Instellingen</Link>
           </nav>
         )}
         <form action={signOut} className="account">
@@ -39,6 +43,8 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         ) : activeTab === "toevoegen" ? (
           <AddStoveForm brands={await getKnownBrands(supabase)} />
+        ) : activeTab === "instellingen" ? (
+          <CompanySettingsForm company={await getCompany(supabase)} />
         ) : (
           <StoveTable stoves={await getStoves(supabase)} />
         )}
