@@ -1,7 +1,7 @@
 # Woonwarmer stove inventory
 
 Web app for registering stoves: take photos, enter brand and model, and the app assigns a
-stove number (1001, 1002, ...). The inventory screen lists all stoves with photos, a search bar
+six-digit stove number (100001, 100002, ...). The inventory screen lists all stoves with photos, a search bar
 and a one-click "sold" status.
 
 Built with Next.js (App Router) and Supabase (Auth, Postgres, Storage).
