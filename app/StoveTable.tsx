@@ -8,9 +8,9 @@ import type { Stove } from "../lib/stoves";
 import SortableHeader from "./SortableHeader";
 import StoveRow from "./StoveRow";
 
-type Filter = "all" | "available" | "sold";
+type Filter = "available" | "sold";
 
-const FILTER_LABELS: Record<Filter, string> = { all: "Alle", available: "Te koop", sold: "Verkocht" };
+const FILTER_LABELS: Record<Filter, string> = { available: "Te koop", sold: "Verkocht" };
 
 function matchesSearch(stove: Stove, query: string) {
   if (!query) return true;
@@ -25,15 +25,13 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
   // Count and total price (incl. VAT) per filter; stoves without a price count as zero.
   const totals = useMemo(() => {
     const result: Record<Filter, { count: number; cents: number }> = {
-      all: { count: 0, cents: 0 },
       available: { count: 0, cents: 0 },
       sold: { count: 0, cents: 0 },
     };
     for (const stove of stoves) {
-      for (const key of ["all", stove.soldAt ? "sold" : "available"] as const) {
-        result[key].count += 1;
-        result[key].cents += stove.priceCents ?? 0;
-      }
+      const key = stove.soldAt ? "sold" : "available";
+      result[key].count += 1;
+      result[key].cents += stove.priceCents ?? 0;
     }
     return result;
   }, [stoves]);
@@ -42,9 +40,13 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
 
   const query = search.trim().toLowerCase();
   const visible = sortStoves(
-    stoves.filter((stove) => matchesSearch(stove, query) && (filter === "all" || (filter === "sold") === Boolean(stove.soldAt))),
+    stoves.filter((stove) => matchesSearch(stove, query) && (filter === "sold") === Boolean(stove.soldAt)),
     sort,
   );
+  const otherFilter: Filter = filter === "sold" ? "available" : "sold";
+  const otherMatches = query
+    ? stoves.filter((stove) => matchesSearch(stove, query) && (otherFilter === "sold") === Boolean(stove.soldAt)).length
+    : 0;
   const visibleCents = visible.reduce((sum, stove) => sum + (stove.priceCents ?? 0), 0);
 
   const header = (label: string, sortKey: SortKey, className?: string) => (
@@ -79,7 +81,14 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
           <p>Voeg de eerste toe via <Link href="/">Kachel toevoegen</Link>.</p>
         </div>
       ) : visible.length === 0 ? (
-        <div className="notice"><p>Geen kachels gevonden.</p></div>
+        <div className="notice">
+          <p>Geen kachels gevonden bij {FILTER_LABELS[filter]}.</p>
+          {otherMatches > 0 && (
+            <button type="button" className="text-button" onClick={() => setFilter(otherFilter)}>
+              {otherMatches} gevonden bij {FILTER_LABELS[otherFilter]} →
+            </button>
+          )}
+        </div>
       ) : (
         <div className="table-wrap">
           <table className="stove-table">
