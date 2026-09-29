@@ -9,6 +9,10 @@
 | Feature previews | `feature/*`, `fix/*` | Generated `*.vercel.app` preview URL | Preview |
 | Local | any | http://localhost:3000 | Development |
 
+Functions run in Vercel's `dub1` (Dublin) region, set in `vercel.json`, next to the Supabase
+database in `eu-west-1` (Ireland). Every page makes several sequential Supabase calls, so keep
+both in the same region; update `regions` when the database moves.
+
 All environments currently share **one Supabase project**. Consequences:
 
 - Data changed on staging or in a preview (stoves, photos, sold status, invoices) is changed in production too.
