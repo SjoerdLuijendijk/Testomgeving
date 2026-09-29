@@ -379,23 +379,3 @@ Then provide a concise Dutch completion report containing:
 If a Git commit is appropriate, propose a concise English commit message.
 
 Do not commit or push until explicitly authorized.
-
-## Current Project Security Context
-
-Before performing new feature work in this repository, inspect the current Supabase/authentication state carefully.
-
-The project previously had broad anonymous access policies for notes, note attachments, and storage. These are not acceptable under the rules above.
-
-The intended direction is:
-
-- Supabase Auth using email magic-link authentication.
-- Notes and note files must have an owner (`user_id`).
-- Existing disposable test data may be deleted rather than migrated to a user.
-- Owner-only RLS for notes and note files.
-- Owner-only storage access.
-- Remove broad anonymous policies.
-- Revoke unnecessary execution permissions on database functions such as `rls_auto_enable()`.
-- Private attachments should use authorized access / signed URLs.
-- Do not introduce an insecure temporary workaround.
-
-Do not assume this security work has already been completed. Inspect the actual repository and Supabase state before relying on it.
