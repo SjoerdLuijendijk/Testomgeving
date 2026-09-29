@@ -1,22 +1,21 @@
 import Link from "next/link";
 import { requireTeamMember } from "../lib/auth";
-import { getCompany } from "../lib/invoice-queries";
 import { getKnownBrands, getStoves } from "../lib/stove-queries";
 import { signOut } from "./auth/actions";
 import AddStoveForm from "./AddStoveForm";
 import BrandLogo from "./BrandLogo";
-import CompanySettingsForm from "./CompanySettingsForm";
+import SettingsPanel from "./SettingsPanel";
 import StoveTable from "./StoveTable";
 
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ tab?: string | string[] }>;
+  searchParams: Promise<{ tab?: string | string[]; sectie?: string | string[] }>;
 };
 
 export default async function Page({ searchParams }: PageProps) {
   const { supabase, user, isMember } = await requireTeamMember();
-  const requestedTab = (await searchParams).tab;
+  const { tab: requestedTab, sectie } = await searchParams;
   const activeTab = requestedTab === "voorraad" || requestedTab === "instellingen" ? requestedTab : "toevoegen";
 
   return (
@@ -45,7 +44,7 @@ export default async function Page({ searchParams }: PageProps) {
         ) : activeTab === "toevoegen" ? (
           <AddStoveForm brands={await getKnownBrands(supabase)} />
         ) : activeTab === "instellingen" ? (
-          <CompanySettingsForm company={await getCompany(supabase)} />
+          <SettingsPanel supabase={supabase} section={sectie === "advertentie" ? "advertentie" : "bedrijf"} />
         ) : (
           <StoveTable stoves={await getStoves(supabase)} />
         )}

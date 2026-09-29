@@ -31,8 +31,7 @@ export default function CompanySettingsForm({ company }: { company: Company | nu
   }
 
   return (
-    <section className="panel" aria-labelledby="settings-title">
-      <h1 id="settings-title">Instellingen</h1>
+    <>
       <p className="muted">Deze bedrijfsgegevens komen op elke nieuwe factuur. Bestaande facturen veranderen niet.</p>
       <form onSubmit={handleSubmit} className="form-stack">
         {FIELDS.map((field) => (
@@ -59,6 +58,6 @@ export default function CompanySettingsForm({ company }: { company: Company | nu
           {pending ? "Opslaan…" : "Opslaan"}
         </button>
       </form>
-    </section>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import type { Company } from "./invoice";
+import { DEFAULT_AD_PROMPT } from "./ad-prompt";
 import { formatPrice } from "./price";
 import { CONDITION_LABELS, FLUE_OUTLET_LABELS, type Stove } from "./stoves";
 
@@ -18,21 +19,14 @@ export type AdCompany = Pick<Company, "name" | "address" | "postal_code" | "city
 
 export class AdGenerationError extends Error {}
 
-function instructions(companyName: string) {
-  return [
-    `Je schrijft kant-en-klare Marktplaats-advertenties voor kachels namens ${companyName}, een kachelwinkel.`,
-    "Toon: licht zakelijk, vriendelijk en toegankelijk; niet stijf en zonder overdreven superlatieven. Schrijf in het Nederlands en spreek de lezer aan met 'je'.",
-    "Gebruik uitsluitend de feiten uit de invoer. Verzin geen eigenschappen die er niet in staan, zoals vermogen, brandstof, energielabel, bouwjaar, garantie, levering, installatie of openingstijden.",
-    "Opmaak: platte tekst zonder Markdown (geen **, # of _). Emoji mag spaarzaam.",
-    "Structuur:",
-    "1. Eerste regel: een pakkende titel van maximaal 60 tekens met merk en model.",
-    "2. Een lege regel, dan een korte inleiding van twee à drie zinnen.",
-    "3. Een kopje 'Specificaties' met een lijst waarin elke regel begint met '• '.",
-    "4. De vraagprijs op een eigen regel.",
-    `5. Een afsluitende alinea over ${companyName} met een uitnodiging om contact op te nemen of langs te komen, met alleen de contactgegevens uit de invoer.`,
-    "Geef alleen de advertentietekst terug, zonder toelichting.",
-  ].join("\n");
-}
+// Always appended after the editable prompt, so an edited prompt cannot switch off these guards.
+const FIXED_RULES = [
+  "Vaste regels (deze gaan altijd voor):",
+  "- Gebruik voor de kachel uitsluitend de feiten uit de invoer. Verzin geen eigenschappen die er niet staan, zoals vermogen, brandstof, energielabel, bouwjaar, garantie, levering of installatie.",
+  "- Gebruik over het bedrijf alleen wat in de instructies hierboven en in de invoer staat, en alleen de contactgegevens uit de invoer.",
+  "- Schrijf platte tekst zonder Markdown (geen **, # of _).",
+  "- Geef alleen de advertentietekst terug, zonder toelichting.",
+].join("\n");
 
 function describeStove(stove: AdStove) {
   const lines = [
@@ -75,7 +69,7 @@ function extractText(body: unknown): string {
     .trim();
 }
 
-export async function generateMarketplaceAd(stove: AdStove, company: AdCompany | null): Promise<string> {
+export async function generateMarketplaceAd(stove: AdStove, company: AdCompany | null, prompt: string | null): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     console.error("Generating marketplace ad failed: OPENAI_API_KEY is not set");
@@ -89,7 +83,7 @@ export async function generateMarketplaceAd(stove: AdStove, company: AdCompany |
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || DEFAULT_MODEL,
-        instructions: instructions(company?.name || FALLBACK_COMPANY_NAME),
+        instructions: `${prompt?.trim() || DEFAULT_AD_PROMPT}\n\n${FIXED_RULES}`,
         input: `Kachel:\n${describeStove(stove)}\n\nBedrijf:\n${describeCompany(company)}`,
         max_output_tokens: MAX_OUTPUT_TOKENS,
         store: false,

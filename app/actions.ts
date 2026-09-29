@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { requireTeamMember } from "../lib/auth";
+import { refreshStoredAd } from "../lib/marketplace-ad-store";
 import { parseStockQuantity, parseStoveFields } from "../lib/stove-fields";
 import { LISTING_CHANNELS, PHOTOS_BUCKET, type ListingChannel } from "../lib/stoves";
 import { readPhotos, storePhotos, UserError } from "../lib/stove-photos";
@@ -44,6 +46,8 @@ export async function addStove(formData: FormData): Promise<ActionResult<{ numbe
     .single();
   if (error) return { ok: false, error: errorMessage(error) };
 
+  // Prepare the Marktplaats ad after the response, so saving never waits for it.
+  after(() => refreshStoredAd(supabase, stove.number));
   revalidatePath("/");
   try {
     await storePhotos(supabase, stove.number, photos);
@@ -69,6 +73,8 @@ export async function updateStove(stoveNumber: number, formData: FormData): Prom
   if (error) return { ok: false, error: errorMessage(error) };
   if (data.length === 0) return { ok: false, error: "Deze kachel bestaat niet meer." };
 
+  // The stored ad would otherwise show outdated details such as the old price.
+  after(() => refreshStoredAd(supabase, stoveNumber));
   revalidatePath("/");
   return { ok: true };
 }

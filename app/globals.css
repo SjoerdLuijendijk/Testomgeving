@@ -863,6 +863,35 @@ a {
   margin-top: 12px;
 }
 
+/* Settings sub tabs */
+
+.sub-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sub-tabs a {
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sub-tabs a[aria-current="page"] {
+  border-bottom-color: var(--accent);
+  color: var(--ink);
+}
+
+.ad-prompt-count {
+  margin: 0;
+  font-size: 13px;
+  text-align: right;
+}
+
 /* Marketplace ad dialog */
 
 .ad-dialog {
@@ -871,6 +900,16 @@ a {
 
 .ad-dialog > p {
   margin: 8px 0 16px;
+}
+
+.ad-warning {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 8%, white);
+  color: var(--ink);
+  font-size: 14px;
 }
 
 .ad-text {

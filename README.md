@@ -70,13 +70,26 @@ generated in the browser with `pdf-lib` and can be downloaded again from the inv
 
 ## Marktplaats ad text
 
-On desktop, each stove has an "Advertentie" button (hidden on phones) that generates an editable
-Dutch Marktplaats ad with OpenAI (Responses API, called server-side with `fetch`). The Server Action
-reads the stove and the company details from Instellingen from the database; only those facts are
-sent to OpenAI, never customer data. Requests are sent with `store: false`.
+When a stove is added or edited, the Server Action schedules an OpenAI call with Next.js `after()`
+(Responses API via `fetch`) and stores the resulting Dutch Marktplaats ad in `stoves.marketplace_ad`,
+so saving never waits for it. On desktop the "Advertentie" button (hidden on phones) shows the stored
+text; if it is missing (older stoves, or a failed background call) it is generated on demand.
+"Opnieuw" generates and stores a new version. The text can be edited and saved by hand
+(`marketplace_ad_edited`); a manual text is never overwritten automatically. If the stove is edited
+afterwards, `marketplace_ad_outdated` is set and the dialog asks to check the text.
 
-Requires `OPENAI_API_KEY` (server-only, in Vercel). `OPENAI_MODEL` is optional and overrides the
-default model set in `lib/marketplace-ad.ts`. Generated text can contain mistakes; check it before posting.
+There is no automatic sync with Marktplaats or 2dehands: posting and updating through their API
+requires a Marktplaats Pro (business) account and a certified API partner. Ads are copied from the
+app and updated by hand on both sites.
+
+The prompt is editable under Instellingen → Advertentie (`ad_settings`, team members only); the
+built-in default in `lib/ad-prompt.ts` is used until it is saved. Fixed guard rules (use only the
+given facts, plain text) are always appended in `lib/marketplace-ad.ts`. Changing the prompt or the
+company details does not regenerate existing ads.
+
+Only stove facts and the company details are sent to OpenAI, never customer data; requests use
+`store: false`. Requires `OPENAI_API_KEY` (server-only, in Vercel). `OPENAI_MODEL` is optional and
+overrides the default model. Generated text can contain mistakes; check it before posting.
 
 ## Photos
 
