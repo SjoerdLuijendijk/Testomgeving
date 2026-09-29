@@ -257,6 +257,9 @@ When implementing uploads:
 
 ## Git Workflow
 
+- Follow the branch workflow in `docs/environments.md`: `main` is production, `staging` is the staging environment, and new work happens on `feature/*` branches created from `staging`.
+- Never commit directly to `main` or `staging`; release by fast-forwarding `main` to `staging`.
+- All environments share one Supabase project, so every migration must be backward compatible with the code currently in production.
 - Keep `main` buildable and deployable.
 - Do not commit or push unless the user explicitly asks or has explicitly authorized it for the current task.
 - Before proposing a commit, review `git diff` and `git status`.

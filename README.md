@@ -13,6 +13,11 @@ Built with Next.js (App Router) and Supabase (Auth, Postgres, Storage).
    `vercel env pull .env.local --environment=development`. The required names are in `.env.example`.
 3. `npm run dev` and open http://localhost:3000
 
+## Environments
+
+Production runs on https://bouwstream.nl (branch `main`), staging on https://staging.bouwstream.nl
+(branch `staging`). See `docs/environments.md` for the branch workflow and the shared database.
+
 ## Supabase setup
 
 1. Apply the migrations in `supabase/migrations` to the project.
