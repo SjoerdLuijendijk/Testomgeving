@@ -1364,6 +1364,64 @@ a {
     display: none;
   }
 
+  /* Compact header: the logo and tabs stay, the signed-in e-mail address is left out. */
+  .site-header {
+    gap: 8px 12px;
+    padding-block: 8px;
+  }
+
+  .brand-logo {
+    padding: 4px 8px;
+  }
+
+  .brand-logo img {
+    height: 48px;
+  }
+
+  .account .muted {
+    display: none;
+  }
+
+  .tabs a {
+    padding: 8px 6px;
+    font-size: 15px;
+  }
+
+  .page-main {
+    padding-top: 12px;
+  }
+
+  /* Stock toolbar: the active "Voorraad" tab already names the page, so the heading is for screen readers only. */
+  .stock-toolbar {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .stock-toolbar h1 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .kind-tabs {
+    width: 100%;
+  }
+
+  .kind-tabs button {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 4px;
+    font-size: 15px;
+  }
+
+  .search-input {
+    flex-basis: 100%;
+    min-height: 44px;
+  }
+
   .filter-group {
     width: 100%;
   }
@@ -1374,9 +1432,9 @@ a {
     padding: 8px 4px;
   }
 
+  /* The totals are also in the footer below the cards. */
   .filter-group button small {
-    font-size: 10px;
-    white-space: normal;
+    display: none;
   }
 
   .table-wrap {
