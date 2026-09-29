@@ -17,17 +17,23 @@ export default function MarketplaceAdDialog({ stoveNumber }: { stoveNumber: numb
   const [saved, setSaved] = useState<MarketplaceAd | null>(null);
   const [text, setText] = useState("");
   const [status, setStatus] = useState<Status>(null);
+  // Which request is running, so only the button that started it shows progress.
+  const [activity, setActivity] = useState<"load" | "save">("load");
+  const [justSaved, setJustSaved] = useState(false);
   const [pending, startTransition] = useTransition();
   const { confirm } = useDialog();
   const id = useId();
 
   const dirty = saved !== null && text !== saved.text;
+  const saving = pending && activity === "save";
 
   // Loads the stored ad (prepared when the stove was saved) or, with regenerate, makes a new one.
   function load(regenerate: boolean) {
     // Results of an earlier request (closed dialog, "Opnieuw") are ignored.
     const request = ++requestRef.current;
     setStatus(null);
+    setActivity("load");
+    setJustSaved(false);
     startTransition(async () => {
       const result = await getMarketplaceAd(stoveNumber, regenerate);
       if (request !== requestRef.current) return;
@@ -65,6 +71,7 @@ export default function MarketplaceAdDialog({ stoveNumber }: { stoveNumber: numb
     const request = ++requestRef.current;
     const value = text.trim();
     setStatus(null);
+    setActivity("save");
     startTransition(async () => {
       const result = await saveMarketplaceAd(stoveNumber, value);
       if (request !== requestRef.current) return;
@@ -74,6 +81,7 @@ export default function MarketplaceAdDialog({ stoveNumber }: { stoveNumber: numb
       }
       setSaved({ text: value, edited: true, outdated: false });
       setText(value);
+      setJustSaved(true);
       setStatus({ kind: "info", text: "Tekst opgeslagen. Werk de advertentie op Marktplaats en 2dehands ook bij." });
     });
   }
@@ -129,6 +137,7 @@ export default function MarketplaceAdDialog({ stoveNumber }: { stoveNumber: numb
           onChange={(event) => {
             setText(event.target.value);
             setStatus(null);
+            setJustSaved(false);
           }}
           readOnly={pending}
           aria-busy={pending}
@@ -142,10 +151,12 @@ export default function MarketplaceAdDialog({ stoveNumber }: { stoveNumber: numb
         <div className="button-row dialog-actions">
           <button type="button" className="secondary-button" onClick={close}>Sluiten</button>
           <button type="button" className="secondary-button" onClick={regenerate} disabled={pending}>
-            {pending ? "Bezig…" : "Opnieuw"}
+            {pending && activity === "load" ? "Bezig…" : "Opnieuw"}
           </button>
           <button type="button" className="secondary-button" onClick={copy} disabled={pending || !text}>Kopiëren</button>
-          <button type="button" className="primary-button" onClick={save} disabled={pending || !dirty || !text.trim()}>Opslaan</button>
+          <button type="button" className="primary-button" onClick={save} disabled={pending || !dirty || !text.trim()}>
+            {saving ? "Opslaan…" : justSaved && !dirty ? "Opgeslagen ✓" : "Opslaan"}
+          </button>
         </div>
       </dialog>
     </>
