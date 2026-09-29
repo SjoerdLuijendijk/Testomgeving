@@ -41,16 +41,21 @@ short-lived signed URLs.
 
 ## Stock
 
-The inventory has two tabs: used and new stoves. A used stove is a single unit with a "sold"
-toggle. A new stove model has one stove number with a stock quantity (set when adding it) and
-"−1 verkocht" / "+1" buttons. The database keeps `sold_at` and `stock_quantity` consistent: a stove
+The inventory has three tabs: used, new and made to order ("Op bestelling"). A used stove is a
+single unit with a "sold" toggle. A new stove model from stock has one stove number with a stock
+quantity (set when adding it) and "−1 verkocht" / "+1" buttons. A made-to-order stove is a new
+model sold without stock and ordered from the supplier once sold: it keeps no stock and never
+sells out. The database keeps `sold_at` and `stock_quantity` consistent: a stove
 is sold exactly when its stock is 0. Stock changes go through `adjust_stove_stock()`, one unit at a
 time, so concurrent sales cannot overwrite each other.
 
 ## Web shop
 
-Each stove has an "Online" checkbox (`shop_listed`, off by default) that marks it for the
-WooCommerce web shop. The sync itself is not built yet; see `docs/woocommerce-sync.md`.
+Each stove has a "Webshop" checkbox (`shop_listed`) for the WooCommerce web shop and a
+"Marktplaats" checkbox (`marketplace_listed`) for Marktplaats and 2dehands, both off by default.
+When a stove sells out the database unticks both, and they cannot be ticked while it is sold out.
+The web shop sync itself is not built yet; see `docs/woocommerce-sync.md`. Marktplaats and 2dehands
+are a manual reminder only; there is no integration.
 
 ## Invoices
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { MAX_PHOTOS_PER_UPLOAD, STOCK_QUANTITY } from "../lib/stoves";
+import { MAX_PHOTOS_PER_UPLOAD } from "../lib/stoves";
 import { photosToFormData } from "../lib/photo-form-data";
 import { addStove } from "./actions";
 import PhotoPickerButton from "./PhotoPickerButton";
@@ -15,7 +15,6 @@ export default function AddStoveForm({ brands }: { brands: string[] }) {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<{ number: number; warning?: string } | null>(null);
   const [formKey, setFormKey] = useState(0);
-  const [condition, setCondition] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   // Release the preview URLs of photos still shown when leaving the page.
@@ -50,7 +49,6 @@ export default function AddStoveForm({ brands }: { brands: string[] }) {
         photos.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
         setPhotos([]);
         setFormKey((key) => key + 1);
-        setCondition(null);
       } else {
         setError(result.error);
       }
@@ -77,16 +75,7 @@ export default function AddStoveForm({ brands }: { brands: string[] }) {
       <h1 id="add-title">Kachel toevoegen</h1>
       <p className="muted">Het kachelnummer wordt automatisch gemaakt bij het opslaan.</p>
 
-      <form
-        key={formKey}
-        onSubmit={handleSubmit}
-        // The stock field only applies to new stoves, so follow the condition choice.
-        onChange={(event) => {
-          const target = event.target;
-          if (target instanceof HTMLInputElement && target.name === "condition") setCondition(target.value);
-        }}
-        className="form-stack"
-      >
+      <form key={formKey} onSubmit={handleSubmit} className="form-stack">
         <fieldset className="photo-field">
           <legend>Foto&apos;s</legend>
           {photos.length > 0 && (
@@ -119,23 +108,6 @@ export default function AddStoveForm({ brands }: { brands: string[] }) {
         </fieldset>
 
         <StoveFields brands={brands} />
-
-        {condition === "new" && (
-          <>
-            <label htmlFor="stock-quantity">Aantal op voorraad</label>
-            <input
-              id="stock-quantity"
-              name="quantity"
-              type="number"
-              inputMode="numeric"
-              min={STOCK_QUANTITY.min}
-              max={STOCK_QUANTITY.max}
-              step={1}
-              required
-              defaultValue={1}
-            />
-          </>
-        )}
 
         {error && <p className="field-error" role="alert">{error}</p>}
         <button className="primary-button primary-button--large" type="submit" disabled={pending}>

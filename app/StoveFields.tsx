@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import { formatPriceInput } from "../lib/price";
 import {
   COMMON_FLUE_DIAMETERS_MM,
@@ -8,7 +8,10 @@ import {
   DIMENSION_CM,
   FLUE_DIAMETER_MM,
   FLUE_OUTLET_LABELS,
+  LISTING_CHANNELS,
   MAX_TEXT_LENGTH,
+  STOCK_QUANTITY,
+  SUPPLY_LABELS,
   type Stove,
 } from "../lib/stoves";
 import ChoiceGroup from "./ChoiceGroup";
@@ -28,6 +31,15 @@ type StoveFieldsProps = {
 // The stove detail fields shared by the add form and the edit dialog.
 export default function StoveFields({ brands, stove }: StoveFieldsProps) {
   const id = useId();
+  const [condition, setCondition] = useState<string | null>(stove?.condition ?? null);
+  const [supply, setSupply] = useState<string | null>(stove ? (stove.madeToOrder ? "order" : "stock") : null);
+
+  function handleChoice(event: React.FormEvent<HTMLDivElement>) {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    if (target.name === "condition") setCondition(target.value);
+    if (target.name === "supply") setSupply(target.value);
+  }
 
   return (
     <>
@@ -49,7 +61,32 @@ export default function StoveFields({ brands, stove }: StoveFieldsProps) {
       <label htmlFor={`${id}-model`}>Model</label>
       <input id={`${id}-model`} name="model" maxLength={MAX_TEXT_LENGTH} required autoComplete="off" defaultValue={stove?.model} />
 
-      <ChoiceGroup legend="Staat" name="condition" options={CONDITION_LABELS} defaultValue={stove?.condition} />
+      {/* display: contents keeps the form's spacing while following the condition and supply choices. */}
+      <div className="field-contents" onChange={handleChoice}>
+        <ChoiceGroup legend="Staat" name="condition" options={CONDITION_LABELS} defaultValue={stove?.condition} />
+
+        {condition === "new" && (
+          <ChoiceGroup legend="Levering" name="supply" options={SUPPLY_LABELS} defaultValue={stove ? (stove.madeToOrder ? "order" : "stock") : undefined} />
+        )}
+
+        {/* The stock is only set when adding; afterwards it changes one unit at a time in the inventory. */}
+        {!stove && condition === "new" && supply === "stock" && (
+          <>
+            <label htmlFor={`${id}-quantity`}>Aantal op voorraad</label>
+            <input
+              id={`${id}-quantity`}
+              name="quantity"
+              type="number"
+              inputMode="numeric"
+              min={STOCK_QUANTITY.min}
+              max={STOCK_QUANTITY.max}
+              step={1}
+              required
+              defaultValue={1}
+            />
+          </>
+        )}
+      </div>
 
       <fieldset className="dimension-group">
         <legend>Afmetingen <span className="muted">(cm)</span></legend>
@@ -103,10 +140,14 @@ export default function StoveFields({ brands, stove }: StoveFieldsProps) {
         defaultValue={stove?.priceCents ? formatPriceInput(stove.priceCents) : undefined}
       />
 
-      <label className="checkbox-field">
-        <input type="checkbox" name="shopListed" defaultChecked={stove?.shopListed ?? false} />
-        <span>Online zetten in de webshop</span>
-      </label>
+      {Object.values(LISTING_CHANNELS).map(({ field, description }) => (
+        <label key={field} className="checkbox-field">
+          {/* Sold-out stoves cannot be listed; a disabled checkbox is not submitted, so it saves as off. */}
+          <input type="checkbox" name={field} defaultChecked={stove?.[field] ?? false} disabled={Boolean(stove?.soldAt)} />
+          <span>{description}</span>
+        </label>
+      ))}
+      {stove?.soldAt && <p className="muted">Verkocht: wordt nergens aangeboden.</p>}
     </>
   );
 }

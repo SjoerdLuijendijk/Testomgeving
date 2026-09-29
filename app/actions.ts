@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireTeamMember } from "../lib/auth";
 import { parseStockQuantity, parseStoveFields } from "../lib/stove-fields";
-import { PHOTOS_BUCKET } from "../lib/stoves";
+import { LISTING_CHANNELS, PHOTOS_BUCKET, type ListingChannel } from "../lib/stoves";
 import { readPhotos, storePhotos, UserError } from "../lib/stove-photos";
 
 export type ActionResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
@@ -24,7 +24,7 @@ function isPositiveId(value: unknown): value is number {
 export async function addStove(formData: FormData): Promise<ActionResult<{ number: number; warning?: string }>> {
   const fields = parseStoveFields(formData);
   if (!fields.ok) return fields;
-  const quantity = parseStockQuantity(formData, fields.values.condition);
+  const quantity = parseStockQuantity(formData, fields.values);
   if (!quantity.ok) return quantity;
 
   const { supabase, isMember } = await requireTeamMember();
@@ -104,21 +104,33 @@ export async function adjustStoveStock(stoveNumber: number, delta: -1 | 1): Prom
     };
   }
   if (error) return { ok: false, error: errorMessage(error) };
-  if (data === null) return { ok: false, error: "Deze kachel bestaat niet meer." };
+  // Null: the stove no longer exists, or it is made to order and keeps no stock.
+  if (data === null) return { ok: false, error: "De voorraad van deze kachel kan niet worden aangepast." };
 
   revalidatePath("/");
   return { ok: true };
 }
 
-export async function setStoveShopListed(stoveNumber: number, listed: boolean): Promise<ActionResult> {
-  if (!isPositiveId(stoveNumber) || typeof listed !== "boolean") return { ok: false, error: "Onbekende kachel." };
+export async function setStoveListed(stoveNumber: number, channel: ListingChannel, listed: boolean): Promise<ActionResult> {
+  if (!isPositiveId(stoveNumber) || !Object.hasOwn(LISTING_CHANNELS, channel) || typeof listed !== "boolean") {
+    return { ok: false, error: "Onbekende kachel." };
+  }
 
   const { supabase, isMember } = await requireTeamMember();
   if (!isMember) return NO_ACCESS;
 
-  const { data, error } = await supabase.from("stoves").update({ shop_listed: listed }).eq("number", stoveNumber).select("number");
+  const { data, error } = await supabase
+    .from("stoves")
+    .update({ [LISTING_CHANNELS[channel].column]: listed })
+    .eq("number", stoveNumber)
+    .select("stock_quantity");
   if (error) return { ok: false, error: errorMessage(error) };
   if (data.length === 0) return { ok: false, error: "Deze kachel bestaat niet meer." };
+  // The database keeps sold-out stoves unlisted, so the tick did not stick.
+  if (listed && data[0].stock_quantity === 0) {
+    revalidatePath("/");
+    return { ok: false, error: "Een verkochte kachel kan niet worden aangeboden." };
+  }
 
   revalidatePath("/");
   return { ok: true };

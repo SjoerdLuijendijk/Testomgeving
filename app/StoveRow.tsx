@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { formatPrice } from "../lib/price";
-import { CONDITION_LABELS, FLUE_OUTLET_LABELS, type Stove } from "../lib/stoves";
+import { CONDITION_LABELS, FLUE_OUTLET_LABELS, LISTING_CHANNELS, type ListingChannel, type Stove } from "../lib/stoves";
 import EditStoveDialog from "./EditStoveDialog";
 import InvoiceDialog from "./InvoiceDialog";
 import PhotoCell from "./PhotoCell";
-import ShopListedToggle from "./ShopListedToggle";
+import ListingToggle from "./ListingToggle";
 import SoldToggle from "./SoldToggle";
 import StockControl from "./StockControl";
 import StoveInvoiceLinks from "./StoveInvoiceLinks";
@@ -39,13 +39,24 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       <td data-label="Rookafvoer" className="cell-detail cell-nowrap">{formatFlue(stove)}</td>
       <td data-label="Prijs" className="cell-price cell-nowrap cell-numeric">{stove.priceCents ? formatPrice(stove.priceCents) : MISSING}</td>
       <td data-label="Status" className="cell-status cell-sold">
-        {stove.condition === "new" ? (
+        {stove.madeToOrder ? (
+          <span className="stock-count">Op bestelling</span>
+        ) : stove.condition === "new" ? (
           <StockControl stoveNumber={stove.number} quantity={stove.stockQuantity} />
         ) : (
           <SoldToggle stoveNumber={stove.number} sold={Boolean(stove.soldAt)} />
         )}
       </td>
-      <td data-label="Online" className="cell-detail cell-status"><ShopListedToggle stoveNumber={stove.number} listed={stove.shopListed} /></td>
+      {(Object.keys(LISTING_CHANNELS) as ListingChannel[]).map((channel) => (
+        <td key={channel} data-label={LISTING_CHANNELS[channel].label} className="cell-detail cell-status">
+          <ListingToggle
+            stoveNumber={stove.number}
+            channel={channel}
+            listed={stove[LISTING_CHANNELS[channel].field]}
+            soldOut={Boolean(stove.soldAt)}
+          />
+        </td>
+      ))}
       <td data-label="Toegevoegd" className="cell-detail muted">
         <time dateTime={stove.createdAt}>{DATE_FORMAT.format(new Date(stove.createdAt))}</time>
       </td>

@@ -6,6 +6,7 @@ import {
   FLUE_OUTLET_LABELS,
   MAX_TEXT_LENGTH,
   STOCK_QUANTITY,
+  SUPPLY_LABELS,
   type Condition,
   type FlueOutlet,
 } from "./stoves";
@@ -21,6 +22,8 @@ export type StoveFieldValues = {
   flue_diameter_mm: number;
   price_cents: number;
   shop_listed: boolean;
+  marketplace_listed: boolean;
+  made_to_order: boolean;
 };
 
 type ParseResult = { ok: true; values: StoveFieldValues } | { ok: false; error: string };
@@ -51,9 +54,11 @@ export function parseStoveFields(formData: FormData): ParseResult {
   const flueOutlet = readChoice(formData, "flueOutlet", FLUE_OUTLET_LABELS);
   const flueDiameter = readInteger(formData, "flueDiameter", FLUE_DIAMETER_MM);
   const price = parsePriceToCents(String(formData.get("price") ?? ""));
+  const supply = readChoice(formData, "supply", SUPPLY_LABELS);
 
   if (!brand || !model) return { ok: false, error: "Vul merk en model in." };
   if (!condition) return { ok: false, error: "Kies nieuw of gebruikt." };
+  if (condition === "new" && !supply) return { ok: false, error: "Kies uit voorraad of op bestelling." };
   if (!height || !width || !depth) {
     return { ok: false, error: `Vul hoogte, breedte en diepte in hele centimeters in (${DIMENSION_CM.min}–${DIMENSION_CM.max}).` };
   }
@@ -75,16 +80,19 @@ export function parseStoveFields(formData: FormData): ParseResult {
       flue_outlet: flueOutlet,
       flue_diameter_mm: flueDiameter,
       price_cents: price,
-      // An unticked checkbox is left out of the form data.
+      // An unticked (or disabled) checkbox is left out of the form data.
       shop_listed: formData.get("shopListed") === "on",
+      marketplace_listed: formData.get("marketplaceListed") === "on",
+      // Only new stoves can be made to order.
+      made_to_order: condition === "new" && supply === "order",
     },
   };
 }
 
-// The initial stock of a new stove. Only new stoves can have more than one unit; the stock is
+// The initial stock of a new stove from stock. Only those can have more than one unit; the stock is
 // changed afterwards one unit at a time, so it is not part of the editable fields.
-export function parseStockQuantity(formData: FormData, condition: Condition): { ok: true; value: number } | { ok: false; error: string } {
-  if (condition === "used") return { ok: true, value: 1 };
+export function parseStockQuantity(formData: FormData, values: StoveFieldValues): { ok: true; value: number } | { ok: false; error: string } {
+  if (values.condition === "used" || values.made_to_order) return { ok: true, value: 1 };
   const quantity = readInteger(formData, "quantity", STOCK_QUANTITY);
   if (!quantity) return { ok: false, error: `Vul het aantal op voorraad in (${STOCK_QUANTITY.min}–${STOCK_QUANTITY.max}).` };
   return { ok: true, value: quantity };

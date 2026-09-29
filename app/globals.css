@@ -280,6 +280,10 @@ a {
   font-size: 18px;
 }
 
+.field-contents {
+  display: contents;
+}
+
 .checkbox-field {
   display: flex;
   align-items: center;
@@ -288,7 +292,7 @@ a {
 }
 
 .checkbox-field input,
-.shop-listed-toggle {
+.listing-toggle {
   width: 22px;
   height: 22px;
   margin: 0;
