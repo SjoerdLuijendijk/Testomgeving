@@ -74,12 +74,27 @@ a {
   border-bottom: 1px solid var(--line);
 }
 
-.brand-name {
-  margin: 0;
-  color: var(--accent);
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--accent);
+}
+
+/* The logo is nearly square, with the name below the house; below ~48px the name is unreadable. */
+.brand-logo img {
+  display: block;
+  width: auto;
+  height: 52px;
+}
+
+.login-card .brand-logo {
+  padding: 12px 18px;
+}
+
+.login-card .brand-logo img {
+  height: 96px;
 }
 
 .tabs {

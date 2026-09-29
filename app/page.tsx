@@ -4,6 +4,7 @@ import { getCompany } from "../lib/invoice-queries";
 import { getKnownBrands, getStoves } from "../lib/stove-queries";
 import { signOut } from "./auth/actions";
 import AddStoveForm from "./AddStoveForm";
+import BrandLogo from "./BrandLogo";
 import CompanySettingsForm from "./CompanySettingsForm";
 import StoveTable from "./StoveTable";
 
@@ -21,7 +22,7 @@ export default async function Page({ searchParams }: PageProps) {
   return (
     <div className="app-shell">
       <header className="site-header">
-        <span className="brand-name">Woonwarmer</span>
+        <BrandLogo />
         {isMember && (
           <nav className="tabs" aria-label="Hoofdmenu">
             <Link href="/" aria-current={activeTab === "toevoegen" ? "page" : undefined}>Kachel toevoegen</Link>
