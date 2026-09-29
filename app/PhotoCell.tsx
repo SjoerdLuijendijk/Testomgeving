@@ -35,7 +35,8 @@ export default function PhotoCell({ stoveNumber, photos }: { stoveNumber: number
         <span key={photo.id} className="thumb">
           {photo.url ? (
             <button type="button" className="thumb-open" onClick={() => setViewIndex(index)} aria-label={`Foto ${index + 1} bekijken`}>
-              <img src={photo.url} alt="" loading="lazy" />
+              {/* The first photo is the preview on collapsed phone cards, so it loads right away. */}
+              <img src={photo.url} alt="" loading={index === 0 ? "eager" : "lazy"} />
             </button>
           ) : (
             <span className="thumb-missing" aria-label="Foto niet beschikbaar">?</span>
