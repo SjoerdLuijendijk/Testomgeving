@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { AdStove } from "./marketplace-ad";
 import { signPhotoUrls } from "./stove-photos";
 import type { Stove } from "./stoves";
 
@@ -35,6 +36,30 @@ export async function getStoves(supabase: SupabaseClient): Promise<Stove[]> {
     invoices: stove.invoices.map((invoice) => ({ id: invoice.id, number: invoice.invoice_number })),
     photos: stove.stove_photos.map((photo) => ({ id: photo.id, url: urlByPath.get(photo.path) ?? null })),
   }));
+}
+
+export async function getStoveForAd(supabase: SupabaseClient, number: number): Promise<AdStove | null> {
+  const { data, error } = await supabase
+    .from("stoves")
+    .select("number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, made_to_order")
+    .eq("number", number)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+
+  return {
+    number: data.number,
+    brand: data.brand,
+    model: data.model,
+    condition: data.condition,
+    heightCm: data.height_cm,
+    widthCm: data.width_cm,
+    depthCm: data.depth_cm,
+    flueOutlet: data.flue_outlet,
+    flueDiameterMm: data.flue_diameter_mm,
+    priceCents: data.price_cents,
+    madeToOrder: data.made_to_order,
+  };
 }
 
 export async function getKnownBrands(supabase: SupabaseClient): Promise<string[]> {

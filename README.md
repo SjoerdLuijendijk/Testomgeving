@@ -68,6 +68,16 @@ details from Instellingen are copied onto the invoice.
 Invoices cannot be changed or deleted after creation; corrections need a credit invoice. PDFs are
 generated in the browser with `pdf-lib` and can be downloaded again from the inventory.
 
+## Marktplaats ad text
+
+On desktop, each stove has an "Advertentie" button (hidden on phones) that generates an editable
+Dutch Marktplaats ad with OpenAI (Responses API, called server-side with `fetch`). The Server Action
+reads the stove and the company details from Instellingen from the database; only those facts are
+sent to OpenAI, never customer data. Requests are sent with `store: false`.
+
+Requires `OPENAI_API_KEY` (server-only, in Vercel). `OPENAI_MODEL` is optional and overrides the
+default model set in `lib/marketplace-ad.ts`. Generated text can contain mistakes; check it before posting.
+
 ## Photos
 
 Photos are resized in the browser to JPEG (max. 1600 px) before upload. The server accepts

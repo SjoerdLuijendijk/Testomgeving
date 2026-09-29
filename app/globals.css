@@ -863,6 +863,37 @@ a {
   margin-top: 12px;
 }
 
+/* Marketplace ad dialog */
+
+.ad-dialog {
+  width: min(680px, calc(100vw - 32px));
+}
+
+.ad-dialog > p {
+  margin: 8px 0 16px;
+}
+
+.ad-text {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d6ccc5;
+  border-radius: var(--radius);
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.ad-dialog .ad-status {
+  min-height: 1.5em;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
 /* Login */
 
 .login-shell {
@@ -1290,6 +1321,10 @@ a {
 
 /* On phones every row becomes a card. */
 @media (max-width: 719px) {
+  .desktop-only {
+    display: none;
+  }
+
   .filter-group {
     width: 100%;
   }

@@ -5,6 +5,7 @@ import { formatPrice } from "../lib/price";
 import { CONDITION_LABELS, FLUE_OUTLET_LABELS, LISTING_CHANNELS, type ListingChannel, type Stove } from "../lib/stoves";
 import EditStoveDialog from "./EditStoveDialog";
 import InvoiceDialog from "./InvoiceDialog";
+import MarketplaceAdDialog from "./MarketplaceAdDialog";
 import PhotoCell from "./PhotoCell";
 import ListingToggle from "./ListingToggle";
 import SoldToggle from "./SoldToggle";
@@ -64,6 +65,7 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
         <span className="row-actions">
           <EditStoveDialog stove={stove} brands={brands} />
           <InvoiceDialog stove={stove} />
+          <MarketplaceAdDialog stoveNumber={stove.number} />
           <StoveInvoiceLinks invoices={stove.invoices} />
         </span>
       </td>
