@@ -94,6 +94,20 @@ export async function setStoveSold(stoveNumber: number, sold: boolean): Promise<
   return { ok: true };
 }
 
+export async function setStoveShopListed(stoveNumber: number, listed: boolean): Promise<ActionResult> {
+  if (!isPositiveId(stoveNumber) || typeof listed !== "boolean") return { ok: false, error: "Onbekende kachel." };
+
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+
+  const { data, error } = await supabase.from("stoves").update({ shop_listed: listed }).eq("number", stoveNumber).select("number");
+  if (error) return { ok: false, error: errorMessage(error) };
+  if (data.length === 0) return { ok: false, error: "Deze kachel bestaat niet meer." };
+
+  revalidatePath("/");
+  return { ok: true };
+}
+
 export async function deleteStovePhoto(photoId: number): Promise<ActionResult> {
   if (!isPositiveId(photoId)) return { ok: false, error: "Onbekende foto." };
 

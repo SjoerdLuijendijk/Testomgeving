@@ -19,6 +19,7 @@ export type StoveFieldValues = {
   flue_outlet: FlueOutlet;
   flue_diameter_mm: number;
   price_cents: number;
+  shop_listed: boolean;
 };
 
 type ParseResult = { ok: true; values: StoveFieldValues } | { ok: false; error: string };
@@ -73,6 +74,8 @@ export function parseStoveFields(formData: FormData): ParseResult {
       flue_outlet: flueOutlet,
       flue_diameter_mm: flueDiameter,
       price_cents: price,
+      // An unticked checkbox is left out of the form data.
+      shop_listed: formData.get("shopListed") === "on",
     },
   };
 }

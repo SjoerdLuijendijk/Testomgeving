@@ -6,7 +6,7 @@ export async function getStoves(supabase: SupabaseClient): Promise<Stove[]> {
   const { data, error } = await supabase
     .from("stoves")
     .select(
-      "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, sold_at, created_at, stove_photos (id, path), invoices (id, invoice_number)",
+      "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, shop_listed, sold_at, created_at, stove_photos (id, path), invoices (id, invoice_number)",
     )
     .order("number", { ascending: false })
     .order("id", { referencedTable: "stove_photos", ascending: true })
@@ -26,6 +26,7 @@ export async function getStoves(supabase: SupabaseClient): Promise<Stove[]> {
     flueOutlet: stove.flue_outlet,
     flueDiameterMm: stove.flue_diameter_mm,
     priceCents: stove.price_cents,
+    shopListed: stove.shop_listed,
     soldAt: stove.sold_at,
     createdAt: stove.created_at,
     invoices: stove.invoices.map((invoice) => ({ id: invoice.id, number: invoice.invoice_number })),

@@ -30,8 +30,14 @@ app yet. Adding a team member takes two steps:
    (lowercase e-mail).
 
 Row Level Security on `stoves`, `stove_photos` and the private `stove-photos` storage bucket
-allows access only to signed-in users whose e-mail is in `team_members`. After creation only
-`sold_at` of a stove can be changed. Photos are served through short-lived signed URLs.
+allows access only to signed-in users whose e-mail is in `team_members`. After creation the stove
+number stays fixed; team members can edit the other details. Photos are served through
+short-lived signed URLs.
+
+## Web shop
+
+Each stove has an "Online" checkbox (`shop_listed`, off by default) that marks it for the
+WooCommerce web shop. The sync itself is not built yet; see `docs/woocommerce-sync.md`.
 
 ## Invoices
 

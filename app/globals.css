@@ -256,13 +256,28 @@ a {
   font-weight: 600;
 }
 
-.form-stack input:not([type="file"]):not([type="radio"]) {
+.form-stack input:not([type="file"]):not([type="radio"]):not([type="checkbox"]) {
   min-height: 52px;
   padding: 12px 14px;
   border: 1px solid #d6ccc5;
   border-radius: var(--radius);
   background: white;
   font-size: 18px;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+}
+
+.checkbox-field input,
+.shop-listed-toggle {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent);
 }
 
 .choice-group,

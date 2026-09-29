@@ -32,6 +32,7 @@ export type Stove = {
   flueOutlet: FlueOutlet | null;
   flueDiameterMm: number | null;
   priceCents: number | null;
+  shopListed: boolean;
   soldAt: string | null;
   createdAt: string;
   photos: StovePhoto[];

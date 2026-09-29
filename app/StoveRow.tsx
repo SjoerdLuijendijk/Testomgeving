@@ -3,6 +3,7 @@ import { CONDITION_LABELS, FLUE_OUTLET_LABELS, type Stove } from "../lib/stoves"
 import EditStoveDialog from "./EditStoveDialog";
 import InvoiceDialog from "./InvoiceDialog";
 import PhotoCell from "./PhotoCell";
+import ShopListedToggle from "./ShopListedToggle";
 import SoldToggle from "./SoldToggle";
 import StoveInvoiceLinks from "./StoveInvoiceLinks";
 
@@ -30,6 +31,7 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       <td data-label="Rookafvoer" className="cell-nowrap">{formatFlue(stove)}</td>
       <td data-label="Prijs" className="cell-nowrap cell-numeric">{stove.priceCents ? formatPrice(stove.priceCents) : MISSING}</td>
       <td data-label="Status" className="cell-status"><SoldToggle stoveNumber={stove.number} sold={Boolean(stove.soldAt)} /></td>
+      <td data-label="Online" className="cell-status"><ShopListedToggle stoveNumber={stove.number} listed={stove.shopListed} /></td>
       <td data-label="Toegevoegd" className="muted">
         <time dateTime={stove.createdAt}>{DATE_FORMAT.format(new Date(stove.createdAt))}</time>
       </td>

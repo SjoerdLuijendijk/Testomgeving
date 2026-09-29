@@ -102,6 +102,11 @@ export default function StoveFields({ brands, stove }: StoveFieldsProps) {
         required
         defaultValue={stove?.priceCents ? formatPriceInput(stove.priceCents) : undefined}
       />
+
+      <label className="checkbox-field">
+        <input type="checkbox" name="shopListed" defaultChecked={stove?.shopListed ?? false} />
+        <span>Online zetten in de webshop</span>
+      </label>
     </>
   );
 }

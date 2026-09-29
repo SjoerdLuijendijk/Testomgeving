@@ -103,6 +103,7 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
                 <th scope="col">Rookafvoer</th>
                 {header("Prijs", "priceCents", "cell-numeric")}
                 {header("Status", "status")}
+                <th scope="col">Online</th>
                 {header("Toegevoegd", "createdAt")}
                 <th scope="col"><span className="visually-hidden">Acties</span></th>
               </tr>
@@ -114,7 +115,7 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
               <tr>
                 <td colSpan={7}>{visible.length} {visible.length === 1 ? "kachel" : "kachels"}</td>
                 <td className="cell-numeric">{formatPrice(visibleCents)}</td>
-                <td colSpan={3} className="muted">incl. btw</td>
+                <td colSpan={4} className="muted">incl. btw</td>
               </tr>
             </tfoot>
           </table>
