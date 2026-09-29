@@ -1,9 +1,10 @@
 "use client";
 
 import { useOptimistic, useTransition } from "react";
-import { setStoveSold } from "./actions";
+import { adjustStoveStock } from "./actions";
 import { useDialog } from "./DialogProvider";
 
+// Sold status of a used (single-unit) stove: selling or restocking its one unit.
 export default function SoldToggle({ stoveNumber, sold }: { stoveNumber: number; sold: boolean }) {
   const [optimisticSold, setOptimisticSold] = useOptimistic(sold);
   const [pending, startTransition] = useTransition();
@@ -16,7 +17,7 @@ export default function SoldToggle({ stoveNumber, sold }: { stoveNumber: number;
     }
     startTransition(async () => {
       setOptimisticSold(!optimisticSold);
-      const result = await setStoveSold(stoveNumber, !optimisticSold);
+      const result = await adjustStoveStock(stoveNumber, optimisticSold ? 1 : -1);
       if (!result.ok) await notify(result.error);
     });
   }

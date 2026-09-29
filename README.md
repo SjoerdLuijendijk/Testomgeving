@@ -39,6 +39,14 @@ allows access only to signed-in users whose e-mail is in `team_members`. After c
 number stays fixed; team members can edit the other details. Photos are served through
 short-lived signed URLs.
 
+## Stock
+
+The inventory has two tabs: used and new stoves. A used stove is a single unit with a "sold"
+toggle. A new stove model has one stove number with a stock quantity (set when adding it) and
+"−1 verkocht" / "+1" buttons. The database keeps `sold_at` and `stock_quantity` consistent: a stove
+is sold exactly when its stock is 0. Stock changes go through `adjust_stove_stock()`, one unit at a
+time, so concurrent sales cannot overwrite each other.
+
 ## Web shop
 
 Each stove has an "Online" checkbox (`shop_listed`, off by default) that marks it for the

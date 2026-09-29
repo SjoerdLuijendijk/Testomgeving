@@ -27,15 +27,18 @@ them instead of creating duplicates.
 | `flue_outlet` | attribute "Rookafvoer" | Boven / Achter. |
 | `flue_diameter_mm` | attribute "Maat afvoer" | In mm. |
 | photos | `images` | Uploaded once through short-lived signed URLs; WooCommerce keeps its own public copy. |
-| — | `manage_stock: true`, `stock_quantity: 1` | Each stove is unique. |
+| `stock_quantity` | `manage_stock: true`, `stock_quantity` | Used stoves are unique (1); a new stove model can have more units under one number. |
 
 ## State rules
 
 | App state | WooCommerce |
 | --- | --- |
-| `shop_listed` on, not sold | Product published, stock 1. |
+| `shop_listed` on, in stock | Product published with the app's stock quantity. |
 | `shop_listed` off | Product set to draft (not deleted, so order history stays intact). |
-| Sold (`sold_at` set) | Stock 0 / out of stock. |
+| Sold out (`stock_quantity` 0, `sold_at` set) | Stock 0 / out of stock. |
+
+A web shop order reports back by lowering the stock by the ordered quantity (through
+`adjust_stove_stock` or a similar function), not by setting `sold_at` directly.
 
 ## Still to decide (phase 2 and 3)
 

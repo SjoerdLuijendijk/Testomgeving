@@ -17,6 +17,8 @@ export type FlueOutlet = keyof typeof FLUE_OUTLET_LABELS;
 export const DIMENSION_CM = { min: 1, max: 500 } as const;
 export const FLUE_DIAMETER_MM = { min: 50, max: 400 } as const;
 export const COMMON_FLUE_DIAMETERS_MM = [100, 120, 125, 130, 150, 180, 200];
+// Keep in sync with the stock quantity migration. Used stoves are always a single unit.
+export const STOCK_QUANTITY = { min: 1, max: 10000 } as const;
 
 export type StovePhoto = { id: number; url: string | null };
 export type StoveInvoice = { id: number; number: string };
@@ -33,6 +35,8 @@ export type Stove = {
   flueDiameterMm: number | null;
   priceCents: number | null;
   shopListed: boolean;
+  /** Units in stock; 0 exactly when soldAt is set. */
+  stockQuantity: number;
   soldAt: string | null;
   createdAt: string;
   photos: StovePhoto[];

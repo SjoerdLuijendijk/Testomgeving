@@ -2,13 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { requireTeamMember } from "../lib/auth";
-import { parseStoveFields } from "../lib/stove-fields";
+import { parseStockQuantity, parseStoveFields } from "../lib/stove-fields";
 import { PHOTOS_BUCKET } from "../lib/stoves";
 import { readPhotos, storePhotos, UserError } from "../lib/stove-photos";
 
 export type ActionResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
 const NO_ACCESS = { ok: false, error: "Je hebt geen toegang tot de voorraad." } as const;
+// Postgres error code for a violated check constraint.
+const CHECK_VIOLATION = "23514";
 
 function errorMessage(error: unknown) {
   // Database and storage details are not shown to the user.
@@ -22,6 +24,8 @@ function isPositiveId(value: unknown): value is number {
 export async function addStove(formData: FormData): Promise<ActionResult<{ number: number; warning?: string }>> {
   const fields = parseStoveFields(formData);
   if (!fields.ok) return fields;
+  const quantity = parseStockQuantity(formData, fields.values.condition);
+  if (!quantity.ok) return quantity;
 
   const { supabase, isMember } = await requireTeamMember();
   if (!isMember) return NO_ACCESS;
@@ -33,7 +37,11 @@ export async function addStove(formData: FormData): Promise<ActionResult<{ numbe
     return { ok: false, error: errorMessage(error) };
   }
 
-  const { data: stove, error } = await supabase.from("stoves").insert(fields.values).select("number").single();
+  const { data: stove, error } = await supabase
+    .from("stoves")
+    .insert({ ...fields.values, stock_quantity: quantity.value })
+    .select("number")
+    .single();
   if (error) return { ok: false, error: errorMessage(error) };
 
   revalidatePath("/");
@@ -55,6 +63,9 @@ export async function updateStove(stoveNumber: number, formData: FormData): Prom
   if (!isMember) return NO_ACCESS;
 
   const { data, error } = await supabase.from("stoves").update(fields.values).eq("number", stoveNumber).select("number");
+  if (error?.code === CHECK_VIOLATION) {
+    return { ok: false, error: "Deze kachel heeft meer dan 1 op voorraad en kan daarom niet op gebruikt worden gezet." };
+  }
   if (error) return { ok: false, error: errorMessage(error) };
   if (data.length === 0) return { ok: false, error: "Deze kachel bestaat niet meer." };
 
@@ -78,17 +89,22 @@ export async function addStovePhotos(stoveNumber: number, formData: FormData): P
   return { ok: true };
 }
 
-export async function setStoveSold(stoveNumber: number, sold: boolean): Promise<ActionResult> {
-  if (!isPositiveId(stoveNumber) || typeof sold !== "boolean") return { ok: false, error: "Onbekende kachel." };
+// Sells (-1) or restocks (+1) one unit; the stove counts as sold once its stock reaches 0.
+export async function adjustStoveStock(stoveNumber: number, delta: -1 | 1): Promise<ActionResult> {
+  if (!isPositiveId(stoveNumber) || (delta !== -1 && delta !== 1)) return { ok: false, error: "Onbekende kachel." };
 
   const { supabase, isMember } = await requireTeamMember();
   if (!isMember) return NO_ACCESS;
 
-  const { error } = await supabase
-    .from("stoves")
-    .update({ sold_at: sold ? new Date().toISOString() : null })
-    .eq("number", stoveNumber);
+  const { data, error } = await supabase.rpc("adjust_stove_stock", { p_stove_number: stoveNumber, p_delta: delta });
+  if (error?.code === CHECK_VIOLATION) {
+    return {
+      ok: false,
+      error: delta === -1 ? "Deze kachel is al uitverkocht." : "Een gebruikte kachel kan maar 1 keer op voorraad staan.",
+    };
+  }
   if (error) return { ok: false, error: errorMessage(error) };
+  if (data === null) return { ok: false, error: "Deze kachel bestaat niet meer." };
 
   revalidatePath("/");
   return { ok: true };

@@ -5,6 +5,7 @@ import {
   FLUE_DIAMETER_MM,
   FLUE_OUTLET_LABELS,
   MAX_TEXT_LENGTH,
+  STOCK_QUANTITY,
   type Condition,
   type FlueOutlet,
 } from "./stoves";
@@ -78,4 +79,13 @@ export function parseStoveFields(formData: FormData): ParseResult {
       shop_listed: formData.get("shopListed") === "on",
     },
   };
+}
+
+// The initial stock of a new stove. Only new stoves can have more than one unit; the stock is
+// changed afterwards one unit at a time, so it is not part of the editable fields.
+export function parseStockQuantity(formData: FormData, condition: Condition): { ok: true; value: number } | { ok: false; error: string } {
+  if (condition === "used") return { ok: true, value: 1 };
+  const quantity = readInteger(formData, "quantity", STOCK_QUANTITY);
+  if (!quantity) return { ok: false, error: `Vul het aantal op voorraad in (${STOCK_QUANTITY.min}–${STOCK_QUANTITY.max}).` };
+  return { ok: true, value: quantity };
 }

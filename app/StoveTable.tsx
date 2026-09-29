@@ -8,9 +8,17 @@ import type { Stove } from "../lib/stoves";
 import SortableHeader from "./SortableHeader";
 import StoveRow from "./StoveRow";
 
+type Kind = "used" | "new";
 type Filter = "available" | "sold";
 
+const KIND_LABELS: Record<Kind, string> = { used: "Gebruikt", new: "Nieuw" };
 const FILTER_LABELS: Record<Filter, string> = { available: "Te koop", sold: "Verkocht" };
+
+// Stoves registered before the condition field existed are treated as used.
+const kindOf = (stove: Stove): Kind => (stove.condition === "new" ? "new" : "used");
+
+// Units a row stands for: its stock, or the single sold unit once sold out.
+const unitsOf = (stove: Stove) => (stove.soldAt ? 1 : stove.stockQuantity);
 
 function matchesSearch(stove: Stove, query: string) {
   if (!query) return true;
@@ -19,35 +27,44 @@ function matchesSearch(stove: Stove, query: string) {
 
 export default function StoveTable({ stoves }: { stoves: Stove[] }) {
   const [search, setSearch] = useState("");
+  const [kind, setKind] = useState<Kind>("used");
   const [filter, setFilter] = useState<Filter>("available");
   const [sort, setSort] = useState(DEFAULT_SORT);
 
-  // Count and total price (incl. VAT) per filter; stoves without a price count as zero.
+  const kindCounts = useMemo(() => {
+    const result: Record<Kind, number> = { used: 0, new: 0 };
+    for (const stove of stoves) result[kindOf(stove)] += 1;
+    return result;
+  }, [stoves]);
+  const stovesOfKind = useMemo(() => stoves.filter((stove) => kindOf(stove) === kind), [stoves, kind]);
+
+  // Units and total price (incl. VAT) per filter; stoves without a price count as zero.
   const totals = useMemo(() => {
     const result: Record<Filter, { count: number; cents: number }> = {
       available: { count: 0, cents: 0 },
       sold: { count: 0, cents: 0 },
     };
-    for (const stove of stoves) {
+    for (const stove of stovesOfKind) {
       const key = stove.soldAt ? "sold" : "available";
-      result[key].count += 1;
-      result[key].cents += stove.priceCents ?? 0;
+      result[key].count += unitsOf(stove);
+      result[key].cents += (stove.priceCents ?? 0) * unitsOf(stove);
     }
     return result;
-  }, [stoves]);
+  }, [stovesOfKind]);
 
   const brands = useMemo(() => [...new Set(stoves.map((stove) => stove.brand))].sort((a, b) => a.localeCompare(b, "nl")), [stoves]);
 
   const query = search.trim().toLowerCase();
   const visible = sortStoves(
-    stoves.filter((stove) => matchesSearch(stove, query) && (filter === "sold") === Boolean(stove.soldAt)),
+    stovesOfKind.filter((stove) => matchesSearch(stove, query) && (filter === "sold") === Boolean(stove.soldAt)),
     sort,
   );
   const otherFilter: Filter = filter === "sold" ? "available" : "sold";
   const otherMatches = query
-    ? stoves.filter((stove) => matchesSearch(stove, query) && (otherFilter === "sold") === Boolean(stove.soldAt)).length
+    ? stovesOfKind.filter((stove) => matchesSearch(stove, query) && (otherFilter === "sold") === Boolean(stove.soldAt)).length
     : 0;
-  const visibleCents = visible.reduce((sum, stove) => sum + (stove.priceCents ?? 0), 0);
+  const visibleUnits = visible.reduce((sum, stove) => sum + unitsOf(stove), 0);
+  const visibleCents = visible.reduce((sum, stove) => sum + (stove.priceCents ?? 0) * unitsOf(stove), 0);
 
   const header = (label: string, sortKey: SortKey, className?: string) => (
     <SortableHeader label={label} sortKey={sortKey} sort={sort} onSort={(key) => setSort((current) => nextSort(current, key))} className={className} />
@@ -57,6 +74,13 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
     <section aria-labelledby="stock-title">
       <div className="stock-toolbar">
         <h1 id="stock-title">Voorraad</h1>
+        <div className="kind-tabs" role="group" aria-label="Soort kachel">
+          {(Object.keys(KIND_LABELS) as Kind[]).map((key) => (
+            <button key={key} type="button" aria-pressed={kind === key} onClick={() => setKind(key)}>
+              {KIND_LABELS[key]} <span>{kindCounts[key]}</span>
+            </button>
+          ))}
+        </div>
         <input
           className="search-input"
           type="search"
@@ -82,7 +106,7 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
         </div>
       ) : visible.length === 0 ? (
         <div className="notice">
-          <p>Geen kachels gevonden bij {FILTER_LABELS[filter]}.</p>
+          <p>Geen kachels gevonden bij {KIND_LABELS[kind].toLowerCase()} · {FILTER_LABELS[filter].toLowerCase()}.</p>
           {otherMatches > 0 && (
             <button type="button" className="text-button" onClick={() => setFilter(otherFilter)}>
               {otherMatches} gevonden bij {FILTER_LABELS[otherFilter]} →
@@ -113,7 +137,7 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={7}>{visible.length} {visible.length === 1 ? "kachel" : "kachels"}</td>
+                <td colSpan={7}>{visibleUnits} {visibleUnits === 1 ? "kachel" : "kachels"}</td>
                 <td className="cell-numeric">{formatPrice(visibleCents)}</td>
                 <td colSpan={4} className="muted">incl. btw</td>
               </tr>

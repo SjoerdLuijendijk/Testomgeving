@@ -892,6 +892,73 @@ a {
   background: white;
 }
 
+.kind-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--line);
+}
+
+.kind-tabs button {
+  margin-bottom: -2px;
+  padding: 8px 16px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.kind-tabs button span {
+  font-weight: 400;
+}
+
+.kind-tabs button[aria-pressed="true"] {
+  border-bottom-color: var(--accent);
+  color: var(--ink);
+}
+
+.stock-control {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.stock-control[aria-busy="true"] {
+  opacity: 0.6;
+}
+
+.stock-count {
+  min-width: 96px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stock-count--sold {
+  color: var(--sold);
+}
+
+.stock-button {
+  min-height: 36px;
+  padding: 4px 10px;
+  border: 1px solid #d6ccc5;
+  border-radius: 6px;
+  background: white;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stock-button--sell {
+  border-color: var(--available);
+  background: var(--available);
+  color: white;
+}
+
+.stock-button:disabled {
+  opacity: 0.45;
+}
+
 .filter-group {
   display: flex;
   gap: 4px;
@@ -1163,6 +1230,22 @@ a {
     font-size: 13px;
   }
 
+  .stove-table .stock-control {
+    flex-wrap: nowrap;
+  }
+
+  .stove-table .stock-count {
+    min-width: 88px;
+    font-size: 13px;
+  }
+
+  .stove-table .stock-button {
+    min-height: 26px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
   .stove-table .photo-cell {
     flex-wrap: nowrap;
     gap: 6px;
@@ -1335,6 +1418,24 @@ a {
     min-width: 84px;
     min-height: 32px;
     padding: 4px 10px;
+    font-size: 13px;
+  }
+
+  /* Count on its own line above the two buttons, so the card keeps room for brand and model. */
+  .stove-table .stock-control {
+    justify-content: flex-end;
+    max-width: 150px;
+  }
+
+  .stove-table .stock-count {
+    flex-basis: 100%;
+    min-width: 0;
+    font-size: 13px;
+    text-align: right;
+  }
+
+  .stove-table .stock-button {
+    min-height: 32px;
     font-size: 13px;
   }
 
