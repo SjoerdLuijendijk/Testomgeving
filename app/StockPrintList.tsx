@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatPrice } from "../lib/price";
-import { formatDimensions, formatFlue, formatType, kindOf, MISSING, unitsOf } from "../lib/stove-display";
+import { formatDimensions, formatFlue, formatType, kindOf, MISSING } from "../lib/stove-display";
 import { sortStoves } from "../lib/stove-sort";
 import type { Stove } from "../lib/stoves";
 
@@ -10,12 +10,9 @@ const DATE_FORMAT = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "l
 const PRINT_SORT = { key: "brand", direction: "asc" } as const;
 
 function StockSection({ title, stoves }: { title: string; stoves: Stove[] }) {
-  const units = stoves.reduce((sum, stove) => sum + unitsOf(stove), 0);
-  const cents = stoves.reduce((sum, stove) => sum + (stove.priceCents ?? 0) * unitsOf(stove), 0);
-
   return (
     <section className="print-section">
-      <h2>{title} <span>({units} {units === 1 ? "kachel" : "kachels"})</span></h2>
+      <h2>{title}</h2>
       {stoves.length === 0 ? (
         <p>Geen kachels op voorraad.</p>
       ) : (
@@ -42,12 +39,6 @@ function StockSection({ title, stoves }: { title: string; stoves: Stove[] }) {
               </tr>
             ))}
           </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={5}>Totaal incl. btw</td>
-              <td className="cell-numeric cell-nowrap">{formatPrice(cents)}</td>
-            </tr>
-          </tfoot>
         </table>
       )}
     </section>

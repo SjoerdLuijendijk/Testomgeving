@@ -20,7 +20,7 @@ Branches: `feature/session-log`, `feature/photo-preview-count`, `feature/admin-i
   online status) and imports new shop products, never twice.
 - Removed the Marktplaats and 2dehands checkboxes (linked from WooCommerce itself).
 - "Type kachel" is free text with suggestions; known types keep their key.
-- Print: the "Aantal" column is left off the printout; the print button is a printer icon at the top
+- Print: the "Aantal" column, the number of stoves and the total amount are left off the printout; the print button is a printer icon at the top
   right of the stock page.
 - Web shop name is now brand + stove type ("Hwam Houtkachel"); the "Naam in webshop" and "Model"
   fields are gone (migration `20260930240000_optional_stove_model.sql` makes the column optional).

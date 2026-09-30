@@ -1852,10 +1852,6 @@ a {
     font-size: 13pt;
   }
 
-  .print-stock h2 span {
-    font-weight: normal;
-  }
-
   .print-section + .print-section {
     break-before: page;
   }
@@ -1883,12 +1879,6 @@ a {
 
   .print-stock tr {
     break-inside: avoid;
-  }
-
-  .print-stock tfoot td {
-    border-top: 1pt solid black;
-    border-bottom: 0;
-    font-weight: bold;
   }
 
   .print-stock .cell-numeric {
