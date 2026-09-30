@@ -8,9 +8,18 @@ import { useDialog } from "./DialogProvider";
 export default function StockControl({ stoveNumber, quantity }: { stoveNumber: number; quantity: number }) {
   const [optimisticQuantity, setOptimisticQuantity] = useOptimistic(quantity);
   const [pending, startTransition] = useTransition();
-  const { notify } = useDialog();
+  const { confirm, notify } = useDialog();
 
-  function adjust(delta: -1 | 1) {
+  async function adjust(delta: -1 | 1) {
+    // Selling the last unit sells out the stove, which moves it to the sold archive.
+    if (delta === -1 && optimisticQuantity === 1) {
+      const confirmed = await confirm({
+        title: `Laatste kachel ${stoveNumber} verkocht?`,
+        message: "De kachel is dan uitverkocht en gaat naar het Verkocht archief (menu rechtsboven).",
+        confirmLabel: "Op verkocht zetten",
+      });
+      if (!confirmed) return;
+    }
     startTransition(async () => {
       setOptimisticQuantity(optimisticQuantity + delta);
       const result = await adjustStoveStock(stoveNumber, delta);
