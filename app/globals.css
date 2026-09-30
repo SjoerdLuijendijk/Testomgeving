@@ -1285,9 +1285,8 @@ a {
   border-color: var(--field-border-hover);
 }
 
-/* Segmented controls: the type tabs and the sale filter share one look and height. */
-.kind-tabs,
-.filter-group {
+/* Segmented control for the stove type. */
+.kind-tabs {
   display: flex;
   gap: 2px;
   min-height: var(--control-height);
@@ -1296,8 +1295,7 @@ a {
   background: var(--track);
 }
 
-.kind-tabs button,
-.filter-group button {
+.kind-tabs button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1313,20 +1311,17 @@ a {
   transition: background-color 0.15s, color 0.15s;
 }
 
-.kind-tabs button:not([aria-pressed="true"]):hover,
-.filter-group button:not([aria-pressed="true"]):hover {
+.kind-tabs button:not([aria-pressed="true"]):hover {
   color: var(--ink);
 }
 
-.kind-tabs button[aria-pressed="true"],
-.filter-group button[aria-pressed="true"] {
+.kind-tabs button[aria-pressed="true"] {
   background: var(--paper);
   color: var(--ink);
   box-shadow: 0 1px 2px rgb(42 33 29 / 10%), 0 0 0 1px rgb(42 33 29 / 4%);
 }
 
-.kind-tabs button span,
-.filter-group button span {
+.kind-tabs button span {
   color: var(--muted);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -1371,13 +1366,6 @@ a {
 
 .stock-button:disabled {
   opacity: 0.45;
-}
-
-.filter-group button small {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
 }
 
 .table-wrap {
@@ -1720,13 +1708,13 @@ a {
     padding: 20px 16px 24px;
   }
 
-  /* Stock toolbar: the active "Voorraad" tab already names the page, so the heading is for screen readers only. */
+  /* Stock toolbar: the active "Voorraad" tab already names the page, so that heading is for screen readers only; the sold archive keeps its title. */
   .stock-toolbar {
     gap: 8px;
     margin-bottom: 12px;
   }
 
-  .stock-toolbar h1 {
+  .stock-toolbar h1:not(.stock-title--archive) {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -1749,21 +1737,6 @@ a {
   .search-input {
     flex-basis: 100%;
     min-height: 44px;
-  }
-
-  .filter-group {
-    width: 100%;
-  }
-
-  .filter-group button {
-    flex: 1;
-    min-width: 0;
-    padding: 8px 4px;
-  }
-
-  /* The totals are also in the footer below the cards. */
-  .filter-group button small {
-    display: none;
   }
 
   .table-wrap {

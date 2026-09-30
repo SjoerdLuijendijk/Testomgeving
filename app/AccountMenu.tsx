@@ -3,17 +3,25 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { ADMIN_SECTIONS, type AdminSection } from "../lib/admin-sections";
+import { STOCK_VIEW_HREFS } from "../lib/stock-views";
 import { signOut } from "./auth/actions";
+
+type MenuItemKey = "verkocht" | AdminSection;
+
+const MENU_ITEMS: { key: MenuItemKey; label: string; href: string }[] = [
+  { key: "verkocht", label: "Verkocht archief", href: STOCK_VIEW_HREFS.sold },
+  ...ADMIN_SECTIONS,
+];
 
 type AccountMenuProps = {
   email: string | undefined;
-  /** Team members get the management pages; others only sign out. */
+  /** Team members get the sold archive and management pages; others only sign out. */
   showSections: boolean;
-  activeSection: AdminSection | null;
+  activeItem: MenuItemKey | null;
 };
 
-// Profile button top right; its dropdown opens the management pages directly and signs out.
-export default function AccountMenu({ email, showSections, activeSection }: AccountMenuProps) {
+// Profile button top right; its dropdown opens the sold archive and management pages directly and signs out.
+export default function AccountMenu({ email, showSections, activeItem }: AccountMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -61,9 +69,9 @@ export default function AccountMenu({ email, showSections, activeSection }: Acco
         {showSections && (
           <nav aria-label="Beheer">
             <ul>
-              {ADMIN_SECTIONS.map(({ key, label, href }) => (
+              {MENU_ITEMS.map(({ key, label, href }) => (
                 <li key={key}>
-                  <Link href={href} aria-current={activeSection === key ? "page" : undefined} onClick={() => setOpen(false)}>
+                  <Link href={href} aria-current={activeItem === key ? "page" : undefined} onClick={() => setOpen(false)}>
                     {label}
                   </Link>
                 </li>
