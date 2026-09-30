@@ -47,135 +47,147 @@ export default function StoveFields({ brands, stove }: StoveFieldsProps) {
 
   return (
     <>
-      <label htmlFor={`${id}-brand`}>Merk</label>
-      <input
-        id={`${id}-brand`}
-        name="brand"
-        list={`${id}-brands`}
-        maxLength={MAX_TEXT_LENGTH}
-        required
-        autoComplete="off"
-        autoCapitalize="words"
-        defaultValue={stove?.brand}
-      />
-      <datalist id={`${id}-brands`}>
-        {brands.map((brand) => <option key={brand} value={brand} />)}
-      </datalist>
+      <fieldset className="form-section">
+        <legend className="form-section-title">Kachel</legend>
+        <label htmlFor={`${id}-brand`}>Merk</label>
+        <input
+          id={`${id}-brand`}
+          name="brand"
+          list={`${id}-brands`}
+          maxLength={MAX_TEXT_LENGTH}
+          required
+          autoComplete="off"
+          autoCapitalize="words"
+          defaultValue={stove?.brand}
+        />
+        <datalist id={`${id}-brands`}>
+          {brands.map((brand) => <option key={brand} value={brand} />)}
+        </datalist>
 
-      {/* Pick a suggestion or type a type of your own. */}
-      <label htmlFor={`${id}-stove-type`}>Type kachel <span className="muted">(optioneel)</span></label>
-      <input
-        id={`${id}-stove-type`}
-        name="stoveType"
-        list={`${id}-stove-types`}
-        maxLength={MAX_TEXT_LENGTH}
-        autoComplete="off"
-        placeholder="Kies of typ, bijv. Houtkachel"
-        defaultValue={stoveTypeLabel(stove?.stoveType ?? null) ?? undefined}
-      />
-      <datalist id={`${id}-stove-types`}>
-        {Object.values(STOVE_TYPE_LABELS).map((label) => <option key={label} value={label} />)}
-      </datalist>
+        {/* Pick a suggestion or type a type of your own. */}
+        <label htmlFor={`${id}-stove-type`}>Type kachel <span className="muted">(optioneel)</span></label>
+        <input
+          id={`${id}-stove-type`}
+          name="stoveType"
+          list={`${id}-stove-types`}
+          maxLength={MAX_TEXT_LENGTH}
+          autoComplete="off"
+          placeholder="Kies of typ, bijv. Houtkachel"
+          defaultValue={stoveTypeLabel(stove?.stoveType ?? null) ?? undefined}
+        />
+        <datalist id={`${id}-stove-types`}>
+          {Object.values(STOVE_TYPE_LABELS).map((label) => <option key={label} value={label} />)}
+        </datalist>
 
-      {/* display: contents keeps the form's spacing while following the condition and supply choices. */}
-      <div className="field-contents" onChange={handleChoice}>
-        <ChoiceGroup legend="Staat" name="condition" options={CONDITION_LABELS} defaultValue={stove?.condition} />
+        {/* display: contents keeps the form's spacing while following the condition and supply choices. */}
+        <div className="field-contents" onChange={handleChoice}>
+          <ChoiceGroup legend="Staat" name="condition" options={CONDITION_LABELS} defaultValue={stove?.condition} />
 
-        {condition === "new" && (
-          <ChoiceGroup legend="Levering" name="supply" options={SUPPLY_LABELS} defaultValue={stove ? (stove.madeToOrder ? "order" : "stock") : undefined} />
-        )}
+          {condition === "new" && (
+            <ChoiceGroup legend="Levering" name="supply" options={SUPPLY_LABELS} defaultValue={stove ? (stove.madeToOrder ? "order" : "stock") : undefined} />
+          )}
 
-        {/* The stock is only set when adding; afterwards it changes one unit at a time in the inventory. */}
-        {!stove && condition === "new" && supply === "stock" && (
-          <>
-            <label htmlFor={`${id}-quantity`}>Aantal op voorraad</label>
-            <input
-              id={`${id}-quantity`}
-              name="quantity"
-              type="number"
-              inputMode="numeric"
-              min={STOCK_QUANTITY.min}
-              max={STOCK_QUANTITY.max}
-              step={1}
-              required
-              defaultValue={1}
-            />
-          </>
-        )}
-      </div>
-
-      <fieldset className="dimension-group">
-        <legend>Afmetingen <span className="muted">(cm)</span></legend>
-        <div className="dimension-fields">
-          {DIMENSION_FIELDS.map(({ name, label, key }) => (
-            <label key={name}>
-              <span>{label}</span>
+          {/* The stock is only set when adding; afterwards it changes one unit at a time in the inventory. */}
+          {!stove && condition === "new" && supply === "stock" && (
+            <>
+              <label htmlFor={`${id}-quantity`}>Aantal op voorraad</label>
               <input
-                name={name}
+                id={`${id}-quantity`}
+                name="quantity"
                 type="number"
                 inputMode="numeric"
-                min={DIMENSION_CM.min}
-                max={DIMENSION_CM.max}
+                min={STOCK_QUANTITY.min}
+                max={STOCK_QUANTITY.max}
                 step={1}
                 required
-                defaultValue={stove?.[key] ?? undefined}
+                defaultValue={1}
               />
-            </label>
-          ))}
+            </>
+          )}
         </div>
       </fieldset>
 
-      <ChoiceGroup legend="Rookafvoer" name="flueOutlet" options={FLUE_OUTLET_LABELS} defaultValue={stove?.flueOutlet} />
+      <fieldset className="form-section">
+        <legend className="form-section-title">Afmetingen en aansluiting</legend>
+        <fieldset className="dimension-group">
+          <legend>Afmetingen <span className="muted">(cm)</span></legend>
+          <div className="dimension-fields">
+            {DIMENSION_FIELDS.map(({ name, label, key }) => (
+              <label key={name}>
+                <span>{label}</span>
+                <input
+                  name={name}
+                  type="number"
+                  inputMode="numeric"
+                  min={DIMENSION_CM.min}
+                  max={DIMENSION_CM.max}
+                  step={1}
+                  required
+                  defaultValue={stove?.[key] ?? undefined}
+                />
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
-      <label htmlFor={`${id}-flue-diameter`}>Maat afvoer <span className="muted">(Ø mm)</span></label>
-      <input
-        id={`${id}-flue-diameter`}
-        name="flueDiameter"
-        type="number"
-        inputMode="numeric"
-        list={`${id}-flue-diameters`}
-        min={FLUE_DIAMETER_MM.min}
-        max={FLUE_DIAMETER_MM.max}
-        step={1}
-        required
-        defaultValue={stove?.flueDiameterMm ?? undefined}
-      />
-      <datalist id={`${id}-flue-diameters`}>
-        {COMMON_FLUE_DIAMETERS_MM.map((diameter) => <option key={diameter} value={diameter} />)}
-      </datalist>
+        <ChoiceGroup legend="Rookafvoer" name="flueOutlet" options={FLUE_OUTLET_LABELS} defaultValue={stove?.flueOutlet} />
 
-      <NumberField
-        name="flueCenterHeight"
-        label="Hoogte hart achter"
-        unit="cm"
-        decimal
-        min={DIMENSION_CM.min}
-        max={DIMENSION_CM.max}
-        defaultValue={stove?.flueCenterHeightCm}
-      />
+        <label htmlFor={`${id}-flue-diameter`}>Maat afvoer <span className="muted">(Ø mm)</span></label>
+        <input
+          id={`${id}-flue-diameter`}
+          name="flueDiameter"
+          type="number"
+          inputMode="numeric"
+          list={`${id}-flue-diameters`}
+          min={FLUE_DIAMETER_MM.min}
+          max={FLUE_DIAMETER_MM.max}
+          step={1}
+          required
+          defaultValue={stove?.flueDiameterMm ?? undefined}
+        />
+        <datalist id={`${id}-flue-diameters`}>
+          {COMMON_FLUE_DIAMETERS_MM.map((diameter) => <option key={diameter} value={diameter} />)}
+        </datalist>
 
-      <StoveSpecFields stove={stove} />
+        <NumberField
+          name="flueCenterHeight"
+          label="Hoogte hart achter"
+          unit="cm"
+          decimal
+          min={DIMENSION_CM.min}
+          max={DIMENSION_CM.max}
+          defaultValue={stove?.flueCenterHeightCm}
+        />
+      </fieldset>
 
-      <label htmlFor={`${id}-price`}>Verkoopprijs <span className="muted">(€ incl. btw)</span></label>
-      <input
-        id={`${id}-price`}
-        name="price"
-        type="text"
-        inputMode="decimal"
-        autoComplete="off"
-        placeholder="bijv. 1.250"
-        required
-        defaultValue={stove?.priceCents ? formatPriceInput(stove.priceCents) : undefined}
-      />
+      <fieldset className="form-section">
+        <legend className="form-section-title">Productgegevens</legend>
+        <StoveSpecFields stove={stove} />
+      </fieldset>
 
-      {Object.values(LISTING_CHANNELS).map(({ field, description }) => (
-        <label key={field} className="checkbox-field">
-          {/* Sold-out stoves cannot be listed; a disabled checkbox is not submitted, so it saves as off. */}
-          <input type="checkbox" name={field} defaultChecked={stove?.[field] ?? false} disabled={Boolean(stove?.soldAt)} />
-          <span>{description}</span>
-        </label>
-      ))}
-      {stove?.soldAt && <p className="muted">Verkocht: wordt nergens aangeboden.</p>}
+      <fieldset className="form-section">
+        <legend className="form-section-title">Prijs en verkoop</legend>
+        <label htmlFor={`${id}-price`}>Verkoopprijs <span className="muted">(€ incl. btw)</span></label>
+        <input
+          id={`${id}-price`}
+          name="price"
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          placeholder="bijv. 1.250"
+          required
+          defaultValue={stove?.priceCents ? formatPriceInput(stove.priceCents) : undefined}
+        />
+
+        {Object.values(LISTING_CHANNELS).map(({ field, description }) => (
+          <label key={field} className="checkbox-field">
+            {/* Sold-out stoves cannot be listed; a disabled checkbox is not submitted, so it saves as off. */}
+            <input type="checkbox" name={field} defaultChecked={stove?.[field] ?? false} disabled={Boolean(stove?.soldAt)} />
+            <span>{description}</span>
+          </label>
+        ))}
+        {stove?.soldAt && <p className="muted">Verkocht: wordt nergens aangeboden.</p>}
+      </fieldset>
     </>
   );
 }
