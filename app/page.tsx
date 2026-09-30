@@ -44,7 +44,7 @@ export default async function Page({ searchParams }: PageProps) {
         ) : activeTab === "toevoegen" ? (
           <AddStoveForm brands={await getKnownBrands(supabase)} />
         ) : activeTab === "instellingen" ? (
-          <SettingsPanel supabase={supabase} section={sectie === "advertentie" ? "advertentie" : "bedrijf"} />
+          <SettingsPanel supabase={supabase} section={sectie === "advertentie" || sectie === "webshop" ? sectie : "bedrijf"} />
         ) : (
           <StoveTable stoves={await getStoves(supabase)} />
         )}

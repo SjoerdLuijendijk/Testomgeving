@@ -7,10 +7,6 @@ const SIGNED_URL_TTL_SECONDS = 60 * 60;
 // A validation failure whose message is safe to show to the user.
 export class UserError extends Error {}
 
-function isJpeg(bytes: Uint8Array) {
-  return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
-}
-
 // Validates untrusted uploads by size and content, not by the browser-supplied name or type.
 export async function readPhotos(formData: FormData) {
   const files = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
@@ -29,7 +25,13 @@ export async function readPhotos(formData: FormData) {
   );
 }
 
+export function isJpeg(bytes: Uint8Array) {
+  return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+}
+
+// Returns the new photo ids in the order of the given photos.
 export async function storePhotos(supabase: SupabaseClient, stoveNumber: number, photos: Uint8Array[]) {
+  const ids: number[] = [];
   for (const bytes of photos) {
     const path = `${stoveNumber}/${randomUUID()}.jpg`;
     const { error: uploadError } = await supabase.storage
@@ -37,12 +39,14 @@ export async function storePhotos(supabase: SupabaseClient, stoveNumber: number,
       .upload(path, bytes, { contentType: "image/jpeg" });
     if (uploadError) throw uploadError;
 
-    const { error: rowError } = await supabase.from("stove_photos").insert({ stove_number: stoveNumber, path });
+    const { data: row, error: rowError } = await supabase.from("stove_photos").insert({ stove_number: stoveNumber, path }).select("id").single();
     if (rowError) {
       await supabase.storage.from(PHOTOS_BUCKET).remove([path]);
       throw rowError;
     }
+    ids.push(row.id);
   }
+  return ids;
 }
 
 // Private bucket: hand out short-lived links for display.

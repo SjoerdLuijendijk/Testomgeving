@@ -175,6 +175,23 @@ export async function deleteStovePhoto(photoId: number): Promise<ActionResult> {
   return { ok: true };
 }
 
+// Links an imported stove to its web shop product and updates the product right away. From then on
+// the app keeps the product up to date, like for stoves added in the app.
+export async function linkStoveToShop(stoveNumber: number): Promise<ActionResult> {
+  if (!isPositiveId(stoveNumber)) return { ok: false, error: "Onbekende kachel." };
+
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+
+  const { data, error } = await supabase.from("stoves").update({ shop_sync_enabled: true }).eq("number", stoveNumber).select("number");
+  if (error) return { ok: false, error: errorMessage(error) };
+  if (data.length === 0) return { ok: false, error: "Deze kachel bestaat niet meer." };
+
+  const syncError = await syncStoveToShop(supabase, stoveNumber);
+  revalidatePath("/");
+  return syncError ? { ok: false, error: `Gekoppeld, maar de webshop is niet bijgewerkt: ${syncError}` } : { ok: true };
+}
+
 // Retries the web shop update right away, for example after the shop was unreachable.
 export async function retryShopSync(stoveNumber: number): Promise<ActionResult> {
   if (!isPositiveId(stoveNumber)) return { ok: false, error: "Onbekende kachel." };

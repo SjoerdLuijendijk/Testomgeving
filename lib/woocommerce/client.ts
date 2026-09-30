@@ -1,6 +1,8 @@
 // Server-only: reads the WooCommerce REST API keys. Import only from server code.
 
 const API_PATH = "/wp-json/wc/v3";
+// The public Store API, used for what the REST API lacks (such as smaller photo sizes).
+const STORE_API_PATH = "/wp-json/wc/store/v1";
 // Creating a product makes WordPress download its photos, which can take a while.
 const TIMEOUT_MS = 60_000;
 
@@ -15,7 +17,7 @@ export class WooCommerceError extends Error {
   }
 }
 
-type Config = { baseUrl: string; authorization: string };
+type Config = { origin: string; baseUrl: string; storeUrl: string; authorization: string };
 
 // Null when the shop connection is not configured for this environment.
 export function getWooCommerceConfig(): Config | null {
@@ -33,8 +35,11 @@ export function getWooCommerceConfig(): Config | null {
   // Basic authentication is only safe over HTTPS.
   if (parsed.protocol !== "https:") return null;
 
+  const root = `${parsed.origin}${parsed.pathname.replace(/\/+$/, "")}`;
   return {
-    baseUrl: `${parsed.origin}${parsed.pathname.replace(/\/+$/, "")}${API_PATH}`,
+    origin: parsed.origin,
+    baseUrl: `${root}${API_PATH}`,
+    storeUrl: `${root}${STORE_API_PATH}`,
     authorization: `Basic ${Buffer.from(`${key}:${secret}`).toString("base64")}`,
   };
 }
@@ -47,12 +52,21 @@ function describeStatus(status: number, code: string | undefined) {
   return `De webshop weigerde de wijziging${code ? ` (${code})` : ""}.`;
 }
 
-export async function wooRequest<T>(config: Config, method: "GET" | "POST" | "PUT", path: string, body?: unknown): Promise<T> {
+export function wooRequest<T>(config: Config, method: "GET" | "POST" | "PUT", path: string, body?: unknown): Promise<T> {
+  return request<T>(`${config.baseUrl}${path}`, method, { Authorization: config.authorization }, body);
+}
+
+// Public, read-only Store API; sent without the API key.
+export function storeApiRequest<T>(config: Config, path: string): Promise<T> {
+  return request<T>(`${config.storeUrl}${path}`, "GET", {});
+}
+
+async function request<T>(url: string, method: "GET" | "POST" | "PUT", auth: Record<string, string>, body?: unknown): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${config.baseUrl}${path}`, {
+    response = await fetch(url, {
       method,
-      headers: { Authorization: config.authorization, Accept: "application/json", ...(body ? { "Content-Type": "application/json" } : {}) },
+      headers: { ...auth, Accept: "application/json", ...(body ? { "Content-Type": "application/json" } : {}) },
       body: body ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(TIMEOUT_MS),
       cache: "no-store",

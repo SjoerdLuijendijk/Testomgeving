@@ -45,11 +45,37 @@ ticking "Webshop" again creates a new product. WooCommerce does not count trashe
 checking SKUs; should a shop reject the SKU anyway, the sync reports `product_invalid_sku` until the
 trashed product is deleted permanently.
 
-## Existing shop products
+## Importing the existing shop products
 
-The shop had 94 products when the sync was built, with five-digit SKUs such as `26118` that do not
-match the app's six-digit stove numbers. The sync never touches them; they stay managed in
-WordPress. Linking or importing them is still to be decided.
+Rule: nothing in the shop changes without an explicit action by a team member. The import only
+reads from the shop.
+
+Instellingen → Webshop (`lib/woocommerce/import.ts`, `import-mapping.ts`) takes over published
+products as stoves: one by its five-digit number ("Deze kachel importeren"), or all of them
+("Alles importeren"):
+
+- A stove keeps its five-digit shop SKU as its stove number (e.g. 26118), which is also on the
+  stove itself. The database allows explicit numbers only in the five-digit range; six-digit numbers
+  stay assigned by the sequence (migration `20260930170000_allow_shop_stove_numbers.sql`).
+- The stove records its product (`shop_product_id`, `shop_listed`) but starts **unlinked**
+  (`shop_sync_enabled = false`, migration `20260930190000_add_shop_sync_enabled.sql`): the sync
+  skips it entirely. The inventory shows "Koppelen" next to its Webshop checkbox; linking
+  (`linkStoveToShop`, after a confirmation) enables the sync and updates the product right away.
+  Until then, selling it in the app does not take it offline in the shop.
+- Details are parsed from the shop's global and product attributes (Merk, Staat kachel, Type kachel,
+  Aansluiting, Vermogen, Harthoogte achter, Rendement, Energielabel, Garantie, ...). Values that do
+  not make sense are left empty. The model is the product name without SKU prefix, type and brand,
+  or "Onbekend". The shop name is kept as the web shop name.
+- Photos are downloaded from the shop (a WordPress size of at most about 1600 px, JPEG, within the
+  app's photo size limit) and stored in the app. Linking uploads them to the shop again as new
+  images named `kachel-<number>-foto-<photo id>`; the old images stay in the media library.
+- It runs in batches of four products per server action call; the settings page repeats the call
+  until nothing is left. Existing stove numbers are skipped, so it can be run again safely.
+- Fire bowls (category "Vuurschalen"), products without a five-digit SKU and out-of-stock products
+  are skipped.
+
+Once linked, the app owns the product like any other: linking replaces its attributes, categories
+and images with the app's data.
 
 ## Field mapping (app → WooCommerce)
 

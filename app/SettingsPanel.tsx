@@ -5,12 +5,14 @@ import { getCompany } from "../lib/invoice-queries";
 import { getAdPrompt } from "../lib/marketplace-ad-store";
 import AdPromptForm from "./AdPromptForm";
 import CompanySettingsForm from "./CompanySettingsForm";
+import ShopImportPanel from "./ShopImportPanel";
 
-export type SettingsSection = "bedrijf" | "advertentie";
+export type SettingsSection = "bedrijf" | "advertentie" | "webshop";
 
 const SECTIONS: { key: SettingsSection; label: string; href: string }[] = [
   { key: "bedrijf", label: "Bedrijfsgegevens", href: "/?tab=instellingen" },
   { key: "advertentie", label: "Advertentie", href: "/?tab=instellingen&sectie=advertentie" },
+  { key: "webshop", label: "Webshop", href: "/?tab=instellingen&sectie=webshop" },
 ];
 
 export default async function SettingsPanel({ supabase, section }: { supabase: SupabaseClient; section: SettingsSection }) {
@@ -22,7 +24,9 @@ export default async function SettingsPanel({ supabase, section }: { supabase: S
           <Link key={key} href={href} aria-current={section === key ? "page" : undefined}>{label}</Link>
         ))}
       </nav>
-      {section === "advertentie" ? (
+      {section === "webshop" ? (
+        <ShopImportPanel />
+      ) : section === "advertentie" ? (
         <AdPromptForm prompt={(await getAdPrompt(supabase)) ?? DEFAULT_AD_PROMPT} />
       ) : (
         <CompanySettingsForm company={await getCompany(supabase)} />

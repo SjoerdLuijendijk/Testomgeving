@@ -8,6 +8,7 @@ import InvoiceDialog from "./InvoiceDialog";
 import MarketplaceAdDialog from "./MarketplaceAdDialog";
 import PhotoCell from "./PhotoCell";
 import ListingToggle from "./ListingToggle";
+import ShopLinkButton from "./ShopLinkButton";
 import ShopSyncStatus from "./ShopSyncStatus";
 import SoldToggle from "./SoldToggle";
 import StockControl from "./StockControl";
@@ -65,7 +66,8 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
             listed={stove[LISTING_CHANNELS[channel].field]}
             soldOut={Boolean(stove.soldAt)}
           />
-          {channel === "shop" && stove.shopSyncError && <ShopSyncStatus stoveNumber={stove.number} error={stove.shopSyncError} />}
+          {channel === "shop" && !stove.shopSyncEnabled && <ShopLinkButton stoveNumber={stove.number} />}
+          {channel === "shop" && stove.shopSyncEnabled && stove.shopSyncError && <ShopSyncStatus stoveNumber={stove.number} error={stove.shopSyncError} />}
         </td>
       ))}
       <td data-label="Toegevoegd" className="cell-detail muted">
