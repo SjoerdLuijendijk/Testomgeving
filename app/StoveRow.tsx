@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { formatPrice } from "../lib/price";
 import { formatDimensions, formatFlue, formatType, MISSING } from "../lib/stove-display";
-import { CONDITION_LABELS, LISTING_CHANNELS, type ListingChannel, type Stove } from "../lib/stoves";
+import { LISTING_CHANNELS, type ListingChannel, type Stove } from "../lib/stoves";
 import DeleteStoveDialog from "./DeleteStoveDialog";
 import EditStoveDialog from "./EditStoveDialog";
 import InvoiceDialog from "./InvoiceDialog";
@@ -28,7 +28,6 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       <td data-label="Nr." className="cell-number">{stove.number}</td>
       <td data-label="Foto's" className="cell-photo"><PhotoCell stoveNumber={stove.number} photos={stove.photos} /></td>
       <td data-label="Merk" className="cell-brand">{stove.brand}</td>
-      <td data-label="Staat" className="cell-detail">{stove.condition ? CONDITION_LABELS[stove.condition] : MISSING}</td>
       <td data-label="Type" className="cell-detail">{formatType(stove)}</td>
       <td data-label="H × B × D" className="cell-detail cell-nowrap cell-numeric">{formatDimensions(stove)}</td>
       <td data-label="Rookafvoer" className="cell-detail cell-nowrap">{formatFlue(stove)}</td>
