@@ -1063,6 +1063,19 @@ a {
   margin-bottom: 16px;
 }
 
+/* The heading with the print button on the right, on a line of its own. */
+.stock-title-row {
+  display: flex;
+  flex: 1 1 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.stock-title-row h1 {
+  margin: 0;
+}
+
 .search-input {
   flex: 1 1 280px;
   min-height: 48px;

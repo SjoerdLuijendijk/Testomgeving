@@ -19,6 +19,8 @@ Branches: `feature/session-log`, `feature/photo-preview-count`, `feature/admin-i
 - Admin → Webshop → "Alles uit webshop ophalen": updates existing stoves (stock, price, attributes,
   online status) and imports new shop products, never twice.
 - Removed the Marktplaats and 2dehands checkboxes (linked from WooCommerce itself).
+- Print: the "Aantal" column is left off the printout; the print button is a printer icon at the top
+  right of the stock page.
 - Web shop name is now brand + stove type ("Hwam Houtkachel"); the "Naam in webshop" and "Model"
   fields are gone (migration `20260930240000_optional_stove_model.sql` makes the column optional).
 - Released all of the above to staging and production.

@@ -9,7 +9,7 @@ import type { Stove } from "../lib/stoves";
 const DATE_FORMAT = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric" });
 const PRINT_SORT = { key: "brand", direction: "asc" } as const;
 
-function StockSection({ title, stoves, showQuantity }: { title: string; stoves: Stove[]; showQuantity: boolean }) {
+function StockSection({ title, stoves }: { title: string; stoves: Stove[] }) {
   const units = stoves.reduce((sum, stove) => sum + unitsOf(stove), 0);
   const cents = stoves.reduce((sum, stove) => sum + (stove.priceCents ?? 0) * unitsOf(stove), 0);
 
@@ -27,7 +27,6 @@ function StockSection({ title, stoves, showQuantity }: { title: string; stoves: 
               <th scope="col">Type</th>
               <th scope="col">H × B × D</th>
               <th scope="col">Rookafvoer</th>
-              {showQuantity && <th scope="col" className="cell-numeric">Aantal</th>}
               <th scope="col" className="cell-numeric">Prijs</th>
             </tr>
           </thead>
@@ -39,7 +38,6 @@ function StockSection({ title, stoves, showQuantity }: { title: string; stoves: 
                 <td>{formatType(stove)}</td>
                 <td className="cell-nowrap">{formatDimensions(stove)}</td>
                 <td>{formatFlue(stove)}</td>
-                {showQuantity && <td className="cell-numeric">{stove.stockQuantity}</td>}
                 <td className="cell-numeric cell-nowrap">{stove.priceCents ? formatPrice(stove.priceCents) : MISSING}</td>
               </tr>
             ))}
@@ -47,7 +45,6 @@ function StockSection({ title, stoves, showQuantity }: { title: string; stoves: 
           <tfoot>
             <tr>
               <td colSpan={5}>Totaal incl. btw</td>
-              {showQuantity && <td className="cell-numeric">{units}</td>}
               <td className="cell-numeric cell-nowrap">{formatPrice(cents)}</td>
             </tr>
           </tfoot>
@@ -76,8 +73,8 @@ export default function StockPrintList({ stoves }: { stoves: Stove[] }) {
         <h1>Voorraad kachels</h1>
         {printedAt && <p>{DATE_FORMAT.format(printedAt)}</p>}
       </header>
-      <StockSection title="Nieuw" stoves={inStock.filter((stove) => kindOf(stove) === "new")} showQuantity />
-      <StockSection title="Gereviseerd" stoves={inStock.filter((stove) => kindOf(stove) === "used")} showQuantity={false} />
+      <StockSection title="Nieuw" stoves={inStock.filter((stove) => kindOf(stove) === "new")} />
+      <StockSection title="Gereviseerd" stoves={inStock.filter((stove) => kindOf(stove) === "used")} />
     </div>
   );
 }

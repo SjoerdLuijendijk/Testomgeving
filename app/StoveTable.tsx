@@ -71,10 +71,16 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
     <section aria-labelledby="stock-title">
       <StockPrintList stoves={stoves} />
       <div className="stock-toolbar">
-        <h1 id="stock-title">Voorraad</h1>
-        <button type="button" className="secondary-button" onClick={() => window.print()} disabled={stoves.length === 0}>
-          Afdrukken
-        </button>
+        <div className="stock-title-row">
+          <h1 id="stock-title">Voorraad</h1>
+          <button type="button" className="icon-button" onClick={() => window.print()} disabled={stoves.length === 0} title="Voorraad afdrukken" aria-label="Voorraad afdrukken">
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9V3h12v6" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <path d="M6 14h12v7H6z" />
+            </svg>
+          </button>
+        </div>
         <div className="kind-tabs" role="group" aria-label="Soort kachel">
           {(Object.keys(KIND_LABELS) as Kind[]).map((key) => (
             <button key={key} type="button" aria-pressed={kind === key} onClick={() => setKind(key)}>
