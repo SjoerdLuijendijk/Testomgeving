@@ -1,4 +1,4 @@
-// Limits and the editable part of the Marktplaats ad prompt (Admin → Advertentie).
+// Limits and the editable part of the Marktplaats ad prompt (account menu → Prompt instellen).
 // Shared with the browser for the "reset" button; contains no secrets.
 
 export const MAX_AD_PROMPT_LENGTH = 4000;

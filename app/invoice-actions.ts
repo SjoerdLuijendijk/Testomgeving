@@ -53,7 +53,7 @@ export async function createInvoice(stoveNumber: number, input: { customer: unkn
     // Codes only; the payload contains customer data.
     console.error("Creating invoice failed", { code: error.code });
     if (error.message.includes("company settings missing")) {
-      return { ok: false, error: "Vul eerst de bedrijfsgegevens in bij Admin → Bedrijfsgegevens." };
+      return { ok: false, error: "Vul eerst de bedrijfsgegevens in via het menu rechtsboven → Bedrijfsgegevens." };
     }
     return FAILED;
   }

@@ -47,7 +47,7 @@ export default function DeleteStoveDialog({ stove }: { stove: Stove }) {
           <p>
             {stoveProductName(stove)} en de foto&apos;s worden uit de app verwijderd. Dit kan niet ongedaan worden gemaakt.
           </p>
-          {stove.invoices.length > 0 && <p>De facturen blijven bewaard onder Admin → Facturen.</p>}
+          {stove.invoices.length > 0 && <p>De facturen blijven bewaard onder Facturen in het menu rechtsboven.</p>}
 
           {inShop && (
             <label className="checkbox-field">
