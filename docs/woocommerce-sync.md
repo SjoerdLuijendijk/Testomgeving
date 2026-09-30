@@ -38,7 +38,11 @@ Development unless testing the sync on purpose.
 ## Matching
 
 The stove number is the product SKU. The product is found by the stored
-`shop_product_id`, else by SKU; otherwise it is created. If two syncs race to create it,
+`shop_product_id`, else by SKU; otherwise it is created. Products the app creates or updates carry
+the meta field `woonwarmer_stove_number`. A product found by a five-digit SKU alone is only used when
+it carries that field with the same number; otherwise it belongs to another shop product and the sync
+(or deletion) stops with "Nummer … is in de webshop al in gebruik door een ander product." Six-digit
+SKUs were only ever created by the app and are accepted without it. If two syncs race to create it,
 WooCommerce rejects the duplicate SKU and the second sync updates the first one's product.
 A product in the WordPress trash counts as deleted: it is not updated (which would restore it), and
 ticking "Webshop" again creates a new product. WooCommerce does not count trashed products when
@@ -58,7 +62,8 @@ products as stoves: one by its five-digit number ("Deze kachel importeren"), or 
   stove itself. The database allows explicit numbers only in the five-digit range. Stoves added in
   the app get the highest five-digit number ever used plus one, so they continue the shop's
   numbering (migration `20260930233000_continue_shop_stove_numbers.sql`). A number that exists only
-  in the shop and not yet in the app can still be handed out; the sync then reports the duplicate SKU.
+  in the shop and not yet in the app can still be handed out; the sync then refuses to touch that
+  shop product (see Matching).
 - The stove records its product (`shop_product_id`, `shop_listed`) but starts **unlinked**
   (`shop_sync_enabled = false`, migration `20260930190000_add_shop_sync_enabled.sql`): the sync
   skips it entirely. The inventory shows "Koppelen" next to its Webshop checkbox; linking
