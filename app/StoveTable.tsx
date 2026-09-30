@@ -114,7 +114,6 @@ export default function StoveTable({ stoves, view }: { stoves: Stove[]; view: St
                 {header("Nr.", "number", "cell-number")}
                 <th scope="col">Foto&apos;s</th>
                 {header("Merk", "brand")}
-                {header("Staat", "condition")}
                 <th scope="col">Type</th>
                 <th scope="col" className="cell-numeric">H × B × D</th>
                 <th scope="col">Rookafvoer</th>
@@ -134,7 +133,7 @@ export default function StoveTable({ stoves, view }: { stoves: Stove[]; view: St
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={7}>{visibleUnits} {visibleUnits === 1 ? "kachel" : "kachels"}</td>
+                <td colSpan={6}>{visibleUnits} {visibleUnits === 1 ? "kachel" : "kachels"}</td>
                 <td className="cell-numeric">{formatPrice(visibleCents)}</td>
                 <td colSpan={2 + ACTION_LABELS.length + Object.keys(LISTING_CHANNELS).length} className="muted">incl. btw</td>
               </tr>
