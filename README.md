@@ -1,7 +1,9 @@
 # Woonwarmer stove inventory
 
-Web app for registering stoves: take photos, enter brand and model, and the app assigns a
-six-digit stove number (100001, 100002, ...). The inventory screen lists all stoves with photos, a search bar
+Web app for registering stoves: take photos, enter brand and model, and the app assigns the next
+stove number in the web shop's five-digit numbering (26119, 26120, ...; migration
+`20260930233000_continue_shop_stove_numbers.sql`). Stoves registered before that keep their six-digit
+number (100001, ...). The inventory screen lists all stoves with photos, a search bar
 and a one-click "sold" status.
 
 Built with Next.js (App Router) and Supabase (Auth, Postgres, Storage).
@@ -64,8 +66,8 @@ Each stove has a "Webshop" checkbox (`shop_listed`) for the WooCommerce web shop
 "Marktplaats" (`marketplace_listed`) and "2dehands" (`secondhand_listed`, 2dehands.be) checkboxes,
 all off by default. When a stove sells out the database unticks all of them, and they cannot be
 ticked while it is sold out.
-Changes to a stove are pushed to the WooCommerce shop in the background; web shop orders do
-not report back yet. Configuration and field mapping: `docs/woocommerce-sync.md`. Marktplaats and
+Changes to a stove are pushed to the WooCommerce shop in the background, and a webhook takes shop
+changes (title, price, stock, attributes, orders, new products) back into the app. Configuration and field mapping: `docs/woocommerce-sync.md`. Marktplaats and
 2dehands have no integration; their checkboxes are reminders, with an AI-written ad text.
 
 ## Deleting stoves

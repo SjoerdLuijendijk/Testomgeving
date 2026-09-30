@@ -14,6 +14,10 @@ const FLUE_TERMS = { top: ["Bovenaansluiting"], rear: ["Achteraansluiting"], bot
 // Details that go into the shop's global (filterable) attributes instead of a product-specific one.
 const GLOBAL_SPEC_KEYS: StoveSpecKey[] = ["condition", "stoveType", "power", "flueOutlet"];
 
+// Marks products made or taken over by the app with their stove number, so a product that only
+// shares the SKU (made in WordPress under a number the app handed out as well) is never overwritten.
+export const STOVE_NUMBER_META_KEY = "woonwarmer_stove_number";
+
 // Photos keep this name in the shop, so a later sync reuses them instead of uploading them again.
 export function shopImageName(stoveNumber: number, photoId: number) {
   return `kachel-${stoveNumber}-foto-${photoId}`;
@@ -74,6 +78,7 @@ export async function buildShopProduct(stove: StoveDetails, photos: ShopPhoto[],
     // The database unticks sold-out stoves, so a listed stove is always available.
     status: stove.shopListed ? "publish" : "draft",
     sku: String(stove.number),
+    meta_data: [{ key: STOVE_NUMBER_META_KEY, value: String(stove.number) }],
     regular_price: stove.priceCents ? (stove.priceCents / 100).toFixed(2) : "",
     description: stove.description ?? "",
     categories: categoryIds.map((id) => ({ id })),

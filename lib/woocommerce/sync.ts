@@ -2,12 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { signPhotoUrls } from "../stove-photos";
 import { getStoveDetails, getStovePhotoPaths } from "../stove-queries";
 import { getWooCommerceConfig, WooCommerceError, wooRequest } from "./client";
-import { buildShopProduct, type ShopImage, type ShopPhoto } from "./product";
+import { buildShopProduct, STOVE_NUMBER_META_KEY, type ShopImage, type ShopPhoto } from "./product";
 import { ShopTaxonomy } from "./taxonomy";
 
 // Server-only. Pushes one stove to the WooCommerce shop with the caller's (team member's) client.
 
-type ShopProduct = { id: number; status: string; images: ShopImage[] };
+type ShopProduct = { id: number; status: string; images: ShopImage[]; meta_data?: { key: string; value: unknown }[] };
 type Config = NonNullable<ReturnType<typeof getWooCommerceConfig>>;
 
 const NOT_CONFIGURED = "De webshopkoppeling is nog niet ingesteld.";
@@ -27,7 +27,15 @@ export async function findProduct(config: Config, productId: number | null, sku:
     }
   }
   const matches = await wooRequest<ShopProduct[]>(config, "GET", `/products?sku=${encodeURIComponent(sku)}`);
-  return matches.find((product) => product.status !== "trash") ?? null;
+  const match = matches.find((product) => product.status !== "trash");
+  if (!match) return null;
+  // Found by SKU only: it must be a product the app made for this stove, not another shop product.
+  // Six-digit numbers were only ever handed out by the app, before products carried the marker.
+  const madeByApp = sku.length === 6 || match.meta_data?.some(({ key, value }) => key === STOVE_NUMBER_META_KEY && String(value) === sku);
+  if (!madeByApp) {
+    throw new WooCommerceError(`Nummer ${sku} is in de webshop al in gebruik door een ander product.`, undefined, "sku_taken");
+  }
+  return match;
 }
 
 async function signedPhotos(supabase: SupabaseClient, stoveNumber: number): Promise<ShopPhoto[]> {
