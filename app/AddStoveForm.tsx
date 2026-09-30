@@ -71,13 +71,13 @@ export default function AddStoveForm({ brands }: { brands: string[] }) {
   }
 
   return (
-    <section className="panel" aria-labelledby="add-title">
+    <section className="panel panel--form" aria-labelledby="add-title">
       <h1 id="add-title">Kachel toevoegen</h1>
       <p className="muted">Het kachelnummer wordt automatisch gemaakt bij het opslaan.</p>
 
       <form key={formKey} onSubmit={handleSubmit} className="form-stack">
-        <fieldset className="photo-field">
-          <legend>Foto&apos;s</legend>
+        <fieldset className="form-section photo-field">
+          <legend className="form-section-title">Foto&apos;s</legend>
           {photos.length > 0 && (
             <ul className="photo-previews">
               {photos.map((photo, index) => (

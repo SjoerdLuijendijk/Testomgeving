@@ -8,6 +8,12 @@
   --sold: #e2445c;
   --line: #e8e1dc;
   --line-soft: #f1ece8;
+  --field-border: #ddd4ce;
+  --field-border-hover: #c9bdb5;
+  --track: #f3eeea;
+  --focus-ring: 0 0 0 3px rgb(180 70 43 / 16%);
+  --card-shadow: 0 1px 2px rgb(42 33 29 / 4%), 0 6px 20px rgb(42 33 29 / 4%);
+  --control-height: 44px;
   --row-hover: #faf6f3;
   --paper: #ffffff;
   --background: #f6f3f0;
@@ -196,6 +202,7 @@ a {
   border-radius: var(--radius);
   font-weight: 600;
   text-decoration: none;
+  transition: background-color 0.15s, border-color 0.15s;
 }
 
 .primary-button {
@@ -210,15 +217,20 @@ a {
 
 .primary-button--large {
   width: 100%;
-  min-height: 56px;
-  margin-top: 8px;
-  font-size: 18px;
+  min-height: 52px;
+  margin-top: 12px;
+  font-size: 17px;
 }
 
 .secondary-button {
-  border: 1px solid var(--line);
+  border: 1px solid var(--field-border);
   background: var(--paper);
   color: var(--ink);
+}
+
+.secondary-button:not(:disabled):hover {
+  border-color: var(--field-border-hover);
+  background: var(--row-hover);
 }
 
 .photo-add-button {
@@ -229,16 +241,16 @@ a {
   width: 100%;
   min-height: 76px;
   padding: 14px 20px;
-  border: 2px dashed var(--accent);
-  border-radius: 14px;
-  background: #fdf1ec;
+  border: 1.5px dashed #dcb3a3;
+  border-radius: 12px;
+  background: #fdf8f6;
   color: var(--accent-dark);
   transition: background-color 0.15s, border-color 0.15s;
 }
 
 .photo-add-button:not([aria-disabled="true"]):hover {
-  border-style: solid;
-  background: #fbe4da;
+  border-color: var(--accent);
+  background: #fcefe9;
 }
 
 .photo-add-button:focus-within,
@@ -255,7 +267,7 @@ a {
 }
 
 .photo-add-text strong {
-  font-size: 17px;
+  font-size: 16px;
 }
 
 .photo-add-text small {
@@ -316,13 +328,24 @@ a {
 .notice {
   padding: 24px;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--paper);
+  box-shadow: var(--card-shadow);
 }
 
 .panel {
   max-width: 560px;
   margin: 0 auto;
+}
+
+.panel--form {
+  max-width: 680px;
+  padding: 28px 32px 32px;
+}
+
+.panel--form > .muted {
+  margin: 0;
+  font-size: 14px;
 }
 
 .form-stack {
@@ -332,21 +355,70 @@ a {
   margin-top: 20px;
 }
 
-.form-stack label,
-.photo-field legend {
-  margin-top: 8px;
+.form-stack label {
+  margin-top: 6px;
+  font-size: 14px;
   font-weight: 600;
+}
+
+.form-stack label .muted {
+  font-weight: 400;
+}
+
+/* A titled group of fields; the float makes the legend an ordinary block above the fields. */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 24px 0 4px;
+  border: 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.form-stack > .form-section:first-child {
+  padding-top: 4px;
+  border-top: 0;
+}
+
+.form-section-title {
+  float: left;
+  width: 100%;
+  margin: 0 0 4px;
+  padding: 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .form-stack input:not([type="file"]):not([type="radio"]):not([type="checkbox"]),
 .form-stack select,
 .form-stack textarea {
-  min-height: 52px;
-  padding: 12px 14px;
-  border: 1px solid #d6ccc5;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid var(--field-border);
   border-radius: var(--radius);
   background: white;
-  font-size: 18px;
+  font-size: 16px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-stack input:not([type="file"]):not([type="radio"]):not([type="checkbox"]):hover,
+.form-stack select:hover,
+.form-stack textarea:hover {
+  border-color: var(--field-border-hover);
+}
+
+.form-stack input:not([type="file"]):not([type="radio"]):not([type="checkbox"]):focus-visible,
+.form-stack select:focus-visible,
+.form-stack textarea:focus-visible,
+.search-input:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .field-contents {
@@ -357,7 +429,13 @@ a {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 52px;
+  min-height: 44px;
+}
+
+.form-stack .checkbox-field {
+  margin-top: 0;
+  font-size: 15px;
+  font-weight: 400;
 }
 
 .checkbox-field input,
@@ -377,9 +455,15 @@ a {
 
 .choice-group legend,
 .dimension-group legend {
-  margin: 8px 0;
+  margin: 6px 0 8px;
   padding: 0;
+  font-size: 14px;
   font-weight: 600;
+}
+
+.choice-group legend .muted,
+.dimension-group legend .muted {
+  font-weight: 400;
 }
 
 .choice-options {
@@ -403,16 +487,23 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
-  border: 1px solid #d6ccc5;
+  min-height: 48px;
+  border: 1px solid var(--field-border);
   border-radius: var(--radius);
   background: white;
+  font-size: 15px;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.choice-options label:hover input:not(:checked) + span {
+  border-color: var(--field-border-hover);
 }
 
 .choice-options input:checked + span {
   border-color: var(--accent);
-  background: var(--accent);
-  color: white;
+  background: #fdf1ec;
+  color: var(--accent-dark);
+  box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 .choice-options input:focus-visible + span {
@@ -427,14 +518,16 @@ a {
 
 .form-stack textarea {
   font: inherit;
-  font-size: 18px;
+  font-size: 16px;
   resize: vertical;
 }
 
 .more-fields summary {
-  min-height: 52px;
+  min-height: 44px;
   display: flex;
   align-items: center;
+  color: var(--accent);
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -456,7 +549,8 @@ a {
   flex-direction: column;
   gap: 4px;
   margin: 0;
-  font-size: 14px;
+  color: var(--muted);
+  font-size: 13px;
   font-weight: 400;
 }
 
@@ -465,12 +559,7 @@ a {
 }
 
 .photo-field {
-  display: flex;
-  flex-direction: column;
   gap: 12px;
-  margin: 0;
-  padding: 0;
-  border: 0;
 }
 
 .photo-previews {
@@ -1089,7 +1178,7 @@ a {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 16px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 /* The heading with the print button on the right, on a line of its own. */
@@ -1106,38 +1195,65 @@ a {
 }
 
 .search-input {
-  flex: 1 1 280px;
-  min-height: 48px;
-  padding: 10px 14px;
-  border: 1px solid #d6ccc5;
+  flex: 1 1 240px;
+  min-height: var(--control-height);
+  padding: 8px 14px 8px 40px;
+  border: 1px solid var(--field-border);
   border-radius: var(--radius);
-  background: white;
+  background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a6d66' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 14px center / 18px;
+  font-size: 15px;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.kind-tabs {
+.search-input:hover {
+  border-color: var(--field-border-hover);
+}
+
+/* Segmented controls: the type tabs and the sale filter share one look and height. */
+.kind-tabs,
+.filter-group {
   display: flex;
-  gap: 4px;
-  border-bottom: 2px solid var(--line);
+  gap: 2px;
+  min-height: var(--control-height);
+  padding: 3px;
+  border-radius: var(--radius);
+  background: var(--track);
 }
 
-.kind-tabs button {
-  margin-bottom: -2px;
-  padding: 8px 16px;
+.kind-tabs button,
+.filter-group button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
   border: 0;
-  border-bottom: 3px solid transparent;
+  border-radius: 7px;
   background: none;
   color: var(--muted);
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
 }
 
-.kind-tabs button span {
-  font-weight: 400;
-}
-
-.kind-tabs button[aria-pressed="true"] {
-  border-bottom-color: var(--accent);
+.kind-tabs button:not([aria-pressed="true"]):hover,
+.filter-group button:not([aria-pressed="true"]):hover {
   color: var(--ink);
+}
+
+.kind-tabs button[aria-pressed="true"],
+.filter-group button[aria-pressed="true"] {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(42 33 29 / 10%), 0 0 0 1px rgb(42 33 29 / 4%);
+}
+
+.kind-tabs button span,
+.filter-group button span {
+  color: var(--muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .stock-control {
@@ -1181,47 +1297,11 @@ a {
   opacity: 0.45;
 }
 
-.filter-group {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--paper);
-}
-
-.filter-group button {
-  padding: 8px 12px;
-  border: 0;
-  border-radius: 7px;
-  background: none;
-  font-weight: 600;
-}
-
 .filter-group button small {
-  display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
-  white-space: nowrap;
-}
-
-.filter-group button[aria-pressed="true"] small {
-  color: #d9d0ca;
-}
-
-.filter-group button span {
-  color: var(--muted);
-  font-weight: 400;
-}
-
-.filter-group button[aria-pressed="true"] {
-  background: var(--ink);
-  color: white;
-}
-
-.filter-group button[aria-pressed="true"] span {
-  color: #d9d0ca;
+  font-variant-numeric: tabular-nums;
 }
 
 .table-wrap {
@@ -1406,10 +1486,8 @@ a {
   }
 
   .table-wrap {
-    max-height: calc(100dvh - 190px);
-    overflow: auto;
     border-radius: 12px;
-    box-shadow: 0 1px 2px rgb(42 33 29 / 4%), 0 6px 20px rgb(42 33 29 / 4%);
+    box-shadow: var(--card-shadow);
   }
 
   .stove-table {
@@ -1432,9 +1510,6 @@ a {
   }
 
   .stove-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
     padding-block: 11px;
     border-bottom: 1px solid var(--line);
     color: var(--muted);
@@ -1489,9 +1564,6 @@ a {
     height: 18px;
   }
 
-  .stove-table thead th:first-child {
-    z-index: 3;
-  }
 
   /* Narrow action columns; icons sit at the same spot in every row. */
   .stove-table .cell-actions {
@@ -1532,8 +1604,6 @@ a {
   }
 
   .stove-table tfoot td {
-    position: sticky;
-    bottom: 0;
     border-top: 1px solid var(--line);
     border-bottom: 0;
     background: #fbf9f7;
@@ -1639,6 +1709,10 @@ a {
 
   .page-main {
     padding-top: 12px;
+  }
+
+  .panel--form {
+    padding: 20px 16px 24px;
   }
 
   /* Stock toolbar: the active "Voorraad" tab already names the page, so the heading is for screen readers only. */
