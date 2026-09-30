@@ -10,7 +10,7 @@ export const DEFAULT_AD_PROMPT = `Je schrijft kant-en-klare Marktplaats-adverten
 Toon: licht zakelijk, vriendelijk en toegankelijk; niet stijf en zonder overdreven superlatieven. Schrijf in het Nederlands en spreek de lezer aan met 'je'. Emoji mag spaarzaam.
 
 Structuur:
-1. Eerste regel: een pakkende titel van maximaal 60 tekens met merk en model.
+1. Eerste regel: een pakkende titel van maximaal 60 tekens met merk en type kachel.
 2. Een lege regel, dan een korte inleiding van twee à drie zinnen.
 3. Een kopje 'Specificaties' met een lijst waarin elke regel begint met '• '.
 4. De vraagprijs op een eigen regel.

@@ -1,6 +1,6 @@
 # Woonwarmer stove inventory
 
-Web app for registering stoves: take photos, enter brand and model, and the app assigns the next
+Web app for registering stoves: take photos, enter the brand and details, and the app assigns the next
 stove number in the web shop's five-digit numbering (26119, 26120, ...; migration
 `20260930233000_continue_shop_stove_numbers.sql`). Stoves registered before that keep their six-digit
 number (100001, ...). The inventory screen lists all stoves with photos, a search bar
@@ -44,12 +44,13 @@ short-lived signed URLs.
 
 ## Product details
 
-Besides the required details (brand, model, condition, dimensions, flue outlet and diameter, price)
+Besides the required details (brand, condition, dimensions, flue outlet and diameter, price)
 a stove has optional product details that the web shop shows: stove type, power
 (kW), weight, rear flue centre height, external air supply, new firebox, thermostat, and under
 "Meer productgegevens" minimum/maximum power, efficiency, energy label, warranty, material and a
 description. The flue outlet can be top, rear or both.
-The web shop name is always the brand plus the model ("Hwam 3120"; a model "Onbekend" is left out).
+The web shop name is always the brand plus the stove type ("Hwam Houtkachel"), or only the brand
+when no type is chosen. The model is no longer entered (migration `20260930240000_optional_stove_model.sql`).
 
 ## Stock
 

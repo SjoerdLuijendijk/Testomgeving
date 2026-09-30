@@ -28,7 +28,6 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       <td data-label="Nr." className="cell-number">{stove.number}</td>
       <td data-label="Foto's" className="cell-photo"><PhotoCell stoveNumber={stove.number} photos={stove.photos} /></td>
       <td data-label="Merk" className="cell-brand">{stove.brand}</td>
-      <td data-label="Model" className="cell-model">{stove.model}</td>
       <td data-label="Staat" className="cell-detail">{stove.condition ? CONDITION_LABELS[stove.condition] : MISSING}</td>
       <td data-label="Type" className="cell-detail">{formatType(stove)}</td>
       <td data-label="H × B × D" className="cell-detail cell-nowrap cell-numeric">{formatDimensions(stove)}</td>

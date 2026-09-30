@@ -1,6 +1,6 @@
 import type { Stove } from "./stoves";
 
-export type SortKey = "number" | "brand" | "model" | "condition" | "priceCents" | "status" | "createdAt";
+export type SortKey = "number" | "brand" | "condition" | "priceCents" | "status" | "createdAt";
 export type SortState = { key: SortKey; direction: "asc" | "desc" };
 
 export const DEFAULT_SORT: SortState = { key: "number", direction: "desc" };

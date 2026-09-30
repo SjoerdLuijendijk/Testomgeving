@@ -62,9 +62,6 @@ export default function StoveFields({ brands, stove }: StoveFieldsProps) {
         {brands.map((brand) => <option key={brand} value={brand} />)}
       </datalist>
 
-      <label htmlFor={`${id}-model`}>Model</label>
-      <input id={`${id}-model`} name="model" maxLength={MAX_TEXT_LENGTH} required autoComplete="off" defaultValue={stove?.model} />
-
       <SelectField name="stoveType" label="Type kachel" options={STOVE_TYPE_LABELS} defaultValue={stove?.stoveType} />
 
       {/* display: contents keeps the form's spacing while following the condition and supply choices. */}

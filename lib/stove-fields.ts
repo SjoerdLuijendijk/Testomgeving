@@ -22,7 +22,6 @@ import {
 
 export type StoveFieldValues = {
   brand: string;
-  model: string;
   condition: Condition;
   height_cm: number;
   width_cm: number;
@@ -110,7 +109,6 @@ function readOptionalBoolean(formData: FormData, name: string) {
 // Validates the untrusted stove form fields shared by creating and editing a stove.
 export function parseStoveFields(formData: FormData): ParseResult {
   const brand = readText(formData, "brand");
-  const model = readText(formData, "model");
   const condition = readChoice(formData, "condition", CONDITION_LABELS);
   const height = readInteger(formData, "height", DIMENSION_CM);
   const width = readInteger(formData, "width", DIMENSION_CM);
@@ -120,7 +118,7 @@ export function parseStoveFields(formData: FormData): ParseResult {
   const price = parsePriceToCents(String(formData.get("price") ?? ""));
   const supply = readChoice(formData, "supply", SUPPLY_LABELS);
 
-  if (!brand || !model) return { ok: false, error: "Vul merk en model in." };
+  if (!brand) return { ok: false, error: "Vul het merk in." };
   if (!condition) return { ok: false, error: "Kies nieuw of gereviseerd." };
   if (condition === "new" && !supply) return { ok: false, error: "Kies uit voorraad of op bestelling." };
   if (!height || !width || !depth) {
@@ -171,7 +169,6 @@ export function parseStoveFields(formData: FormData): ParseResult {
     ok: true,
     values: {
       brand,
-      model,
       condition,
       height_cm: height,
       width_cm: width,

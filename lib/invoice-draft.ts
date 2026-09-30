@@ -1,5 +1,6 @@
 import { DEFAULT_VAT_RATE, MAX_QUANTITY, type Customer, type InvoiceLine, type VatRate } from "./invoice";
 import { formatPriceInput, parsePriceToCents } from "./price";
+import { stoveProductName } from "./stove-specs";
 import { CONDITION_LABELS, type Stove } from "./stoves";
 
 /** Invoice line as edited in the form: quantity and price are still text. */
@@ -22,7 +23,7 @@ export function stoveLine(stove: Stove): DraftLine {
   const condition = stove.condition ? `, ${CONDITION_LABELS[stove.condition].toLowerCase()}` : "";
   return {
     key: nextKey(),
-    description: `Kachel ${stove.number} – ${stove.brand} ${stove.model}${condition}`,
+    description: `Kachel ${stove.number} – ${stoveProductName(stove)}${condition}`,
     quantity: "1",
     price: stove.priceCents ? formatPriceInput(stove.priceCents) : "",
     vatRate: DEFAULT_VAT_RATE,

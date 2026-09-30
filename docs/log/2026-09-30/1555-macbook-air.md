@@ -19,7 +19,8 @@ Branches: `feature/session-log`, `feature/photo-preview-count`, `feature/admin-i
 - Admin → Webshop → "Alles uit webshop ophalen": updates existing stoves (stock, price, attributes,
   online status) and imports new shop products, never twice.
 - Removed the Marktplaats and 2dehands checkboxes (linked from WooCommerce itself).
-- Web shop name is now always brand + model; the "Naam in webshop" field is gone.
+- Web shop name is now brand + stove type ("Hwam Houtkachel"); the "Naam in webshop" and "Model"
+  fields are gone (migration `20260930240000_optional_stove_model.sql` makes the column optional).
 - Released all of the above to staging and production.
 
 ## Decisions
@@ -38,6 +39,8 @@ Branches: `feature/session-log`, `feature/photo-preview-count`, `feature/admin-i
   (number 26xxx), and "Alles uit webshop ophalen".
 
 ## Manual steps and migrations
+- `20260930240000_optional_stove_model.sql` must be applied before the release of
+  `feature/remove-model` (new stoves are saved without a model).
 - The six migrations of 2026-09-30 (`20260930120000` to `20260930211000`) and the WooCommerce and
   OpenAI variables in Vercel are, according to the user, in place.
 - Applied and verified after the production release: `20260930230000_keep_invoices_of_deleted_stoves.sql`

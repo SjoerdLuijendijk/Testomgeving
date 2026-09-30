@@ -28,9 +28,9 @@ function stockChanges(product: ShopProductState, condition: CurrentStove["condit
 
 // Everything the shop describes. Values the shop leaves empty or that cannot be read keep the app's
 // value, so a stove never loses details through a shop edit. The title is not taken over: the app
-// names products after brand and model, and the model is not derived from the title.
+// names products after brand and stove type.
 export function stoveChangesFromShop(product: ShopProductState, stove: CurrentStove): StoveChanges {
-  const { model: _model, product_name: _title, brand, ...details } = shopProductDetails(product);
+  const { product_name: _title, brand, ...details } = shopProductDetails(product);
   const changes: StoveChanges = {};
   for (const [key, value] of Object.entries(details)) {
     if (value !== null) changes[key] = value;

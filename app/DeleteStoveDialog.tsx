@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { stoveProductName } from "../lib/stove-specs";
 import type { Stove } from "../lib/stoves";
 import { deleteStoveAction } from "./actions";
 
@@ -44,7 +45,7 @@ export default function DeleteStoveDialog({ stove }: { stove: Stove }) {
         <form onSubmit={handleSubmit} className="form-stack delete-form">
           <h2 id={titleId}>Kachel {stove.number} verwijderen?</h2>
           <p>
-            {stove.brand} {stove.model} en de foto&apos;s worden uit de app verwijderd. Dit kan niet ongedaan worden gemaakt.
+            {stoveProductName(stove)} en de foto&apos;s worden uit de app verwijderd. Dit kan niet ongedaan worden gemaakt.
           </p>
           {stove.invoices.length > 0 && <p>De facturen blijven bewaard onder Admin → Facturen.</p>}
 

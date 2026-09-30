@@ -3,12 +3,11 @@ import { signPhotoUrls } from "./stove-photos";
 import type { Stove, StoveDetails, StoveInvoice } from "./stoves";
 
 const DETAIL_COLUMNS =
-  "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, stove_type, power_kw, min_power_kw, max_power_kw, weight_kg, flue_center_height_cm, external_air_supply, new_firebox, thermostat, efficiency_percent, energy_label, warranty_years, material, description, shop_listed, shop_sync_error, shop_sync_enabled, shop_product_id, made_to_order, stock_quantity, sold_at, created_at";
+  "number, brand, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, stove_type, power_kw, min_power_kw, max_power_kw, weight_kg, flue_center_height_cm, external_air_supply, new_firebox, thermostat, efficiency_percent, energy_label, warranty_years, material, description, shop_listed, shop_sync_error, shop_sync_enabled, shop_product_id, made_to_order, stock_quantity, sold_at, created_at";
 
 type DetailsRow = {
   number: number;
   brand: string;
-  model: string;
   condition: StoveDetails["condition"];
   height_cm: number | null;
   width_cm: number | null;
@@ -44,7 +43,6 @@ function toStoveDetails(row: DetailsRow): StoveDetails {
   return {
     number: row.number,
     brand: row.brand,
-    model: row.model,
     condition: row.condition,
     heightCm: row.height_cm,
     widthCm: row.width_cm,

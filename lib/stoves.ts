@@ -52,7 +52,6 @@ export type StoveInvoice = { id: number; number: string };
 export type Stove = {
   number: number;
   brand: string;
-  model: string;
   condition: Condition | null;
   heightCm: number | null;
   widthCm: number | null;
@@ -60,7 +59,6 @@ export type Stove = {
   flueOutlet: FlueOutlet | null;
   flueDiameterMm: number | null;
   priceCents: number | null;
-  /** Web shop product name; when empty the shop name is built from type, brand and model. */
   stoveType: StoveType | null;
   powerKw: number | null;
   minPowerKw: number | null;

@@ -1617,13 +1617,13 @@ a {
     font-weight: 600;
   }
 
-  /* Compact card: first photo, number, brand, model, price and status; the rest expands. */
+  /* Compact card: first photo, number, brand, price and status; the rest expands. */
   .stove-table tbody tr {
     display: grid;
     grid-template-columns: 56px minmax(0, auto) minmax(0, 1fr) auto 40px;
     grid-template-areas:
       "photo number number price toggle"
-      "photo brand model status toggle";
+      "photo brand brand status toggle";
     align-items: center;
     gap: 4px 10px;
     margin-bottom: 8px;
@@ -1634,7 +1634,7 @@ a {
     grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto 40px;
     grid-template-areas:
       "number number price toggle"
-      "brand model status toggle";
+      "brand brand status toggle";
   }
 
   .stove-table tbody td {
@@ -1651,11 +1651,9 @@ a {
   .stove-table .cell-sold { grid-area: status; justify-content: flex-end; }
   .stove-table td.cell-toggle { display: flex; grid-area: toggle; align-self: stretch; }
 
-  .stove-table .cell-brand { grid-area: brand; font-weight: 600; }
-  .stove-table .cell-model { grid-area: model; }
-
-  .stove-table .cell-brand,
-  .stove-table .cell-model {
+  .stove-table .cell-brand {
+    grid-area: brand;
+    font-weight: 600;
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;

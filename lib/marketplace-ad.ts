@@ -28,7 +28,6 @@ const FIXED_RULES = [
 function describeStove(stove: StoveDetails) {
   const lines = [
     `Merk: ${stove.brand}`,
-    `Model: ${stove.model}`,
     ...stoveSpecs(stove).map(({ label, value }) => `${label}: ${value}`),
     stove.priceCents && `Vraagprijs: ${formatPrice(stove.priceCents)} incl. btw`,
     stove.madeToOrder && "Beschikbaarheid: op bestelling, niet direct uit voorraad",

@@ -24,7 +24,6 @@ function StockSection({ title, stoves, showQuantity }: { title: string; stoves: 
             <tr>
               <th scope="col">Nr.</th>
               <th scope="col">Merk</th>
-              <th scope="col">Model</th>
               <th scope="col">Type</th>
               <th scope="col">H × B × D</th>
               <th scope="col">Rookafvoer</th>
@@ -37,7 +36,6 @@ function StockSection({ title, stoves, showQuantity }: { title: string; stoves: 
               <tr key={stove.number}>
                 <td>{stove.number}</td>
                 <td>{stove.brand}</td>
-                <td>{stove.model}</td>
                 <td>{formatType(stove)}</td>
                 <td className="cell-nowrap">{formatDimensions(stove)}</td>
                 <td>{formatFlue(stove)}</td>
@@ -48,7 +46,7 @@ function StockSection({ title, stoves, showQuantity }: { title: string; stoves: 
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={6}>Totaal incl. btw</td>
+              <td colSpan={5}>Totaal incl. btw</td>
               {showQuantity && <td className="cell-numeric">{units}</td>}
               <td className="cell-numeric cell-nowrap">{formatPrice(cents)}</td>
             </tr>

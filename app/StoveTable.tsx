@@ -17,7 +17,7 @@ const FILTER_LABELS: Record<Filter, string> = { available: "Te koop", sold: "Ver
 
 function matchesSearch(stove: Stove, query: string) {
   if (!query) return true;
-  return [String(stove.number), stove.brand, stove.model].some((value) => value.toLowerCase().includes(query));
+  return [String(stove.number), stove.brand].some((value) => value.toLowerCase().includes(query));
 }
 
 export default function StoveTable({ stoves }: { stoves: Stove[] }) {
@@ -85,7 +85,7 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
         <input
           className="search-input"
           type="search"
-          placeholder="Zoek op nummer, merk of model"
+          placeholder="Zoek op nummer of merk"
           aria-label="Zoeken"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
@@ -127,7 +127,6 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
                 {header("Nr.", "number", "cell-number")}
                 <th scope="col">Foto&apos;s</th>
                 {header("Merk", "brand")}
-                {header("Model", "model")}
                 {header("Staat", "condition")}
                 <th scope="col">Type</th>
                 <th scope="col" className="cell-numeric">H × B × D</th>

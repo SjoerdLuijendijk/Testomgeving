@@ -38,7 +38,6 @@ export type ShopProductForImport = {
 export type ImportedStoveRow = {
   number: number;
   brand: string;
-  model: string;
   product_name: string;
   condition: "new" | "used";
   stove_type: StoveType | null;
@@ -156,16 +155,6 @@ function flueCenterHeight(text: string | undefined) {
   return oneDecimal(parseNumber(text), DIMENSION_CM);
 }
 
-// The model is what remains of the product name without the SKU prefix, stove type and brand,
-// e.g. "25126-Scan 39" → "39" and "Speksteenkachel Hark 44" → "44".
-function modelFromName(name: string, brand: string) {
-  let model = name.replace(/^\d+\s*-\s*/, "");
-  for (const label of Object.values(STOVE_TYPE_LABELS)) model = model.replace(new RegExp(`^${label}\\b`, "i"), "");
-  if (brand !== UNKNOWN) model = model.replace(new RegExp(brand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), "");
-  model = model.replace(/^[\s\-–,]+|[\s\-–,]+$/g, "").replace(/\s+/g, " ");
-  return truncate(model || UNKNOWN, MAX_TEXT_LENGTH);
-}
-
 function priceCents(product: ShopProductForImport) {
   const euros = Number(product.regular_price || product.price);
   const cents = Number.isFinite(euros) ? Math.round(euros * 100) : 0;
@@ -225,7 +214,6 @@ export function shopProductDetails(product: ShopProductForImport): ShopProductDe
 
   return {
     brand,
-    model: modelFromName(name, brand),
     product_name: truncate(name, MAX_TEXT_LENGTH),
     condition,
     stove_type: stoveType(attributeValues(product, "Type kachel")),

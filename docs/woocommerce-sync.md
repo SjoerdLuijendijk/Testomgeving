@@ -75,9 +75,8 @@ second step of "Alles uit webshop ophalen":
   shows "⚠ Opnieuw"; the run stops when a whole batch fails.
 - Details are parsed from the shop's global and product attributes (Merk, Staat kachel, Type kachel,
   Aansluiting, Vermogen, Harthoogte achter, Rendement, Energielabel, Garantie, ...). Values that do
-  not make sense are left empty. The model is the product name without SKU prefix, type and brand,
-  or "Onbekend". The shop name is stored in `product_name` for reference only; once linked, the
-  product is renamed to brand + model.
+  not make sense are left empty. The shop name is stored in `product_name` for reference only; once
+  linked, the product is renamed to brand + stove type.
 - Photos are downloaded from the shop (a WordPress size of at most about 1600 px, JPEG, within the
   app's photo size limit) and stored in the app. Linking uploads them to the shop again as new
   images named `kachel-<number>-foto-<photo id>`; the old images stay in the media library.
@@ -98,7 +97,7 @@ app first ("Alles uit webshop ophalen").
 | App | WooCommerce product | Notes |
 | --- | --- | --- |
 | `number` | `sku` | Unique key for matching. |
-| `brand` + `model` | `name` | E.g. "Hwam 3120"; a model "Onbekend" is left out. The former `product_name` column is no longer used for the name. |
+| `brand` + `stove_type` | `name` | E.g. "Hwam Houtkachel"; without a type only the brand. `product_name` and `model` are no longer used. |
 | `description` | `description` | Optional free text. |
 | `price_cents` | `regular_price` | Incl. VAT, as a decimal string ("1250.00"). Assumes the shop enters prices incl. VAT. |
 | `condition` + `stove_type` | `categories` | New: "Nieuwe kachels". Gereviseerd: "Gereviseerde kachels" plus "Houtkachels" or "Speksteenkachels". Matched by slug; a missing category is skipped. |
@@ -133,7 +132,7 @@ from the shop:
 
 1. Existing stoves (`lib/woocommerce/shop-refresh.ts`): every stove with a shop product gets the
    shop's stock, price, attributes and online status (not the title: the app names products after
-   brand and model). Values the shop leaves empty keep the app's value; a stove at 0 becomes sold;
+   brand and stove type). Values the shop leaves empty keep the app's value; a stove at 0 becomes sold;
    "op bestelling" in the shop makes it made to order. It runs with the
    team member's own login and shows per stove what changed. Stoves with a pending shop error (⚠)
    are skipped, because the shop has not received their latest change yet; trashed or deleted
