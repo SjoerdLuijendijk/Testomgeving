@@ -131,6 +131,30 @@ export async function adjustStoveStock(stoveNumber: number, delta: -1 | 1): Prom
   return { ok: true };
 }
 
+// Keeps a new stove available once its last unit is sold: from now on it is ordered from the supplier.
+// The database trigger then sets the stock to 1 and clears the sold date.
+export async function makeStoveMadeToOrder(stoveNumber: number): Promise<ActionResult> {
+  if (!isPositiveId(stoveNumber)) return { ok: false, error: "Onbekende kachel." };
+
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+
+  const { data, error } = await supabase
+    .from("stoves")
+    .update({ made_to_order: true })
+    .eq("number", stoveNumber)
+    .eq("condition", "new")
+    .select("number");
+  if (error) return { ok: false, error: errorMessage(error) };
+  if (data.length === 0) return { ok: false, error: "Alleen een nieuwe kachel kan op bestelling leverbaar worden." };
+
+  // The stored ad mentions the availability.
+  after(() => refreshStoredAd(supabase, stoveNumber));
+  syncShopLater(supabase, stoveNumber);
+  revalidatePath("/");
+  return { ok: true };
+}
+
 export async function setStoveListed(stoveNumber: number, channel: ListingChannel, listed: boolean): Promise<ActionResult> {
   if (!isPositiveId(stoveNumber) || !Object.hasOwn(LISTING_CHANNELS, channel) || typeof listed !== "boolean") {
     return { ok: false, error: "Onbekende kachel." };

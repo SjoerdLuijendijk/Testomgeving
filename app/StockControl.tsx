@@ -1,24 +1,35 @@
 "use client";
 
 import { useOptimistic, useTransition } from "react";
-import { adjustStoveStock } from "./actions";
+import { adjustStoveStock, makeStoveMadeToOrder } from "./actions";
 import { useDialog } from "./DialogProvider";
 
 // Stock of a new stove model: sell or restock one unit at a time.
 export default function StockControl({ stoveNumber, quantity }: { stoveNumber: number; quantity: number }) {
   const [optimisticQuantity, setOptimisticQuantity] = useOptimistic(quantity);
   const [pending, startTransition] = useTransition();
-  const { confirm, notify } = useDialog();
+  const { choose, notify } = useDialog();
 
   async function adjust(delta: -1 | 1) {
-    // Selling the last unit sells out the stove, which moves it to the sold archive.
+    // Selling the last unit: archive the sold-out stove, or keep offering it made to order.
     if (delta === -1 && optimisticQuantity === 1) {
-      const confirmed = await confirm({
-        title: `Laatste kachel ${stoveNumber} verkocht?`,
-        message: "De kachel is dan uitverkocht en gaat naar het Verkocht archief (menu rechtsboven).",
-        confirmLabel: "Op verkocht zetten",
+      const choice = await choose({
+        title: `Laatste kachel ${stoveNumber} verkocht`,
+        message:
+          "Archiveren: de kachel is uitverkocht en gaat naar het Verkocht archief (menu rechtsboven). Op bestelling: de kachel blijft te koop en wordt voortaan bij de leverancier besteld.",
+        choices: [
+          { value: "order", label: "Op bestelling leverbaar" },
+          { value: "archive", label: "Archiveren" },
+        ],
       });
-      if (!confirmed) return;
+      if (choice === null) return;
+      if (choice === "order") {
+        startTransition(async () => {
+          const result = await makeStoveMadeToOrder(stoveNumber);
+          if (!result.ok) await notify(result.error);
+        });
+        return;
+      }
     }
     startTransition(async () => {
       setOptimisticQuantity(optimisticQuantity + delta);
