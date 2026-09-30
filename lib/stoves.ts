@@ -8,16 +8,32 @@ export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 export const MAX_PHOTOS_PER_UPLOAD = 6;
 export const MAX_TEXT_LENGTH = 100;
 
-export const CONDITION_LABELS = { new: "Nieuw", used: "Gebruikt" } as const;
-export const FLUE_OUTLET_LABELS = { top: "Boven", rear: "Achter" } as const;
+// "used" is called "Gereviseerd", as in the web shop.
+export const CONDITION_LABELS = { new: "Nieuw", used: "Gereviseerd" } as const;
+export const FLUE_OUTLET_LABELS = { top: "Boven", rear: "Achter", both: "Boven én achter" } as const;
+// The WooCommerce shop's "Type kachel" attribute.
+export const STOVE_TYPE_LABELS = {
+  soapstone: "Speksteenkachel",
+  wood: "Houtkachel",
+  pot: "Potkachel",
+  wood_central_heating: "Hout cv kachel",
+} as const;
+export const ENERGY_LABELS = ["A++", "A+", "A", "B", "C", "D", "E", "F", "G"] as const;
 // How a new stove is supplied: from stock, or ordered from the supplier once sold (no stock kept).
 export const SUPPLY_LABELS = { stock: "Uit voorraad", order: "Op bestelling" } as const;
 export type Condition = keyof typeof CONDITION_LABELS;
 export type FlueOutlet = keyof typeof FLUE_OUTLET_LABELS;
+export type StoveType = keyof typeof STOVE_TYPE_LABELS;
+export type EnergyLabel = (typeof ENERGY_LABELS)[number];
 
-// Keep in sync with the check constraints in the stove specifications migration.
+// Keep in sync with the check constraints in the stove specifications and web shop product fields migrations.
 export const DIMENSION_CM = { min: 1, max: 500 } as const;
 export const FLUE_DIAMETER_MM = { min: 50, max: 400 } as const;
+export const POWER_KW = { min: 0.1, max: 99.9 } as const;
+export const WEIGHT_KG = { min: 1, max: 2000 } as const;
+export const EFFICIENCY_PERCENT = { min: 1, max: 100 } as const;
+export const WARRANTY_YEARS = { min: 0, max: 50 } as const;
+export const MAX_DESCRIPTION_LENGTH = 5000;
 export const COMMON_FLUE_DIAMETERS_MM = [100, 120, 125, 130, 150, 180, 200];
 // Keep in sync with the stock quantity migration. Used stoves are always a single unit.
 export const STOCK_QUANTITY = { min: 1, max: 10000 } as const;
@@ -49,7 +65,26 @@ export type Stove = {
   flueOutlet: FlueOutlet | null;
   flueDiameterMm: number | null;
   priceCents: number | null;
+  /** Web shop product name; when empty the shop name is built from type, brand and model. */
+  productName: string | null;
+  stoveType: StoveType | null;
+  powerKw: number | null;
+  minPowerKw: number | null;
+  maxPowerKw: number | null;
+  weightKg: number | null;
+  /** Height of the rear flue outlet's centre ("harthoogte achter"). */
+  flueCenterHeightCm: number | null;
+  externalAirSupply: boolean | null;
+  newFirebox: boolean | null;
+  thermostat: boolean | null;
+  efficiencyPercent: number | null;
+  energyLabel: EnergyLabel | null;
+  warrantyYears: number | null;
+  material: string | null;
+  description: string | null;
   shopListed: boolean;
+  /** Why the last web shop update failed; null when it succeeded or was not needed. */
+  shopSyncError: string | null;
   marketplaceListed: boolean;
   /** New stove sold without stock; always available, stock is not tracked. */
   madeToOrder: boolean;
@@ -60,3 +95,6 @@ export type Stove = {
   photos: StovePhoto[];
   invoices: StoveInvoice[];
 };
+
+/** A stove without its photos and invoices. */
+export type StoveDetails = Omit<Stove, "photos" | "invoices">;

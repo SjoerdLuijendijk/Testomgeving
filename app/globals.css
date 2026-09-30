@@ -271,7 +271,9 @@ a {
   font-weight: 600;
 }
 
-.form-stack input:not([type="file"]):not([type="radio"]):not([type="checkbox"]) {
+.form-stack input:not([type="file"]):not([type="radio"]):not([type="checkbox"]),
+.form-stack select,
+.form-stack textarea {
   min-height: 52px;
   padding: 12px 14px;
   border: 1px solid #d6ccc5;
@@ -349,6 +351,31 @@ a {
 .choice-options input:focus-visible + span {
   outline: 3px solid #f0a37f;
   outline-offset: 2px;
+}
+
+/* A third choice (e.g. "Boven én achter") spans the full width. */
+.choice-options label:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.form-stack textarea {
+  font: inherit;
+  font-size: 18px;
+  resize: vertical;
+}
+
+.more-fields summary {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.more-fields-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .dimension-fields {
@@ -1593,4 +1620,22 @@ a {
 
 .stove-table .cell-toggle {
   display: none;
+}
+
+.sync-warning {
+  margin-left: 8px;
+  padding: 4px 8px;
+  border: 1px solid #b3261e;
+  border-radius: 6px;
+  background: #fdecea;
+  color: #8c1d18;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sync-warning:disabled {
+  cursor: progress;
+  opacity: 0.7;
 }

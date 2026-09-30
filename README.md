@@ -39,6 +39,14 @@ allows access only to signed-in users whose e-mail is in `team_members`. After c
 number stays fixed; team members can edit the other details. Photos are served through
 short-lived signed URLs.
 
+## Product details
+
+Besides the required details (brand, model, condition, dimensions, flue outlet and diameter, price)
+a stove has optional product details that the web shop shows: web shop name, stove type, power
+(kW), weight, rear flue centre height, external air supply, new firebox, thermostat, and under
+"Meer productgegevens" minimum/maximum power, efficiency, energy label, warranty, material and a
+description. The flue outlet can be top, rear or both.
+
 ## Stock
 
 The inventory has three tabs: used, new and made to order ("Op bestelling"). A used stove is a
@@ -54,8 +62,9 @@ time, so concurrent sales cannot overwrite each other.
 Each stove has a "Webshop" checkbox (`shop_listed`) for the WooCommerce web shop and a
 "Marktplaats" checkbox (`marketplace_listed`) for Marktplaats and 2dehands, both off by default.
 When a stove sells out the database unticks both, and they cannot be ticked while it is sold out.
-The web shop sync itself is not built yet; see `docs/woocommerce-sync.md`. Marktplaats and 2dehands
-are a manual reminder only; there is no integration.
+Changes to a stove are pushed to the WooCommerce shop in the background; web shop orders do
+not report back yet. Configuration and field mapping: `docs/woocommerce-sync.md`. Marktplaats and
+2dehands have no integration; the "Marktplaats" checkbox is a reminder, with an AI-written ad text.
 
 ## Invoices
 

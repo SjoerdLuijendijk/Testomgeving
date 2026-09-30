@@ -11,7 +11,7 @@ import StoveRow from "./StoveRow";
 type Kind = "used" | "new" | "order";
 type Filter = "available" | "sold";
 
-const KIND_LABELS: Record<Kind, string> = { used: "Gebruikt", new: "Nieuw", order: "Op bestelling" };
+const KIND_LABELS: Record<Kind, string> = { used: "Gereviseerd", new: "Nieuw", order: "Op bestelling" };
 const FILTER_LABELS: Record<Filter, string> = { available: "Te koop", sold: "Verkocht" };
 
 // Stoves registered before the condition field existed are treated as used.
@@ -25,7 +25,7 @@ const unitsOf = (stove: Stove) => (stove.soldAt ? 1 : stove.stockQuantity);
 
 function matchesSearch(stove: Stove, query: string) {
   if (!query) return true;
-  return [String(stove.number), stove.brand, stove.model].some((value) => value.toLowerCase().includes(query));
+  return [String(stove.number), stove.brand, stove.model, stove.productName ?? ""].some((value) => value.toLowerCase().includes(query));
 }
 
 export default function StoveTable({ stoves }: { stoves: Stove[] }) {
@@ -133,6 +133,7 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
                 {header("Merk", "brand")}
                 {header("Model", "model")}
                 {header("Staat", "condition")}
+                <th scope="col">Type</th>
                 <th scope="col" className="cell-numeric">H × B × D</th>
                 <th scope="col">Rookafvoer</th>
                 {header("Prijs", "priceCents", "cell-numeric")}

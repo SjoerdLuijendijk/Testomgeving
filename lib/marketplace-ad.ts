@@ -1,7 +1,8 @@
 import type { Company } from "./invoice";
 import { DEFAULT_AD_PROMPT } from "./ad-prompt";
 import { formatPrice } from "./price";
-import { CONDITION_LABELS, FLUE_OUTLET_LABELS, type Stove } from "./stoves";
+import { stoveSpecs } from "./stove-specs";
+import type { StoveDetails } from "./stoves";
 
 // Server-only: reads OPENAI_API_KEY. Import only from Server Actions.
 
@@ -11,10 +12,6 @@ const TIMEOUT_MS = 45_000;
 const MAX_OUTPUT_TOKENS = 4000;
 const FALLBACK_COMPANY_NAME = "Woonwarmer";
 
-export type AdStove = Pick<
-  Stove,
-  "number" | "brand" | "model" | "condition" | "heightCm" | "widthCm" | "depthCm" | "flueOutlet" | "flueDiameterMm" | "priceCents" | "madeToOrder"
->;
 export type AdCompany = Pick<Company, "name" | "address" | "postal_code" | "city" | "email" | "phone">;
 
 export class AdGenerationError extends Error {}
@@ -28,17 +25,16 @@ const FIXED_RULES = [
   "- Geef alleen de advertentietekst terug, zonder toelichting.",
 ].join("\n");
 
-function describeStove(stove: AdStove) {
+function describeStove(stove: StoveDetails) {
   const lines = [
     `Merk: ${stove.brand}`,
     `Model: ${stove.model}`,
-    stove.condition && `Staat: ${CONDITION_LABELS[stove.condition]}`,
-    stove.heightCm && stove.widthCm && stove.depthCm && `Afmetingen (h × b × d): ${stove.heightCm} × ${stove.widthCm} × ${stove.depthCm} cm`,
-    stove.flueOutlet && `Rookafvoer: ${FLUE_OUTLET_LABELS[stove.flueOutlet].toLowerCase()}`,
-    stove.flueDiameterMm && `Diameter rookafvoer: Ø${stove.flueDiameterMm} mm`,
+    ...stoveSpecs(stove).map(({ label, value }) => `${label}: ${value}`),
     stove.priceCents && `Vraagprijs: ${formatPrice(stove.priceCents)} incl. btw`,
     stove.madeToOrder && "Beschikbaarheid: op bestelling, niet direct uit voorraad",
     `Kachelnummer (referentie): ${stove.number}`,
+    stove.description && `Beschrijving:
+${stove.description}`,
   ];
   return lines.filter(Boolean).join("\n");
 }
@@ -69,7 +65,7 @@ function extractText(body: unknown): string {
     .trim();
 }
 
-export async function generateMarketplaceAd(stove: AdStove, company: AdCompany | null, prompt: string | null): Promise<string> {
+export async function generateMarketplaceAd(stove: StoveDetails, company: AdCompany | null, prompt: string | null): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     console.error("Generating marketplace ad failed: OPENAI_API_KEY is not set");

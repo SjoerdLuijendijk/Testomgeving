@@ -1,50 +1,91 @@
 # WooCommerce sync
 
-Status: design only. The shop sync itself is not built yet; only the `shop_listed` flag exists.
+Status: phase 1 is built: the app pushes stoves to the WooCommerce shop (woonwarmer.nl). Web shop
+orders do not report back yet (phase 2); a web shop sale must be counted down in the app by hand.
 
-## Direction
+## Configuration
 
-- The app is the source of truth for stock. Stoves are entered in the app; the sync creates or
-  updates the matching WooCommerce product.
-- WooCommerce reports sales back. A web shop order marks the stove as sold (`sold_at`) in the app.
-- Only stoves with `shop_listed = true` ("Online" in the inventory) are offered in the shop.
+Server-only Vercel environment variables (never `NEXT_PUBLIC_*`):
+
+| Variable | Value |
+| --- | --- |
+| `WOOCOMMERCE_URL` | The shop's address, e.g. `https://woonwarmer.nl` (HTTPS only). |
+| `WOOCOMMERCE_CONSUMER_KEY` | REST API consumer key (`ck_...`). |
+| `WOOCOMMERCE_CONSUMER_SECRET` | REST API consumer secret (`cs_...`). |
+
+Create the key in WordPress → WooCommerce → Settings → Advanced → REST API with permission
+"Read/Write", linked to a dedicated shop-manager user rather than an administrator where possible.
+Without these variables the sync is off; a listed stove then shows "De webshopkoppeling is nog niet
+ingesteld." in the inventory.
+
+All environments share one database, so any environment with the variables writes to the live
+shop with the same data. Set them for Production and Preview (staging); leave them out of
+Development unless testing the sync on purpose.
+
+## How it works
+
+- Code: `lib/woocommerce/` (`client.ts` HTTP and errors, `taxonomy.ts` attributes, terms and
+  categories, `product.ts` the product payload, `sync.ts` the sync of one stove).
+- Every server action that changes a stove (add, edit, stock, "Webshop" checkbox, photos) schedules
+  `syncStoveToShop` with `after()`, so saving never waits for the shop. It runs with the signed-in
+  team member's Supabase client, so RLS applies as usual.
+- The outcome is stored on the stove: `shop_product_id`, `shop_synced_at` and `shop_sync_error`
+  (migration `20260930150000_add_shop_sync_status.sql`). A failure shows "⚠ Opnieuw" next to the
+  Webshop checkbox; clicking it runs the sync again right away (`retryShopSync`).
+- A stove that was never listed and has no shop product is skipped without calling the shop.
+- Only the product's status, key, stock and error code are logged, never request or response bodies.
 
 ## Matching
 
-The six-digit stove number is the WooCommerce product SKU. Before the sync goes live, existing
-WooCommerce products for stoves must have their stove number entered as SKU, so the sync links
-them instead of creating duplicates.
+The six-digit stove number is the product SKU. The product is found by the stored
+`shop_product_id`, else by SKU; otherwise it is created. If two syncs race to create it,
+WooCommerce rejects the duplicate SKU and the second sync updates the first one's product.
+
+## Existing shop products
+
+The shop had 94 products when the sync was built, with five-digit SKUs such as `26118` that do not
+match the app's six-digit stove numbers. The sync never touches them; they stay managed in
+WordPress. Linking or importing them is still to be decided.
 
 ## Field mapping (app → WooCommerce)
+
+The sync owns the products it creates: every sync replaces their name, price, description,
+categories, attributes, images and stock. Edits made to those products in WordPress are overwritten.
 
 | App | WooCommerce product | Notes |
 | --- | --- | --- |
 | `number` | `sku` | Unique key for matching. |
-| `brand` + `model` | `name` | For example "Jøtul F 373". |
-| `price_cents` | `regular_price` | Incl. VAT, formatted as a decimal string ("1250.00"). Assumes the shop enters prices incl. VAT. |
-| `condition` | attribute "Staat" | Nieuw / Gebruikt. |
-| `height_cm`, `width_cm`, `depth_cm` | attributes "Hoogte", "Breedte", "Diepte" | In cm. WooCommerce's own `dimensions` could be used instead if shipping needs them. |
-| `flue_outlet` | attribute "Rookafvoer" | Boven / Achter. |
-| `flue_diameter_mm` | attribute "Maat afvoer" | In mm. |
-| photos | `images` | Uploaded once through short-lived signed URLs; WooCommerce keeps its own public copy. |
-| `stock_quantity` | `manage_stock: true`, `stock_quantity` | Used stoves are unique (1); a new stove model can have more units under one number. |
-| `made_to_order` | `manage_stock: false`, `stock_status: "onbackorder"` | Made-to-order stoves keep no stock and are always orderable. |
+| `product_name`, else `stove_type` + `brand` + `model` | `name` | The shop's names look like "Speksteenkachel Hark". |
+| `description` | `description` | Optional free text. |
+| `price_cents` | `regular_price` | Incl. VAT, as a decimal string ("1250.00"). Assumes the shop enters prices incl. VAT. |
+| `condition` + `stove_type` | `categories` | New: "Nieuwe kachels". Gereviseerd: "Gereviseerde kachels" plus "Houtkachels" or "Speksteenkachels". Matched by slug; a missing category is skipped. |
+| `brand` | global attribute "Merk" (`pa_merk`) | Existing terms are matched ignoring case and spaces; a new brand is added as a term. |
+| `condition` | global attribute "Staat kachel" (`pa_staat`) | Nieuw / Gereviseerd. |
+| `stove_type` | global attribute "Type kachel" (`pa_type-kachel`) | |
+| `flue_outlet` | global attribute "Aansluiting" (`pa_aansluiting`) | Bovenaansluiting, Achteraansluiting, or both. |
+| `power_kw` | global attribute "Vermogen" (`pa_vermogen`) | Matches existing terms such as "8kW" or "6,5 kw"; otherwise adds e.g. "7,5 kW". |
+| dimensions, `weight_kg`, `flue_diameter_mm`, `flue_center_height_cm`, yes/no fields, min/max power, efficiency, energy label, warranty, material | product attributes | Labels as in the app's Marktplaats ad details (`lib/stove-specs.ts`), e.g. "Harthoogte achter: 94 cm". Unknown values are left out. WooCommerce's own `dimensions` and `weight` are not used, because their units depend on shop settings. |
+| photos | `images` | Sent as short-lived signed URLs that WordPress downloads once. Each image is named `kachel-<number>-foto-<photo id>`, so later syncs reuse it instead of uploading it again. |
+| `stock_quantity` | `manage_stock: true`, `stock_quantity` | |
+| `made_to_order` | `manage_stock: false`, `stock_status: "onbackorder"` | Always orderable. |
 
 ## State rules
 
 | App state | WooCommerce |
 | --- | --- |
-| `shop_listed` on, in stock | Product published with the app's stock quantity. |
-| `shop_listed` off | Product set to draft (not deleted, so order history stays intact). |
-| Sold out (`stock_quantity` 0, `sold_at` set) | Stock 0 / out of stock. The database also turns `shop_listed` off. |
+| "Webshop" ticked | Product published with the app's stock. |
+| "Webshop" unticked | Product set to draft (never deleted, so order history stays intact). |
+| Sold out | The database unticks "Webshop", so the product becomes a draft with stock 0. |
 
-A web shop order reports back by lowering the stock by the ordered quantity (through
-`adjust_stove_stock` or a similar function), not by setting `sold_at` directly.
+## Known limitations
 
-## Still to decide (phase 2 and 3)
+- Two syncs for the same stove can overlap (for example two quick edits); the last one to finish
+  wins, which may briefly be the older data until the next change.
+- Background syncs finish after the page has refreshed; a failure shows up on the next page load.
 
-- WooCommerce REST API keys with the least permissions needed, stored as server-only Vercel
-  environment variables.
-- Receiving order webhooks: signature verification, a narrowly scoped server-side database
-  function to mark a stove as sold, and a Vercel Deployment Protection exception for the webhook
-  route only.
+## Phase 2: orders back to the app (not built)
+
+A web shop order should lower the stock by the ordered quantity (through `adjust_stove_stock` or a
+similar function), not set `sold_at` directly. Needs an order webhook with signature verification,
+a narrowly scoped server-side database function, and a Vercel Deployment Protection exception for
+the webhook route only.

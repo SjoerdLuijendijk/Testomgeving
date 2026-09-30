@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getCompany } from "./invoice-queries";
 import { AdGenerationError, generateMarketplaceAd } from "./marketplace-ad";
-import { getStoveForAd } from "./stove-queries";
+import { getStoveDetails } from "./stove-queries";
 
 // Server-only. All queries use the caller's client, so RLS limits them to team members.
 
@@ -40,7 +40,7 @@ async function updateStoredAd(supabase: SupabaseClient, stoveNumber: number, val
 // Generates the ad from the stored stove, company details and prompt, and saves it on the stove,
 // replacing any manual version. Returns null when the stove does not exist.
 export async function generateAndStoreAd(supabase: SupabaseClient, stoveNumber: number): Promise<string | null> {
-  const [stove, company, prompt] = await Promise.all([getStoveForAd(supabase, stoveNumber), getCompany(supabase), getAdPrompt(supabase)]);
+  const [stove, company, prompt] = await Promise.all([getStoveDetails(supabase, stoveNumber), getCompany(supabase), getAdPrompt(supabase)]);
   if (!stove) return null;
 
   const text = await generateMarketplaceAd(stove, company, prompt);

@@ -11,10 +11,14 @@ import {
   LISTING_CHANNELS,
   MAX_TEXT_LENGTH,
   STOCK_QUANTITY,
+  STOVE_TYPE_LABELS,
   SUPPLY_LABELS,
   type Stove,
 } from "../lib/stoves";
 import ChoiceGroup from "./ChoiceGroup";
+import NumberField from "./NumberField";
+import SelectField from "./SelectField";
+import StoveSpecFields from "./StoveSpecFields";
 
 const DIMENSION_FIELDS = [
   { name: "height", label: "Hoogte", key: "heightCm" },
@@ -60,6 +64,18 @@ export default function StoveFields({ brands, stove }: StoveFieldsProps) {
 
       <label htmlFor={`${id}-model`}>Model</label>
       <input id={`${id}-model`} name="model" maxLength={MAX_TEXT_LENGTH} required autoComplete="off" defaultValue={stove?.model} />
+
+      <label htmlFor={`${id}-product-name`}>Naam in webshop <span className="muted">(optioneel)</span></label>
+      <input
+        id={`${id}-product-name`}
+        name="productName"
+        maxLength={MAX_TEXT_LENGTH}
+        autoComplete="off"
+        placeholder="Leeg: type, merk en model"
+        defaultValue={stove?.productName ?? undefined}
+      />
+
+      <SelectField name="stoveType" label="Type kachel" options={STOVE_TYPE_LABELS} defaultValue={stove?.stoveType} />
 
       {/* display: contents keeps the form's spacing while following the condition and supply choices. */}
       <div className="field-contents" onChange={handleChoice}>
@@ -127,6 +143,18 @@ export default function StoveFields({ brands, stove }: StoveFieldsProps) {
       <datalist id={`${id}-flue-diameters`}>
         {COMMON_FLUE_DIAMETERS_MM.map((diameter) => <option key={diameter} value={diameter} />)}
       </datalist>
+
+      <NumberField
+        name="flueCenterHeight"
+        label="Hoogte hart achter"
+        unit="cm"
+        decimal
+        min={DIMENSION_CM.min}
+        max={DIMENSION_CM.max}
+        defaultValue={stove?.flueCenterHeightCm}
+      />
+
+      <StoveSpecFields stove={stove} />
 
       <label htmlFor={`${id}-price`}>Verkoopprijs <span className="muted">(€ incl. btw)</span></label>
       <input

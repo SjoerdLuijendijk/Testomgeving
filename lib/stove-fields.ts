@@ -2,13 +2,22 @@ import { parsePriceToCents } from "./price";
 import {
   CONDITION_LABELS,
   DIMENSION_CM,
+  EFFICIENCY_PERCENT,
+  ENERGY_LABELS,
   FLUE_DIAMETER_MM,
   FLUE_OUTLET_LABELS,
+  MAX_DESCRIPTION_LENGTH,
   MAX_TEXT_LENGTH,
+  POWER_KW,
   STOCK_QUANTITY,
+  STOVE_TYPE_LABELS,
   SUPPLY_LABELS,
+  WARRANTY_YEARS,
+  WEIGHT_KG,
   type Condition,
+  type EnergyLabel,
   type FlueOutlet,
+  type StoveType,
 } from "./stoves";
 
 export type StoveFieldValues = {
@@ -24,23 +33,80 @@ export type StoveFieldValues = {
   shop_listed: boolean;
   marketplace_listed: boolean;
   made_to_order: boolean;
+  product_name: string | null;
+  stove_type: StoveType | null;
+  power_kw: number | null;
+  min_power_kw: number | null;
+  max_power_kw: number | null;
+  weight_kg: number | null;
+  flue_center_height_cm: number | null;
+  external_air_supply: boolean | null;
+  new_firebox: boolean | null;
+  thermostat: boolean | null;
+  efficiency_percent: number | null;
+  energy_label: EnergyLabel | null;
+  warranty_years: number | null;
+  material: string | null;
+  description: string | null;
 };
 
 type ParseResult = { ok: true; values: StoveFieldValues } | { ok: false; error: string };
+type Range = { min: number; max: number };
 
-function readText(formData: FormData, name: string) {
-  const value = String(formData.get(name) ?? "").trim();
-  return value.length > 0 && value.length <= MAX_TEXT_LENGTH ? value : null;
+// An optional field that was filled in with an invalid value.
+const INVALID = Symbol("invalid");
+
+function rawValue(formData: FormData, name: string) {
+  return String(formData.get(name) ?? "").trim();
 }
 
-function readInteger(formData: FormData, name: string, range: { min: number; max: number }) {
-  const value = Number(String(formData.get(name) ?? "").trim());
+function readText(formData: FormData, name: string, maxLength = MAX_TEXT_LENGTH) {
+  const value = rawValue(formData, name);
+  return value.length > 0 && value.length <= maxLength ? value : null;
+}
+
+function readInteger(formData: FormData, name: string, range: Range) {
+  const value = Number(rawValue(formData, name));
   return Number.isInteger(value) && value >= range.min && value <= range.max ? value : null;
 }
 
 function readChoice<T extends string>(formData: FormData, name: string, options: Record<T, string>) {
   const value = String(formData.get(name) ?? "");
   return Object.hasOwn(options, value) ? (value as T) : null;
+}
+
+// Optional fields: empty input is null, anything else must be valid.
+function readOptionalText(formData: FormData, name: string, maxLength = MAX_TEXT_LENGTH) {
+  const value = rawValue(formData, name);
+  if (value.length === 0) return null;
+  return value.length <= maxLength ? value : INVALID;
+}
+
+function readOptionalInteger(formData: FormData, name: string, range: Range) {
+  if (rawValue(formData, name).length === 0) return null;
+  return readInteger(formData, name, range) ?? INVALID;
+}
+
+// Accepts Dutch ("5,5") and English ("5.5") decimals with at most one decimal place.
+function readOptionalDecimal(formData: FormData, name: string, range: Range) {
+  const value = rawValue(formData, name).replace(",", ".");
+  if (value.length === 0) return null;
+  if (!/^\d+(\.\d)?$/.test(value)) return INVALID;
+  const number = Number(value);
+  return number >= range.min && number <= range.max ? number : INVALID;
+}
+
+function readOptionalChoice<T extends string>(formData: FormData, name: string, options: readonly T[]) {
+  const value = String(formData.get(name) ?? "");
+  if (value.length === 0) return null;
+  return (options as readonly string[]).includes(value) ? (value as T) : INVALID;
+}
+
+// Yes/no fields that can also be left unknown.
+function readOptionalBoolean(formData: FormData, name: string) {
+  const value = String(formData.get(name) ?? "");
+  if (value.length === 0) return null;
+  return value === "yes" ? true : value === "no" ? false : INVALID;
 }
 
 // Validates the untrusted stove form fields shared by creating and editing a stove.
@@ -57,16 +123,53 @@ export function parseStoveFields(formData: FormData): ParseResult {
   const supply = readChoice(formData, "supply", SUPPLY_LABELS);
 
   if (!brand || !model) return { ok: false, error: "Vul merk en model in." };
-  if (!condition) return { ok: false, error: "Kies nieuw of gebruikt." };
+  if (!condition) return { ok: false, error: "Kies nieuw of gereviseerd." };
   if (condition === "new" && !supply) return { ok: false, error: "Kies uit voorraad of op bestelling." };
   if (!height || !width || !depth) {
     return { ok: false, error: `Vul hoogte, breedte en diepte in hele centimeters in (${DIMENSION_CM.min}–${DIMENSION_CM.max}).` };
   }
-  if (!flueOutlet) return { ok: false, error: "Kies of de rookafvoer boven of achter zit." };
+  if (!flueOutlet) return { ok: false, error: "Kies of de rookafvoer boven, achter of allebei zit." };
   if (!flueDiameter) {
     return { ok: false, error: `Vul de maat van de afvoer in millimeters in (${FLUE_DIAMETER_MM.min}–${FLUE_DIAMETER_MM.max}).` };
   }
   if (!price) return { ok: false, error: "Vul een geldige verkoopprijs in, bijvoorbeeld 1.250 of 1250,50." };
+
+  const productName = readOptionalText(formData, "productName");
+  const stoveType = readOptionalChoice(formData, "stoveType", Object.keys(STOVE_TYPE_LABELS) as StoveType[]);
+  const power = readOptionalDecimal(formData, "power", POWER_KW);
+  const minPower = readOptionalDecimal(formData, "minPower", POWER_KW);
+  const maxPower = readOptionalDecimal(formData, "maxPower", POWER_KW);
+  const weight = readOptionalInteger(formData, "weight", WEIGHT_KG);
+  const flueCenterHeight = readOptionalDecimal(formData, "flueCenterHeight", DIMENSION_CM);
+  const externalAirSupply = readOptionalBoolean(formData, "externalAirSupply");
+  const newFirebox = readOptionalBoolean(formData, "newFirebox");
+  const thermostat = readOptionalBoolean(formData, "thermostat");
+  const efficiency = readOptionalDecimal(formData, "efficiency", EFFICIENCY_PERCENT);
+  const energyLabel = readOptionalChoice(formData, "energyLabel", ENERGY_LABELS);
+  const warranty = readOptionalInteger(formData, "warranty", WARRANTY_YEARS);
+  const material = readOptionalText(formData, "material");
+  const description = readOptionalText(formData, "description", MAX_DESCRIPTION_LENGTH);
+
+  if (productName === INVALID) return { ok: false, error: `De naam mag maximaal ${MAX_TEXT_LENGTH} tekens zijn.` };
+  if (stoveType === INVALID) return { ok: false, error: "Kies een geldig type kachel." };
+  if (power === INVALID || minPower === INVALID || maxPower === INVALID) {
+    return { ok: false, error: `Vul het vermogen in kW in, bijvoorbeeld 8 of 5,5 (${POWER_KW.min}–${POWER_KW.max}).` };
+  }
+  if (minPower !== null && maxPower !== null && minPower > maxPower) {
+    return { ok: false, error: "Het minimale vermogen mag niet hoger zijn dan het maximale vermogen." };
+  }
+  if (weight === INVALID) return { ok: false, error: `Vul het gewicht in hele kilo's in (${WEIGHT_KG.min}–${WEIGHT_KG.max}).` };
+  if (flueCenterHeight === INVALID) {
+    return { ok: false, error: `Vul de hoogte hart achter in cm in, bijvoorbeeld 94 of 89,5 (${DIMENSION_CM.min}–${DIMENSION_CM.max}).` };
+  }
+  if (externalAirSupply === INVALID || newFirebox === INVALID || thermostat === INVALID) {
+    return { ok: false, error: "Kies ja, nee of niet ingevuld." };
+  }
+  if (efficiency === INVALID) return { ok: false, error: "Vul het rendement in procenten in, bijvoorbeeld 78 of 80,5." };
+  if (energyLabel === INVALID) return { ok: false, error: "Kies een geldig energielabel." };
+  if (warranty === INVALID) return { ok: false, error: `Vul de garantie in hele jaren in (${WARRANTY_YEARS.min}–${WARRANTY_YEARS.max}).` };
+  if (material === INVALID) return { ok: false, error: `Het materiaal mag maximaal ${MAX_TEXT_LENGTH} tekens zijn.` };
+  if (description === INVALID) return { ok: false, error: `De beschrijving mag maximaal ${MAX_DESCRIPTION_LENGTH} tekens zijn.` };
 
   return {
     ok: true,
@@ -85,6 +188,21 @@ export function parseStoveFields(formData: FormData): ParseResult {
       marketplace_listed: formData.get("marketplaceListed") === "on",
       // Only new stoves can be made to order.
       made_to_order: condition === "new" && supply === "order",
+      product_name: productName,
+      stove_type: stoveType,
+      power_kw: power,
+      min_power_kw: minPower,
+      max_power_kw: maxPower,
+      weight_kg: weight,
+      flue_center_height_cm: flueCenterHeight,
+      external_air_supply: externalAirSupply,
+      new_firebox: newFirebox,
+      thermostat,
+      efficiency_percent: efficiency,
+      energy_label: energyLabel,
+      warranty_years: warranty,
+      material,
+      description,
     },
   };
 }

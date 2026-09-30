@@ -7,6 +7,7 @@ import { refreshStoredAd } from "../lib/marketplace-ad-store";
 import { parseStockQuantity, parseStoveFields } from "../lib/stove-fields";
 import { LISTING_CHANNELS, PHOTOS_BUCKET, type ListingChannel } from "../lib/stoves";
 import { readPhotos, storePhotos, UserError } from "../lib/stove-photos";
+import { syncStoveToShop } from "../lib/woocommerce/sync";
 
 export type ActionResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -21,6 +22,12 @@ function errorMessage(error: unknown) {
 
 function isPositiveId(value: unknown): value is number {
   return Number.isSafeInteger(value) && (value as number) > 0;
+}
+
+// Updates the web shop product after the response, so saving never waits for the shop. The outcome
+// is stored on the stove and shown in the inventory.
+function syncShopLater(supabase: Parameters<typeof syncStoveToShop>[0], stoveNumber: number) {
+  after(() => syncStoveToShop(supabase, stoveNumber));
 }
 
 export async function addStove(formData: FormData): Promise<ActionResult<{ number: number; warning?: string }>> {
@@ -48,6 +55,8 @@ export async function addStove(formData: FormData): Promise<ActionResult<{ numbe
 
   // Prepare the Marktplaats ad after the response, so saving never waits for it.
   after(() => refreshStoredAd(supabase, stove.number));
+  // Registered after storing the photos below, since after() runs once the response is sent.
+  syncShopLater(supabase, stove.number);
   revalidatePath("/");
   try {
     await storePhotos(supabase, stove.number, photos);
@@ -68,13 +77,14 @@ export async function updateStove(stoveNumber: number, formData: FormData): Prom
 
   const { data, error } = await supabase.from("stoves").update(fields.values).eq("number", stoveNumber).select("number");
   if (error?.code === CHECK_VIOLATION) {
-    return { ok: false, error: "Deze kachel heeft meer dan 1 op voorraad en kan daarom niet op gebruikt worden gezet." };
+    return { ok: false, error: "Deze kachel heeft meer dan 1 op voorraad en kan daarom niet op gereviseerd worden gezet." };
   }
   if (error) return { ok: false, error: errorMessage(error) };
   if (data.length === 0) return { ok: false, error: "Deze kachel bestaat niet meer." };
 
   // The stored ad would otherwise show outdated details such as the old price.
   after(() => refreshStoredAd(supabase, stoveNumber));
+  syncShopLater(supabase, stoveNumber);
   revalidatePath("/");
   return { ok: true };
 }
@@ -91,6 +101,7 @@ export async function addStovePhotos(stoveNumber: number, formData: FormData): P
     return { ok: false, error: errorMessage(error) };
   } finally {
     revalidatePath("/");
+    syncShopLater(supabase, stoveNumber);
   }
   return { ok: true };
 }
@@ -106,13 +117,14 @@ export async function adjustStoveStock(stoveNumber: number, delta: -1 | 1): Prom
   if (error?.code === CHECK_VIOLATION) {
     return {
       ok: false,
-      error: delta === -1 ? "Deze kachel is al uitverkocht." : "Een gebruikte kachel kan maar 1 keer op voorraad staan.",
+      error: delta === -1 ? "Deze kachel is al uitverkocht." : "Een gereviseerde kachel kan maar 1 keer op voorraad staan.",
     };
   }
   if (error) return { ok: false, error: errorMessage(error) };
   // Null: the stove no longer exists, or it is made to order and keeps no stock.
   if (data === null) return { ok: false, error: "De voorraad van deze kachel kan niet worden aangepast." };
 
+  syncShopLater(supabase, stoveNumber);
   revalidatePath("/");
   return { ok: true };
 }
@@ -132,6 +144,7 @@ export async function setStoveListed(stoveNumber: number, channel: ListingChanne
     .select("stock_quantity");
   if (error) return { ok: false, error: errorMessage(error) };
   if (data.length === 0) return { ok: false, error: "Deze kachel bestaat niet meer." };
+  if (channel === "shop") syncShopLater(supabase, stoveNumber);
   // The database keeps sold-out stoves unlisted, so the tick did not stick.
   if (listed && data[0].stock_quantity === 0) {
     revalidatePath("/");
@@ -148,7 +161,7 @@ export async function deleteStovePhoto(photoId: number): Promise<ActionResult> {
   const { supabase, isMember } = await requireTeamMember();
   if (!isMember) return NO_ACCESS;
 
-  const { data: photo, error } = await supabase.from("stove_photos").select("path").eq("id", photoId).single();
+  const { data: photo, error } = await supabase.from("stove_photos").select("path, stove_number").eq("id", photoId).single();
   if (error) return { ok: false, error: errorMessage(error) };
 
   const { error: removeError } = await supabase.storage.from(PHOTOS_BUCKET).remove([photo.path]);
@@ -157,6 +170,19 @@ export async function deleteStovePhoto(photoId: number): Promise<ActionResult> {
   const { error: deleteError } = await supabase.from("stove_photos").delete().eq("id", photoId);
   if (deleteError) return { ok: false, error: errorMessage(deleteError) };
 
+  syncShopLater(supabase, photo.stove_number);
   revalidatePath("/");
   return { ok: true };
+}
+
+// Retries the web shop update right away, for example after the shop was unreachable.
+export async function retryShopSync(stoveNumber: number): Promise<ActionResult> {
+  if (!isPositiveId(stoveNumber)) return { ok: false, error: "Onbekende kachel." };
+
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+
+  const error = await syncStoveToShop(supabase, stoveNumber);
+  revalidatePath("/");
+  return error ? { ok: false, error } : { ok: true };
 }

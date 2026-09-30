@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { formatPrice } from "../lib/price";
-import { CONDITION_LABELS, FLUE_OUTLET_LABELS, LISTING_CHANNELS, type ListingChannel, type Stove } from "../lib/stoves";
+import { CONDITION_LABELS, FLUE_OUTLET_LABELS, LISTING_CHANNELS, STOVE_TYPE_LABELS, type ListingChannel, type Stove } from "../lib/stoves";
 import EditStoveDialog from "./EditStoveDialog";
 import InvoiceDialog from "./InvoiceDialog";
 import MarketplaceAdDialog from "./MarketplaceAdDialog";
 import PhotoCell from "./PhotoCell";
 import ListingToggle from "./ListingToggle";
+import ShopSyncStatus from "./ShopSyncStatus";
 import SoldToggle from "./SoldToggle";
 import StockControl from "./StockControl";
 import StoveInvoiceLinks from "./StoveInvoiceLinks";
@@ -17,6 +18,13 @@ const MISSING = "—";
 
 function formatDimensions({ heightCm, widthCm, depthCm }: Stove) {
   return heightCm && widthCm && depthCm ? `${heightCm} × ${widthCm} × ${depthCm} cm` : MISSING;
+}
+
+const KW_FORMAT = new Intl.NumberFormat("nl-NL", { maximumFractionDigits: 1 });
+
+function formatType({ stoveType, powerKw }: Stove) {
+  const parts = [stoveType && STOVE_TYPE_LABELS[stoveType], powerKw && `${KW_FORMAT.format(powerKw)} kW`].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : MISSING;
 }
 
 function formatFlue({ flueOutlet, flueDiameterMm }: Stove) {
@@ -36,6 +44,7 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       <td data-label="Merk" className="cell-brand">{stove.brand}</td>
       <td data-label="Model" className="cell-model">{stove.model}</td>
       <td data-label="Staat" className="cell-detail">{stove.condition ? CONDITION_LABELS[stove.condition] : MISSING}</td>
+      <td data-label="Type" className="cell-detail">{formatType(stove)}</td>
       <td data-label="H × B × D" className="cell-detail cell-nowrap cell-numeric">{formatDimensions(stove)}</td>
       <td data-label="Rookafvoer" className="cell-detail cell-nowrap">{formatFlue(stove)}</td>
       <td data-label="Prijs" className="cell-price cell-nowrap cell-numeric">{stove.priceCents ? formatPrice(stove.priceCents) : MISSING}</td>
@@ -56,6 +65,7 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
             listed={stove[LISTING_CHANNELS[channel].field]}
             soldOut={Boolean(stove.soldAt)}
           />
+          {channel === "shop" && stove.shopSyncError && <ShopSyncStatus stoveNumber={stove.number} error={stove.shopSyncError} />}
         </td>
       ))}
       <td data-label="Toegevoegd" className="cell-detail muted">
