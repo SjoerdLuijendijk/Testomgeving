@@ -45,10 +45,11 @@ short-lived signed URLs.
 ## Product details
 
 Besides the required details (brand, model, condition, dimensions, flue outlet and diameter, price)
-a stove has optional product details that the web shop shows: web shop name, stove type, power
+a stove has optional product details that the web shop shows: stove type, power
 (kW), weight, rear flue centre height, external air supply, new firebox, thermostat, and under
 "Meer productgegevens" minimum/maximum power, efficiency, energy label, warranty, material and a
 description. The flue outlet can be top, rear or both.
+The web shop name is always the brand plus the model ("Hwam 3120"; a model "Onbekend" is left out).
 
 ## Stock
 

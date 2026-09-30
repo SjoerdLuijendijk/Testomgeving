@@ -13,7 +13,7 @@ type Config = NonNullable<ReturnType<typeof getWooCommerceConfig>>;
 type ShopProductWithMeta = ShopProduct & ShopProductState & { meta_data?: { key: string; value: unknown }[] };
 type StoveRow = CurrentStove & { number: number; shop_synced_at: string | null; shop_listed: boolean };
 
-const STOVE_COLUMNS = "number, condition, made_to_order, stock_quantity, brand, model, stove_type, product_name, shop_synced_at, shop_listed";
+const STOVE_COLUMNS = "number, condition, made_to_order, stock_quantity, brand, shop_synced_at, shop_listed";
 
 async function fetchProduct(config: Config, productId: number) {
   try {

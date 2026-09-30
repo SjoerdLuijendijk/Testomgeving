@@ -75,7 +75,8 @@ second step of "Alles uit webshop ophalen":
 - Details are parsed from the shop's global and product attributes (Merk, Staat kachel, Type kachel,
   Aansluiting, Vermogen, Harthoogte achter, Rendement, Energielabel, Garantie, ...). Values that do
   not make sense are left empty. The model is the product name without SKU prefix, type and brand,
-  or "Onbekend". The shop name is kept as the web shop name.
+  or "Onbekend". The shop name is stored in `product_name` for reference only; once linked, the
+  product is renamed to brand + model.
 - Photos are downloaded from the shop (a WordPress size of at most about 1600 px, JPEG, within the
   app's photo size limit) and stored in the app. Linking uploads them to the shop again as new
   images named `kachel-<number>-foto-<photo id>`; the old images stay in the media library.
@@ -96,7 +97,7 @@ below), so they are only lost when the app is changed at the same moment.
 | App | WooCommerce product | Notes |
 | --- | --- | --- |
 | `number` | `sku` | Unique key for matching. |
-| `product_name`, else `stove_type` + `brand` + `model` | `name` | The shop's names look like "Speksteenkachel Hark". |
+| `brand` + `model` | `name` | E.g. "Hwam 3120"; a model "Onbekend" is left out. The former `product_name` column is no longer used for the name. |
 | `description` | `description` | Optional free text. |
 | `price_cents` | `regular_price` | Incl. VAT, as a decimal string ("1250.00"). Assumes the shop enters prices incl. VAT. |
 | `condition` + `stove_type` | `categories` | New: "Nieuwe kachels". Gereviseerd: "Gereviseerde kachels" plus "Houtkachels" or "Speksteenkachels". Matched by slug; a missing category is skipped. |
@@ -130,7 +131,8 @@ Admin → Webshop → "Alles uit webshop ophalen" does two things after a confir
 from the shop:
 
 1. Existing stoves (`lib/woocommerce/shop-refresh.ts`): every stove with a shop product gets the
-   shop's stock, title, price, attributes and online status, with the same rules as the webhook
+   shop's stock, price, attributes and online status (not the title: the app names products after
+   brand and model), with the same rules as the webhook
    (values the shop leaves empty keep the app's value; a stove at 0 becomes sold). It runs with the
    team member's own login and shows per stove what changed. Stoves with a pending shop error (⚠)
    are skipped, because the shop has not received their latest change yet; trashed or deleted

@@ -65,16 +65,6 @@ export default function StoveFields({ brands, stove }: StoveFieldsProps) {
       <label htmlFor={`${id}-model`}>Model</label>
       <input id={`${id}-model`} name="model" maxLength={MAX_TEXT_LENGTH} required autoComplete="off" defaultValue={stove?.model} />
 
-      <label htmlFor={`${id}-product-name`}>Naam in webshop <span className="muted">(optioneel)</span></label>
-      <input
-        id={`${id}-product-name`}
-        name="productName"
-        maxLength={MAX_TEXT_LENGTH}
-        autoComplete="off"
-        placeholder="Leeg: type, merk en model"
-        defaultValue={stove?.productName ?? undefined}
-      />
-
       <SelectField name="stoveType" label="Type kachel" options={STOVE_TYPE_LABELS} defaultValue={stove?.stoveType} />
 
       {/* display: contents keeps the form's spacing while following the condition and supply choices. */}

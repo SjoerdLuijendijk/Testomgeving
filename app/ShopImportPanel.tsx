@@ -48,7 +48,7 @@ export default function ShopImportPanel() {
     const confirmed = await confirm({
       title: "Alles uit de webshop ophalen?",
       message:
-        "Kachels die al in de app staan, krijgen de voorraad, titel, prijs, kenmerken en online-status uit de webshop; kachels met een ⚠-melding worden overgeslagen. Daarna worden producten die online staan en nog niet in de app zitten met foto's overgenomen. Niets wordt dubbel geïmporteerd. De webshop verandert niet.",
+        "Kachels die al in de app staan, krijgen de voorraad, prijs, kenmerken en online-status uit de webshop; kachels met een ⚠-melding worden overgeslagen. Daarna worden producten die online staan en nog niet in de app zitten met foto's overgenomen. Niets wordt dubbel geïmporteerd. De webshop verandert niet.",
       confirmLabel: "Alles ophalen",
     });
     if (confirmed) run(undefined, true);

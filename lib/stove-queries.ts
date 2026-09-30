@@ -3,7 +3,7 @@ import { signPhotoUrls } from "./stove-photos";
 import type { Stove, StoveDetails, StoveInvoice } from "./stoves";
 
 const DETAIL_COLUMNS =
-  "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, product_name, stove_type, power_kw, min_power_kw, max_power_kw, weight_kg, flue_center_height_cm, external_air_supply, new_firebox, thermostat, efficiency_percent, energy_label, warranty_years, material, description, shop_listed, shop_sync_error, shop_sync_enabled, shop_product_id, made_to_order, stock_quantity, sold_at, created_at";
+  "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, stove_type, power_kw, min_power_kw, max_power_kw, weight_kg, flue_center_height_cm, external_air_supply, new_firebox, thermostat, efficiency_percent, energy_label, warranty_years, material, description, shop_listed, shop_sync_error, shop_sync_enabled, shop_product_id, made_to_order, stock_quantity, sold_at, created_at";
 
 type DetailsRow = {
   number: number;
@@ -16,7 +16,6 @@ type DetailsRow = {
   flue_outlet: StoveDetails["flueOutlet"];
   flue_diameter_mm: number | null;
   price_cents: number | null;
-  product_name: string | null;
   stove_type: StoveDetails["stoveType"];
   power_kw: number | null;
   min_power_kw: number | null;
@@ -53,7 +52,6 @@ function toStoveDetails(row: DetailsRow): StoveDetails {
     flueOutlet: row.flue_outlet,
     flueDiameterMm: row.flue_diameter_mm,
     priceCents: row.price_cents,
-    productName: row.product_name,
     stoveType: row.stove_type,
     powerKw: row.power_kw,
     minPowerKw: row.min_power_kw,

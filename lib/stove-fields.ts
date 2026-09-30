@@ -32,7 +32,6 @@ export type StoveFieldValues = {
   price_cents: number;
   shop_listed: boolean;
   made_to_order: boolean;
-  product_name: string | null;
   stove_type: StoveType | null;
   power_kw: number | null;
   min_power_kw: number | null;
@@ -133,7 +132,6 @@ export function parseStoveFields(formData: FormData): ParseResult {
   }
   if (!price) return { ok: false, error: "Vul een geldige verkoopprijs in, bijvoorbeeld 1.250 of 1250,50." };
 
-  const productName = readOptionalText(formData, "productName");
   const stoveType = readOptionalChoice(formData, "stoveType", Object.keys(STOVE_TYPE_LABELS) as StoveType[]);
   const power = readOptionalDecimal(formData, "power", POWER_KW);
   const minPower = readOptionalDecimal(formData, "minPower", POWER_KW);
@@ -149,7 +147,6 @@ export function parseStoveFields(formData: FormData): ParseResult {
   const material = readOptionalText(formData, "material");
   const description = readOptionalText(formData, "description", MAX_DESCRIPTION_LENGTH);
 
-  if (productName === INVALID) return { ok: false, error: `De naam mag maximaal ${MAX_TEXT_LENGTH} tekens zijn.` };
   if (stoveType === INVALID) return { ok: false, error: "Kies een geldig type kachel." };
   if (power === INVALID || minPower === INVALID || maxPower === INVALID) {
     return { ok: false, error: `Vul het vermogen in kW in, bijvoorbeeld 8 of 5,5 (${POWER_KW.min}–${POWER_KW.max}).` };
@@ -186,7 +183,6 @@ export function parseStoveFields(formData: FormData): ParseResult {
       shop_listed: formData.get("shopListed") === "on",
       // Only new stoves can be made to order.
       made_to_order: condition === "new" && supply === "order",
-      product_name: productName,
       stove_type: stoveType,
       power_kw: power,
       min_power_kw: minPower,

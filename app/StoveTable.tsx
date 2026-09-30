@@ -25,7 +25,7 @@ const unitsOf = (stove: Stove) => (stove.soldAt ? 1 : stove.stockQuantity);
 
 function matchesSearch(stove: Stove, query: string) {
   if (!query) return true;
-  return [String(stove.number), stove.brand, stove.model, stove.productName ?? ""].some((value) => value.toLowerCase().includes(query));
+  return [String(stove.number), stove.brand, stove.model].some((value) => value.toLowerCase().includes(query));
 }
 
 export default function StoveTable({ stoves }: { stoves: Stove[] }) {

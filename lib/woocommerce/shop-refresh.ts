@@ -18,14 +18,13 @@ export type ShopRefreshResult = {
 // WooCommerce returns at most 100 products per page.
 const PAGE_SIZE = 100;
 const STOVE_COLUMNS =
-  "number, shop_product_id, shop_sync_error, model, brand, product_name, condition, stove_type, height_cm, width_cm, depth_cm, weight_kg, flue_outlet, flue_diameter_mm, flue_center_height_cm, power_kw, min_power_kw, max_power_kw, external_air_supply, new_firebox, thermostat, efficiency_percent, energy_label, warranty_years, material, description, price_cents, made_to_order, stock_quantity, shop_listed";
+  "number, shop_product_id, shop_sync_error, brand, condition, stove_type, height_cm, width_cm, depth_cm, weight_kg, flue_outlet, flue_diameter_mm, flue_center_height_cm, power_kw, min_power_kw, max_power_kw, external_air_supply, new_firebox, thermostat, efficiency_percent, energy_label, warranty_years, material, description, price_cents, made_to_order, stock_quantity, shop_listed";
 
 // How a changed column is named in the result; the remaining columns are product details.
 const FIELD_LABELS: Record<string, string> = {
   stock_quantity: "voorraad",
   made_to_order: "op bestelling",
   shop_listed: "online",
-  product_name: "titel",
   price_cents: "prijs",
   description: "beschrijving",
   brand: "merk",

@@ -61,7 +61,6 @@ export type Stove = {
   flueDiameterMm: number | null;
   priceCents: number | null;
   /** Web shop product name; when empty the shop name is built from type, brand and model. */
-  productName: string | null;
   stoveType: StoveType | null;
   powerKw: number | null;
   minPowerKw: number | null;

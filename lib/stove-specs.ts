@@ -32,10 +32,10 @@ function withUnit(value: number | null, unit: string) {
   return value === null ? null : `${DECIMAL.format(value)} ${unit}`;
 }
 
-// The shop's product names look like "Speksteenkachel Hark"; a stove's own web shop name wins.
-export function stoveProductName(stove: Pick<StoveDetails, "productName" | "stoveType" | "brand" | "model">) {
-  if (stove.productName) return stove.productName;
-  return [stove.stoveType && STOVE_TYPE_LABELS[stove.stoveType], stove.brand, stove.model].filter(Boolean).join(" ");
+// The web shop name is the brand plus the model ("Hwam 3120"); an unknown model is left out.
+export function stoveProductName(stove: Pick<StoveDetails, "brand" | "model">) {
+  const model = stove.model.trim().toLowerCase() === "onbekend" ? "" : stove.model;
+  return [stove.brand, model].filter(Boolean).join(" ");
 }
 
 // The stove's product details in display order, leaving out what is not filled in.
