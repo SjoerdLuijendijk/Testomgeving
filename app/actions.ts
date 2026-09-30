@@ -7,6 +7,7 @@ import { refreshStoredAd } from "../lib/marketplace-ad-store";
 import { parseStockQuantity, parseStoveFields } from "../lib/stove-fields";
 import { LISTING_CHANNELS, PHOTOS_BUCKET, type ListingChannel } from "../lib/stoves";
 import { readPhotos, storePhotos, UserError } from "../lib/stove-photos";
+import { linkStove } from "../lib/woocommerce/link";
 import { syncStoveToShop } from "../lib/woocommerce/sync";
 
 export type ActionResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
@@ -183,13 +184,15 @@ export async function linkStoveToShop(stoveNumber: number): Promise<ActionResult
   const { supabase, isMember } = await requireTeamMember();
   if (!isMember) return NO_ACCESS;
 
-  const { data, error } = await supabase.from("stoves").update({ shop_sync_enabled: true }).eq("number", stoveNumber).select("number");
-  if (error) return { ok: false, error: errorMessage(error) };
-  if (data.length === 0) return { ok: false, error: "Deze kachel bestaat niet meer." };
-
-  const syncError = await syncStoveToShop(supabase, stoveNumber);
+  let result;
+  try {
+    result = await linkStove(supabase, stoveNumber);
+  } catch (error) {
+    return { ok: false, error: errorMessage(error) };
+  }
   revalidatePath("/");
-  return syncError ? { ok: false, error: `Gekoppeld, maar de webshop is niet bijgewerkt: ${syncError}` } : { ok: true };
+  if (result.ok) return { ok: true };
+  return { ok: false, error: result.notFound ? result.error : `Gekoppeld, maar de webshop is niet bijgewerkt: ${result.error}` };
 }
 
 // Retries the web shop update right away, for example after the shop was unreachable.

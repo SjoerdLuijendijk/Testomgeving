@@ -3,9 +3,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_AD_PROMPT } from "../lib/ad-prompt";
 import { getCompany } from "../lib/invoice-queries";
 import { getAdPrompt } from "../lib/marketplace-ad-store";
+import { countUnlinkedStoves } from "../lib/woocommerce/link";
 import AdPromptForm from "./AdPromptForm";
 import CompanySettingsForm from "./CompanySettingsForm";
 import ShopImportPanel from "./ShopImportPanel";
+import ShopLinkAllPanel from "./ShopLinkAllPanel";
 
 export type SettingsSection = "bedrijf" | "advertentie" | "webshop";
 
@@ -25,7 +27,10 @@ export default async function SettingsPanel({ supabase, section }: { supabase: S
         ))}
       </nav>
       {section === "webshop" ? (
-        <ShopImportPanel />
+        <>
+          <ShopImportPanel />
+          <ShopLinkAllPanel unlinkedCount={await countUnlinkedStoves(supabase)} />
+        </>
       ) : section === "advertentie" ? (
         <AdPromptForm prompt={(await getAdPrompt(supabase)) ?? DEFAULT_AD_PROMPT} />
       ) : (

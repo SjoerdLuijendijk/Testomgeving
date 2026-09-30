@@ -62,6 +62,9 @@ products as stoves: one by its five-digit number ("Deze kachel importeren"), or 
   skips it entirely. The inventory shows "Koppelen" next to its Webshop checkbox; linking
   (`linkStoveToShop`, after a confirmation) enables the sync and updates the product right away.
   Until then, selling it in the app does not take it offline in the shop.
+  "Alles koppelen" in Instellingen → Webshop links all unlinked stoves after a confirmation, two per
+  server action call (`lib/woocommerce/link.ts`). A stove whose shop update fails stays linked and
+  shows "⚠ Opnieuw"; the run stops when a whole batch fails.
 - Details are parsed from the shop's global and product attributes (Merk, Staat kachel, Type kachel,
   Aansluiting, Vermogen, Harthoogte achter, Rendement, Energielabel, Garantie, ...). Values that do
   not make sense are left empty. The model is the product name without SKU prefix, type and brand,
