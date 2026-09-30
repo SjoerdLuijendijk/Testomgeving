@@ -66,8 +66,8 @@ Each stove has a "Webshop" checkbox (`shop_listed`) for the WooCommerce web shop
 "Marktplaats" (`marketplace_listed`) and "2dehands" (`secondhand_listed`, 2dehands.be) checkboxes,
 all off by default. When a stove sells out the database unticks all of them, and they cannot be
 ticked while it is sold out.
-Changes to a stove are pushed to the WooCommerce shop in the background; web shop orders do
-not report back yet. Configuration and field mapping: `docs/woocommerce-sync.md`. Marktplaats and
+Changes to a stove are pushed to the WooCommerce shop in the background, and a webhook takes shop
+changes (title, price, stock, attributes, orders, new products) back into the app. Configuration and field mapping: `docs/woocommerce-sync.md`. Marktplaats and
 2dehands have no integration; their checkboxes are reminders, with an AI-written ad text.
 
 ## Deleting stoves
