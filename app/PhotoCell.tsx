@@ -4,11 +4,10 @@ import { useState } from "react";
 import type { StovePhoto } from "../lib/stoves";
 import PhotoViewer from "./PhotoViewer";
 
-// The inventory shows only the main photo with a count badge; photos are managed in the edit dialog.
+// The inventory shows only the main photo; photos are managed in the edit dialog.
 export default function PhotoCell({ stoveNumber, photos }: { stoveNumber: number; photos: StovePhoto[] }) {
   const [viewIndex, setViewIndex] = useState<number | null>(null);
   const [mainPhoto] = photos;
-  const moreCount = photos.length - 1;
 
   if (!mainPhoto) {
     return (
@@ -32,7 +31,6 @@ export default function PhotoCell({ stoveNumber, photos }: { stoveNumber: number
       ) : (
         <span className="thumb-missing" aria-label="Foto niet beschikbaar">?</span>
       )}
-      {moreCount > 0 && <span className="thumb-count" aria-hidden="true">+{moreCount}</span>}
       <PhotoViewer stoveNumber={stoveNumber} photos={photos} index={viewIndex} onIndexChange={setViewIndex} />
     </span>
   );
