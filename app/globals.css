@@ -927,10 +927,12 @@ a {
   display: flex;
   gap: 4px;
   margin-top: 16px;
+  overflow-x: auto;
   border-bottom: 1px solid var(--line);
 }
 
 .sub-tabs a {
+  flex-shrink: 0;
   margin-bottom: -1px;
   padding: 10px 14px;
   border-bottom: 3px solid transparent;
@@ -947,6 +949,40 @@ a {
 .ad-prompt-count {
   margin: 0;
   font-size: 13px;
+  text-align: right;
+}
+
+/* Invoice list (Admin → Facturen) */
+
+.invoice-list {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.invoice-list[aria-busy="true"] {
+  opacity: 0.6;
+}
+
+.invoice-list table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.invoice-list th,
+.invoice-list td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.invoice-list th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.invoice-list .cell-amount {
   text-align: right;
 }
 

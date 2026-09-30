@@ -80,8 +80,7 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
           <InvoiceDialog stove={stove} />
           <MarketplaceAdDialog stoveNumber={stove.number} />
           <StoveInvoiceLinks invoices={stove.invoices} />
-          {/* Stoves with invoices cannot be deleted. */}
-          {stove.invoices.length === 0 && <DeleteStoveDialog stove={stove} />}
+          <DeleteStoveDialog stove={stove} />
         </span>
       </td>
       <td className="cell-toggle">

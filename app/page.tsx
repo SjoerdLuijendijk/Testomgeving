@@ -4,7 +4,7 @@ import { getKnownBrands, getStoves } from "../lib/stove-queries";
 import { signOut } from "./auth/actions";
 import AddStoveForm from "./AddStoveForm";
 import BrandLogo from "./BrandLogo";
-import SettingsPanel from "./SettingsPanel";
+import AdminPanel, { type AdminSection } from "./AdminPanel";
 import StoveTable from "./StoveTable";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,10 @@ type PageProps = {
 export default async function Page({ searchParams }: PageProps) {
   const { supabase, user, isMember } = await requireTeamMember();
   const { tab: requestedTab, sectie } = await searchParams;
-  const activeTab = requestedTab === "voorraad" || requestedTab === "instellingen" ? requestedTab : "toevoegen";
+  // "instellingen" is the tab's former name; its links opened the company details.
+  const activeTab = requestedTab === "voorraad" ? "voorraad" : requestedTab === "admin" || requestedTab === "instellingen" ? "admin" : "toevoegen";
+  const adminSection: AdminSection =
+    sectie === "bedrijf" || sectie === "advertentie" || sectie === "webshop" ? sectie : requestedTab === "instellingen" ? "bedrijf" : "facturen";
 
   return (
     <div className="app-shell">
@@ -26,7 +29,7 @@ export default async function Page({ searchParams }: PageProps) {
           <nav className="tabs" aria-label="Hoofdmenu">
             <Link href="/" aria-current={activeTab === "toevoegen" ? "page" : undefined}>Kachel toevoegen</Link>
             <Link href="/?tab=voorraad" aria-current={activeTab === "voorraad" ? "page" : undefined}>Voorraad</Link>
-            <Link href="/?tab=instellingen" aria-current={activeTab === "instellingen" ? "page" : undefined}>Instellingen</Link>
+            <Link href="/?tab=admin" aria-current={activeTab === "admin" ? "page" : undefined}>Admin</Link>
           </nav>
         )}
         <form action={signOut} className="account">
@@ -43,8 +46,8 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         ) : activeTab === "toevoegen" ? (
           <AddStoveForm brands={await getKnownBrands(supabase)} />
-        ) : activeTab === "instellingen" ? (
-          <SettingsPanel supabase={supabase} section={sectie === "advertentie" || sectie === "webshop" ? sectie : "bedrijf"} />
+        ) : activeTab === "admin" ? (
+          <AdminPanel supabase={supabase} section={adminSection} />
         ) : (
           <StoveTable stoves={await getStoves(supabase)} />
         )}

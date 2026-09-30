@@ -7,22 +7,19 @@ import { trashShopProduct } from "./woocommerce/remove";
 
 export type DeleteStoveResult = { ok: true } | { ok: false; error: string };
 
-// Postgres error code for a violated foreign key (the stove still has invoices).
+// Postgres error code for a violated foreign key. Invoices keep only the stove number since migration
+// 20260930230000; before it is applied, a stove with invoices still cannot be deleted.
 const FOREIGN_KEY_VIOLATION = "23503";
-const HAS_INVOICE = "Deze kachel heeft een factuur en kan daarom niet worden verwijderd.";
+const HAS_INVOICE = "Deze kachel heeft een factuur en kan pas worden verwijderd na de database-update.";
 
 export async function deleteStove(supabase: SupabaseClient, stoveNumber: number, { fromShop }: { fromShop: boolean }): Promise<DeleteStoveResult> {
-  const [stove, invoices, photos] = await Promise.all([
+  const [stove, photos] = await Promise.all([
     supabase.from("stoves").select("shop_product_id").eq("number", stoveNumber).maybeSingle(),
-    supabase.from("invoices").select("id", { count: "exact", head: true }).eq("stove_number", stoveNumber),
     supabase.from("stove_photos").select("path").eq("stove_number", stoveNumber),
   ]);
   if (stove.error) throw stove.error;
-  if (invoices.error) throw invoices.error;
   if (photos.error) throw photos.error;
   if (!stove.data) return { ok: false, error: "Deze kachel bestaat niet meer." };
-  // Checked before touching the shop, so a stove that cannot be deleted keeps its shop product.
-  if ((invoices.count ?? 0) > 0) return { ok: false, error: HAS_INVOICE };
 
   if (fromShop) {
     try {

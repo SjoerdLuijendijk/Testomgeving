@@ -50,7 +50,7 @@ trashed product is deleted permanently.
 Rule: nothing in the shop changes without an explicit action by a team member. The import only
 reads from the shop.
 
-Instellingen → Webshop (`lib/woocommerce/import.ts`, `import-mapping.ts`) takes over published
+Admin → Webshop (`lib/woocommerce/import.ts`, `import-mapping.ts`) takes over published
 products as stoves: one by its five-digit number ("Deze kachel importeren"), or all of them
 ("Alles importeren"):
 
@@ -62,7 +62,7 @@ products as stoves: one by its five-digit number ("Deze kachel importeren"), or 
   skips it entirely. The inventory shows "Koppelen" next to its Webshop checkbox; linking
   (`linkStoveToShop`, after a confirmation) enables the sync and updates the product right away.
   Until then, selling it in the app does not take it offline in the shop.
-  "Alles koppelen" in Instellingen → Webshop links all unlinked stoves after a confirmation, two per
+  "Alles koppelen" in Admin → Webshop links all unlinked stoves after a confirmation, two per
   server action call (`lib/woocommerce/link.ts`). A stove whose shop update fails stays linked and
   shows "⚠ Opnieuw"; the run stops when a whole batch fails.
 - Details are parsed from the shop's global and product attributes (Merk, Staat kachel, Type kachel,
