@@ -45,8 +45,15 @@ export const LISTING_CHANNELS = {
     column: "marketplace_listed",
     field: "marketplaceListed",
     label: "Marktplaats",
-    description: "Plaatsen op Marktplaats en 2dehands",
-    target: "op Marktplaats en 2dehands",
+    description: "Plaatsen op Marktplaats",
+    target: "op Marktplaats",
+  },
+  secondhand: {
+    column: "secondhand_listed",
+    field: "secondhandListed",
+    label: "2dehands",
+    description: "Plaatsen op 2dehands.be",
+    target: "op 2dehands.be",
   },
 } as const;
 export type ListingChannel = keyof typeof LISTING_CHANNELS;
@@ -87,7 +94,10 @@ export type Stove = {
   shopSyncError: string | null;
   /** False for stoves imported from the shop until a team member links them: the app then leaves the shop alone. */
   shopSyncEnabled: boolean;
+  /** The linked WooCommerce product, once the stove has been in the shop. */
+  shopProductId: number | null;
   marketplaceListed: boolean;
+  secondhandListed: boolean;
   /** New stove sold without stock; always available, stock is not tracked. */
   madeToOrder: boolean;
   /** Units in stock; 0 exactly when soldAt is set. */

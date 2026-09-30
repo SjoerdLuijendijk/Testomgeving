@@ -32,7 +32,12 @@ export default function EditStoveDialog({ stove, brands }: { stove: Stove; brand
   const titleId = `edit-stove-${stove.number}`;
   return (
     <>
-      <button type="button" className="text-button" onClick={open}>Bewerken</button>
+      <button type="button" className="icon-button" onClick={open} title="Bewerken" aria-label={`Kachel ${stove.number} bewerken`}>
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+      </button>
       <dialog ref={dialogRef} className="edit-dialog" aria-labelledby={titleId}>
         <form key={formKey} onSubmit={handleSubmit} className="form-stack">
           <h2 id={titleId}>Kachel {stove.number} bewerken</h2>

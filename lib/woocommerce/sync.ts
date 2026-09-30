@@ -15,7 +15,7 @@ const UNKNOWN_ERROR = "Het bijwerken van de webshop is mislukt. Probeer het opni
 // WooCommerce's error code when the SKU is already used by another product.
 const DUPLICATE_SKU = "product_invalid_sku";
 
-async function findProduct(config: Config, productId: number | null, sku: string): Promise<ShopProduct | null> {
+export async function findProduct(config: Config, productId: number | null, sku: string): Promise<ShopProduct | null> {
   if (productId) {
     try {
       const product = await wooRequest<ShopProduct>(config, "GET", `/products/${productId}`);

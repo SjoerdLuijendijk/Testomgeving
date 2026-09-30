@@ -236,6 +236,37 @@ a {
   font-weight: 600;
 }
 
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: #f6e7e1;
+}
+
+.icon-button:focus-visible {
+  outline: 3px solid #f0a37f;
+  outline-offset: 2px;
+}
+
+.icon-button--danger {
+  color: #b3261e;
+}
+
+.icon-button--danger:hover {
+  background: #fdecea;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -1668,4 +1699,17 @@ a {
 .link-shop-button:disabled {
   cursor: progress;
   opacity: 0.7;
+}
+
+.delete-form {
+  margin-top: 0;
+}
+
+.delete-form p {
+  margin: 0;
+}
+
+/* .app-dialog p mutes text; keep warnings in the error colour. */
+.app-dialog .field-error {
+  color: var(--sold);
 }

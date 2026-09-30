@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { requireTeamMember } from "../lib/auth";
 import { refreshStoredAd } from "../lib/marketplace-ad-store";
+import { deleteStove } from "../lib/stove-delete";
 import { parseStockQuantity, parseStoveFields } from "../lib/stove-fields";
 import { LISTING_CHANNELS, PHOTOS_BUCKET, type ListingChannel } from "../lib/stoves";
 import { readPhotos, storePhotos, UserError } from "../lib/stove-photos";
@@ -174,6 +175,24 @@ export async function deleteStovePhoto(photoId: number): Promise<ActionResult> {
   syncShopLater(supabase, photo.stove_number);
   revalidatePath("/");
   return { ok: true };
+}
+
+// Deletes a stove with its photos. With fromShop, its web shop product is moved to the WordPress
+// trash first; if that fails, nothing is deleted. Stoves with invoices cannot be deleted.
+export async function deleteStoveAction(stoveNumber: number, fromShop: boolean): Promise<ActionResult> {
+  if (!isPositiveId(stoveNumber) || typeof fromShop !== "boolean") return { ok: false, error: "Onbekende kachel." };
+
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+
+  try {
+    const result = await deleteStove(supabase, stoveNumber, { fromShop });
+    revalidatePath("/");
+    return result;
+  } catch (error) {
+    console.error("Deleting stove failed", { stoveNumber, code: (error as { code?: unknown })?.code });
+    return { ok: false, error: errorMessage(error) };
+  }
 }
 
 // Links an imported stove to its web shop product and updates the product right away. From then on

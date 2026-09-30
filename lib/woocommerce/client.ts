@@ -52,7 +52,7 @@ function describeStatus(status: number, code: string | undefined) {
   return `De webshop weigerde de wijziging${code ? ` (${code})` : ""}.`;
 }
 
-export function wooRequest<T>(config: Config, method: "GET" | "POST" | "PUT", path: string, body?: unknown): Promise<T> {
+export function wooRequest<T>(config: Config, method: "GET" | "POST" | "PUT" | "DELETE", path: string, body?: unknown): Promise<T> {
   return request<T>(`${config.baseUrl}${path}`, method, { Authorization: config.authorization }, body);
 }
 
@@ -61,7 +61,7 @@ export function storeApiRequest<T>(config: Config, path: string): Promise<T> {
   return request<T>(`${config.storeUrl}${path}`, "GET", {});
 }
 
-async function request<T>(url: string, method: "GET" | "POST" | "PUT", auth: Record<string, string>, body?: unknown): Promise<T> {
+async function request<T>(url: string, method: "GET" | "POST" | "PUT" | "DELETE", auth: Record<string, string>, body?: unknown): Promise<T> {
   let response: Response;
   try {
     response = await fetch(url, {

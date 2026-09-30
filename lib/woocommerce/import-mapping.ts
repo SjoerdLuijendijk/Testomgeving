@@ -65,6 +65,7 @@ export type ImportedStoveRow = {
   stock_quantity: number;
   shop_listed: true;
   marketplace_listed: false;
+  secondhand_listed: false;
   shop_product_id: number;
   shop_sync_enabled: false;
 };
@@ -226,6 +227,7 @@ export function mapShopProduct(product: ShopProductForImport): ImportMapping {
       stock_quantity: madeToOrder ? 1 : stock,
       shop_listed: true,
       marketplace_listed: false,
+      secondhand_listed: false,
       shop_product_id: product.id,
       shop_sync_enabled: false,
     },

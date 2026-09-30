@@ -60,11 +60,19 @@ time, so concurrent sales cannot overwrite each other.
 ## Web shop
 
 Each stove has a "Webshop" checkbox (`shop_listed`) for the WooCommerce web shop and a
-"Marktplaats" checkbox (`marketplace_listed`) for Marktplaats and 2dehands, both off by default.
-When a stove sells out the database unticks both, and they cannot be ticked while it is sold out.
+"Marktplaats" (`marketplace_listed`) and "2dehands" (`secondhand_listed`, 2dehands.be) checkboxes,
+all off by default. When a stove sells out the database unticks all of them, and they cannot be
+ticked while it is sold out.
 Changes to a stove are pushed to the WooCommerce shop in the background; web shop orders do
 not report back yet. Configuration and field mapping: `docs/woocommerce-sync.md`. Marktplaats and
-2dehands have no integration; the "Marktplaats" checkbox is a reminder, with an AI-written ad text.
+2dehands have no integration; their checkboxes are reminders, with an AI-written ad text.
+
+## Deleting stoves
+
+The bin icon in the inventory deletes a stove with its photos (not possible once it has an
+invoice). The dialog offers to move its web shop product to the WordPress trash as well; if that
+fails, nothing is deleted. Marktplaats and 2dehands ads must be removed by hand; the dialog reminds
+when those checkboxes are ticked.
 
 ## Invoices
 
