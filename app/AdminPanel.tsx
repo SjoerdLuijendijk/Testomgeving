@@ -9,6 +9,7 @@ import CompanySettingsForm from "./CompanySettingsForm";
 import InvoiceList from "./InvoiceList";
 import ShopImportPanel from "./ShopImportPanel";
 import ShopLinkAllPanel from "./ShopLinkAllPanel";
+import ShopStockPanel from "./ShopStockPanel";
 
 export type AdminSection = "facturen" | "bedrijf" | "advertentie" | "webshop";
 
@@ -32,6 +33,7 @@ export default async function AdminPanel({ supabase, section }: { supabase: Supa
         <>
           <ShopImportPanel />
           <ShopLinkAllPanel unlinkedCount={await countUnlinkedStoves(supabase)} />
+          <ShopStockPanel />
         </>
       ) : section === "advertentie" ? (
         <AdPromptForm prompt={(await getAdPrompt(supabase)) ?? DEFAULT_AD_PROMPT} />

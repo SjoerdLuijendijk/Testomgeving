@@ -124,6 +124,15 @@ below), so they are only lost when the app is changed at the same moment.
   wins, which may briefly be the older data until the next change.
 - Background syncs finish after the page has refreshed; a failure shows up on the next page load.
 
+## Taking over the shop's stock by hand
+
+Admin → Webshop → "Voorraad uit webshop overnemen" (`lib/woocommerce/stock-refresh.ts`) sets the
+stock of every stove with a shop product to the shop's stock in one go, with the same rules as the
+webhook (a stove at 0 becomes sold; "op bestelling" in the shop makes it made to order). It only reads
+from the shop, runs with the team member's own login and changes nothing else of the stove. Stoves
+with a pending shop error (⚠) are skipped, because the shop has not received their latest change yet;
+trashed or deleted products are skipped as well. Useful after the webhook has been off for a while.
+
 ## Shop changes back to the app (webhook)
 
 `app/api/woocommerce/webhook/route.ts` receives WooCommerce webhooks at
@@ -158,7 +167,7 @@ after the signature check and only writes the columns above plus the import of n
 
 1. Vercel → Settings → Environment Variables, Production only (staging shares the database, so one
    receiver is enough): `SUPABASE_SECRET_KEY` (Supabase → Project Settings → API Keys → Secret keys;
-   create one named `woocommerce-webhook`) and `WOOCOMMERCE_WEBHOOK_SECRET` (a long random value).
+   create one named `woocommerce_webhook`) and `WOOCOMMERCE_WEBHOOK_SECRET` (a long random value).
    Redeploy afterwards.
 2. WordPress → WooCommerce → Settings → Advanced → Webhooks: add four webhooks, each with status
    Active, delivery URL `https://bouwstream.nl/api/woocommerce/webhook`, the same secret as
