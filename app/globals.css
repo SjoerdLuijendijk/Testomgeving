@@ -119,11 +119,46 @@ a {
   color: white;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+/* Gear icon with a small caption, top right of the header. */
+.admin-link {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 44px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.admin-link:hover {
+  background: #f6e7e1;
+}
+
+.admin-link:focus-visible {
+  outline: 3px solid #f0a37f;
+  outline-offset: 2px;
+}
+
+.admin-link[aria-current="page"] {
+  color: var(--accent);
+}
+
 .account {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-left: auto;
   font-size: 14px;
 }
 
