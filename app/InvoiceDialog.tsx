@@ -113,7 +113,13 @@ export default function InvoiceDialog({ stove }: { stove: Stove }) {
   const titleId = `invoice-title-${stove.number}`;
   return (
     <>
-      <button type="button" className="text-button" onClick={open}>Factuur</button>
+      <button type="button" className="icon-button" onClick={open} title="Factuur maken" aria-label={`Factuur maken voor kachel ${stove.number}`}>
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+          <path d="M14 2v6h6" />
+          <path d="M8 13h8M8 17h5" />
+        </svg>
+      </button>
       <dialog ref={dialogRef} className="invoice-dialog" aria-labelledby={titleId} onClose={handleClose}>
         <div className="invoice-dialog-header">
           <h2 id={titleId}>Factuur kachel {stove.number}</h2>

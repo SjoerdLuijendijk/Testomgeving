@@ -57,14 +57,19 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       <td data-label="Toegevoegd" className="cell-detail muted">
         <time dateTime={stove.createdAt}>{DATE_FORMAT.format(new Date(stove.createdAt))}</time>
       </td>
+      {/* Each action has its own column so the icons line up from row to row. */}
       <td className="cell-detail cell-actions">
-        <span className="row-actions">
-          <EditStoveDialog stove={stove} brands={brands} />
-          <InvoiceDialog stove={stove} />
-          <MarketplaceAdDialog stoveNumber={stove.number} />
-          <StoveInvoiceLinks invoices={stove.invoices} />
-          <DeleteStoveDialog stove={stove} />
-        </span>
+        <EditStoveDialog stove={stove} brands={brands} />
+      </td>
+      <td className="cell-detail cell-actions">
+        <InvoiceDialog stove={stove} />
+        <StoveInvoiceLinks invoices={stove.invoices} />
+      </td>
+      <td className="cell-detail cell-actions">
+        <MarketplaceAdDialog stoveNumber={stove.number} />
+      </td>
+      <td className="cell-detail cell-actions">
+        <DeleteStoveDialog stove={stove} />
       </td>
       <td className="cell-toggle">
         <button
