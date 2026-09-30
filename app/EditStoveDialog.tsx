@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import type { Stove } from "../lib/stoves";
 import { updateStove } from "./actions";
 import StoveFields from "./StoveFields";
+import StovePhotoManager from "./StovePhotoManager";
 
 export default function EditStoveDialog({ stove, brands }: { stove: Stove; brands: string[] }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -41,6 +42,7 @@ export default function EditStoveDialog({ stove, brands }: { stove: Stove; brand
       <dialog ref={dialogRef} className="edit-dialog" aria-labelledby={titleId}>
         <form key={formKey} onSubmit={handleSubmit} className="form-stack">
           <h2 id={titleId}>Kachel {stove.number} bewerken</h2>
+          <StovePhotoManager stoveNumber={stove.number} photos={stove.photos} />
           <StoveFields brands={brands} stove={stove} />
           {error && <p className="field-error" role="alert">{error}</p>}
           <div className="button-row dialog-actions">

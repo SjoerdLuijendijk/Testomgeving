@@ -8,8 +8,9 @@ type PhotoViewerProps = {
   photos: StovePhoto[];
   index: number | null;
   onIndexChange: (index: number | null) => void;
-  onDelete: (index: number) => void;
-  deleting: boolean;
+  /** Without it the viewer only shows the photos. */
+  onDelete?: (index: number) => void;
+  deleting?: boolean;
 };
 
 // Full-size photo view inside the app, so photos open instead of downloading.
@@ -46,9 +47,11 @@ export default function PhotoViewer({ stoveNumber, photos, index, onIndexChange,
           <div className="photo-viewer-bar">
             <span>Kachel {stoveNumber} · foto {index + 1} van {count}</span>
             <span className="photo-viewer-actions">
-              <button type="button" className="viewer-button viewer-button--text" onClick={() => onDelete(index)} disabled={deleting}>
-                Verwijderen
-              </button>
+              {onDelete && (
+                <button type="button" className="viewer-button viewer-button--text" onClick={() => onDelete(index)} disabled={deleting}>
+                  Verwijderen
+                </button>
+              )}
               <button type="button" className="viewer-button" onClick={() => onIndexChange(null)} aria-label="Sluiten" autoFocus>×</button>
             </span>
           </div>
