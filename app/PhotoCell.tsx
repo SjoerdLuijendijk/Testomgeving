@@ -20,32 +20,51 @@ export default function PhotoCell({ stoveNumber, photos }: { stoveNumber: number
     });
   }
 
+  // Resolves true when the photo was deleted.
   async function remove(photoId: number) {
     const confirmed = await confirm({ title: "Foto verwijderen?", message: "Dit kan niet ongedaan worden gemaakt.", confirmLabel: "Verwijderen", danger: true });
-    if (!confirmed) return;
-    startTransition(async () => {
-      const result = await deleteStovePhoto(photoId);
-      if (!result.ok) await notify(result.error);
+    if (!confirmed) return false;
+    return new Promise<boolean>((resolve) => {
+      startTransition(async () => {
+        const result = await deleteStovePhoto(photoId);
+        if (!result.ok) await notify(result.error);
+        resolve(result.ok);
+      });
     });
   }
 
+  // After deleting from the viewer, stay on the photo that took its place, or close when none are left.
+  async function removeFromViewer(index: number) {
+    if (!(await remove(photos[index].id))) return;
+    const remaining = photos.length - 1;
+    setViewIndex(remaining === 0 ? null : Math.min(index, remaining - 1));
+  }
+
+  // Only the main photo is shown and downloaded; the others load one at a time in the viewer.
+  const [mainPhoto] = photos;
+  const moreCount = photos.length - 1;
+
   return (
     <div className="photo-cell" aria-busy={pending}>
-      {photos.map((photo, index) => (
-        <span key={photo.id} className="thumb">
-          {photo.url ? (
-            <button type="button" className="thumb-open" onClick={() => setViewIndex(index)} aria-label={`Foto ${index + 1} bekijken`}>
-              {/* The first photo is the preview on collapsed phone cards, so it loads right away. */}
-              <img src={photo.url} alt="" loading={index === 0 ? "eager" : "lazy"} />
+      {mainPhoto && (
+        <span className="thumb">
+          {mainPhoto.url ? (
+            <button type="button" className="thumb-open" onClick={() => setViewIndex(0)} aria-label="Hoofdfoto bekijken">
+              <img src={mainPhoto.url} alt="" />
             </button>
           ) : (
             <span className="thumb-missing" aria-label="Foto niet beschikbaar">?</span>
           )}
-          <button type="button" className="remove-photo" onClick={() => remove(photo.id)} disabled={pending} aria-label={`Foto ${index + 1} verwijderen`}>×</button>
+          <button type="button" className="remove-photo" onClick={() => remove(mainPhoto.id)} disabled={pending} aria-label="Hoofdfoto verwijderen">×</button>
         </span>
-      ))}
+      )}
+      {moreCount > 0 && (
+        <button type="button" className="thumb-more" onClick={() => setViewIndex(1)} aria-label={`Nog ${moreCount} foto's bekijken`}>
+          +{moreCount}
+        </button>
+      )}
       <PhotoPickerButton label={pending ? "…" : "＋📷"} ariaLabel="Foto's toevoegen" onPhotos={upload} className="thumb-add" disabled={pending} />
-      <PhotoViewer stoveNumber={stoveNumber} photos={photos} index={viewIndex} onIndexChange={setViewIndex} />
+      <PhotoViewer stoveNumber={stoveNumber} photos={photos} index={viewIndex} onIndexChange={setViewIndex} onDelete={removeFromViewer} deleting={pending} />
     </div>
   );
 }

@@ -644,6 +644,18 @@ a {
   background: rgb(255 255 255 / 24%);
 }
 
+.viewer-button--text {
+  width: auto;
+  padding: 0 16px;
+  border-radius: 22px;
+  font-size: 15px;
+}
+
+.photo-viewer-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .thumb-open {
   display: block;
   width: 100%;
@@ -1237,6 +1249,25 @@ a {
   line-height: 20px;
 }
 
+.thumb-more {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: var(--line);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: zoom-in;
+}
+
+.thumb-more:hover {
+  background: #fdf1ec;
+}
+
 .thumb-add {
   display: grid;
   place-items: center;
@@ -1386,9 +1417,14 @@ a {
   .stove-table .thumb,
   .stove-table .thumb img,
   .stove-table .thumb-missing,
+  .stove-table .thumb-more,
   .stove-table .thumb-add {
     width: 30px;
     height: 30px;
+  }
+
+  .stove-table .thumb-more {
+    font-size: 12px;
   }
 
   .stove-table .thumb .remove-photo {
