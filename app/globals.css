@@ -76,7 +76,7 @@ a {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 24px;
-  padding: 12px max(16px, calc((100vw - 1200px) / 2));
+  padding: 12px 16px;
   background: var(--paper);
   border-bottom: 1px solid var(--line);
 }
@@ -180,6 +180,11 @@ a {
 }
 
 @media (min-width: 720px) {
+  /* Full width, so the logo sits top left and lines up with the stock table. */
+  .site-header {
+    padding-inline: 24px;
+  }
+
   .tabs {
     order: 0;
     width: auto;
