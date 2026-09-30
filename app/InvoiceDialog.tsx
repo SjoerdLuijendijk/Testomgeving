@@ -132,7 +132,7 @@ export default function InvoiceDialog({ stove }: { stove: Stove }) {
         ) : company === null ? (
           <div className="notice">
             <strong>Bedrijfsgegevens ontbreken</strong>
-            <p>Vul eerst je bedrijfsgegevens in bij <Link href="/?tab=instellingen">Instellingen</Link>; die komen op de factuur.</p>
+            <p>Vul eerst je bedrijfsgegevens in bij <Link href="/?tab=admin&sectie=bedrijf">Admin → Bedrijfsgegevens</Link>; die komen op de factuur.</p>
           </div>
         ) : (
           <div className="invoice-layout">

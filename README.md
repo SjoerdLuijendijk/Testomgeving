@@ -70,8 +70,8 @@ not report back yet. Configuration and field mapping: `docs/woocommerce-sync.md`
 
 ## Deleting stoves
 
-The bin icon in the inventory deletes a stove with its photos (not possible once it has an
-invoice). The dialog offers to move its web shop product to the WordPress trash as well; if that
+The bin icon in the inventory deletes a stove with its photos. Its invoices are kept: they only
+record the stove number (migration `20260930230000_keep_invoices_of_deleted_stoves.sql`). The dialog offers to move its web shop product to the WordPress trash as well; if that
 fails, nothing is deleted. Marktplaats and 2dehands ads must be removed by hand; the dialog reminds
 when those checkboxes are ticked.
 
@@ -81,10 +81,11 @@ Each stove has a "Factuur" button that opens a dialog for customer details and i
 (unit prices incl. VAT, 21 %, 9 % or 0 % per line) with a live draft PDF preview. "Factuur maken"
 calls the `create_invoice()` database function, which stores the invoice and its lines in one
 transaction and assigns the next number of the year (2026-0001, 2026-0002, ...). The seller
-details from Instellingen are copied onto the invoice.
+details from Admin → Bedrijfsgegevens are copied onto the invoice.
 
 Invoices cannot be changed or deleted after creation; corrections need a credit invoice. PDFs are
-generated in the browser with `pdf-lib` and can be downloaded again from the inventory.
+generated in the browser with `pdf-lib` and can be downloaded again from the inventory or from
+Admin → Facturen, which lists all invoices, including those of deleted stoves.
 
 ## Marktplaats ad text
 
@@ -100,7 +101,7 @@ There is no automatic sync with Marktplaats or 2dehands: posting and updating th
 requires a Marktplaats Pro (business) account and a certified API partner. Ads are copied from the
 app and updated by hand on both sites.
 
-The prompt is editable under Instellingen → Advertentie (`ad_settings`, team members only); the
+The prompt is editable under Admin → Advertentie (`ad_settings`, team members only); the
 built-in default in `lib/ad-prompt.ts` is used until it is saved. Fixed guard rules (use only the
 given facts, plain text) are always appended in `lib/marketplace-ad.ts`. Changing the prompt or the
 company details does not regenerate existing ads.

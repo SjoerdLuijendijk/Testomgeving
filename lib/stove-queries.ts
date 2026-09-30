@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { signPhotoUrls } from "./stove-photos";
-import type { Stove, StoveDetails } from "./stoves";
+import type { Stove, StoveDetails, StoveInvoice } from "./stoves";
 
 const DETAIL_COLUMNS =
   "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, product_name, stove_type, power_kw, min_power_kw, max_power_kw, weight_kg, flue_center_height_cm, external_air_supply, new_firebox, thermostat, efficiency_percent, energy_label, warranty_years, material, description, shop_listed, shop_sync_error, shop_sync_enabled, shop_product_id, marketplace_listed, secondhand_listed, made_to_order, stock_quantity, sold_at, created_at";
@@ -84,19 +84,30 @@ function toStoveDetails(row: DetailsRow): StoveDetails {
 }
 
 export async function getStoves(supabase: SupabaseClient): Promise<Stove[]> {
-  const { data, error } = await supabase
-    .from("stoves")
-    .select(`${DETAIL_COLUMNS}, stove_photos (id, path), invoices (id, invoice_number)`)
-    .order("number", { ascending: false })
-    .order("id", { referencedTable: "stove_photos", ascending: true })
-    .order("id", { referencedTable: "invoices", ascending: true });
-  if (error) throw error;
+  // Invoices are fetched separately: they only record the stove number, so they outlive a deleted stove.
+  const [stoves, invoices] = await Promise.all([
+    supabase
+      .from("stoves")
+      .select(`${DETAIL_COLUMNS}, stove_photos (id, path)`)
+      .order("number", { ascending: false })
+      .order("id", { referencedTable: "stove_photos", ascending: true }),
+    supabase.from("invoices").select("id, invoice_number, stove_number").order("id", { ascending: true }),
+  ]);
+  if (stoves.error) throw stoves.error;
+  if (invoices.error) throw invoices.error;
 
-  const urlByPath = await signPhotoUrls(supabase, data.flatMap((stove) => stove.stove_photos.map((photo) => photo.path)));
+  const invoicesByStove = new Map<number, StoveInvoice[]>();
+  for (const invoice of invoices.data) {
+    const list = invoicesByStove.get(invoice.stove_number) ?? [];
+    list.push({ id: invoice.id, number: invoice.invoice_number });
+    invoicesByStove.set(invoice.stove_number, list);
+  }
 
-  return data.map((stove) => ({
+  const urlByPath = await signPhotoUrls(supabase, stoves.data.flatMap((stove) => stove.stove_photos.map((photo) => photo.path)));
+
+  return stoves.data.map((stove) => ({
     ...toStoveDetails(stove as DetailsRow),
-    invoices: stove.invoices.map((invoice) => ({ id: invoice.id, number: invoice.invoice_number })),
+    invoices: invoicesByStove.get(stove.number) ?? [],
     photos: stove.stove_photos.map((photo) => ({ id: photo.id, url: urlByPath.get(photo.path) ?? null })),
   }));
 }

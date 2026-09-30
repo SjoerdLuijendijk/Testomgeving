@@ -37,3 +37,30 @@ export async function getInvoice(supabase: SupabaseClient, id: number): Promise<
     lines: data.invoice_lines.map(({ description, quantity, unit_price_cents, vat_rate }) => ({ description, quantity, unit_price_cents, vat_rate })),
   };
 }
+
+export type InvoiceSummary = {
+  id: number;
+  number: string;
+  issueDate: string;
+  stoveNumber: number;
+  customerName: string;
+  totalCents: number;
+};
+
+// All invoices, newest first. Invoices outlive their stove, so this does not depend on the stoves table.
+export async function listInvoices(supabase: SupabaseClient): Promise<InvoiceSummary[]> {
+  const { data, error } = await supabase
+    .from("invoices")
+    .select("id, invoice_number, issue_date, stove_number, customer_name, invoice_lines (quantity, unit_price_cents)")
+    .order("id", { ascending: false });
+  if (error) throw error;
+
+  return data.map((invoice) => ({
+    id: invoice.id,
+    number: invoice.invoice_number,
+    issueDate: invoice.issue_date,
+    stoveNumber: invoice.stove_number,
+    customerName: invoice.customer_name,
+    totalCents: invoice.invoice_lines.reduce((sum, line) => sum + line.quantity * line.unit_price_cents, 0),
+  }));
+}
