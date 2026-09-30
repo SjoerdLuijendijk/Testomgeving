@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { formatPrice } from "../lib/price";
-import { CONDITION_LABELS, FLUE_OUTLET_LABELS, LISTING_CHANNELS, STOVE_TYPE_LABELS, type ListingChannel, type Stove } from "../lib/stoves";
+import { formatDimensions, formatFlue, formatType, MISSING } from "../lib/stove-display";
+import { CONDITION_LABELS, LISTING_CHANNELS, type ListingChannel, type Stove } from "../lib/stoves";
 import DeleteStoveDialog from "./DeleteStoveDialog";
 import EditStoveDialog from "./EditStoveDialog";
 import InvoiceDialog from "./InvoiceDialog";
@@ -16,23 +17,6 @@ import StockControl from "./StockControl";
 import StoveInvoiceLinks from "./StoveInvoiceLinks";
 
 const DATE_FORMAT = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short", year: "numeric" });
-const MISSING = "—";
-
-function formatDimensions({ heightCm, widthCm, depthCm }: Stove) {
-  return heightCm && widthCm && depthCm ? `${heightCm} × ${widthCm} × ${depthCm} cm` : MISSING;
-}
-
-const KW_FORMAT = new Intl.NumberFormat("nl-NL", { maximumFractionDigits: 1 });
-
-function formatType({ stoveType, powerKw }: Stove) {
-  const parts = [stoveType && STOVE_TYPE_LABELS[stoveType], powerKw && `${KW_FORMAT.format(powerKw)} kW`].filter(Boolean);
-  return parts.length > 0 ? parts.join(", ") : MISSING;
-}
-
-function formatFlue({ flueOutlet, flueDiameterMm }: Stove) {
-  const parts = [flueOutlet && FLUE_OUTLET_LABELS[flueOutlet], flueDiameterMm && `Ø${flueDiameterMm} mm`].filter(Boolean);
-  return parts.length > 0 ? parts.join(", ") : MISSING;
-}
 
 // On phones the row is a compact card; "cell-detail" cells only show once the card is expanded.
 export default function StoveRow({ stove, brands }: { stove: Stove; brands: string[] }) {

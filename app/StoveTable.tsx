@@ -3,25 +3,17 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { formatPrice } from "../lib/price";
+import { kindOf, unitsOf, type StoveKind as Kind } from "../lib/stove-display";
 import { DEFAULT_SORT, nextSort, sortStoves, type SortKey } from "../lib/stove-sort";
 import { LISTING_CHANNELS, type ListingChannel, type Stove } from "../lib/stoves";
 import SortableHeader from "./SortableHeader";
+import StockPrintList from "./StockPrintList";
 import StoveRow from "./StoveRow";
 
-type Kind = "used" | "new" | "order";
 type Filter = "available" | "sold";
 
 const KIND_LABELS: Record<Kind, string> = { used: "Gereviseerd", new: "Nieuw", order: "Op bestelling" };
 const FILTER_LABELS: Record<Filter, string> = { available: "Te koop", sold: "Verkocht" };
-
-// Stoves registered before the condition field existed are treated as used.
-function kindOf(stove: Stove): Kind {
-  if (stove.condition !== "new") return "used";
-  return stove.madeToOrder ? "order" : "new";
-}
-
-// Units a row stands for: its stock, or the single sold unit once sold out.
-const unitsOf = (stove: Stove) => (stove.soldAt ? 1 : stove.stockQuantity);
 
 function matchesSearch(stove: Stove, query: string) {
   if (!query) return true;
@@ -77,8 +69,12 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
 
   return (
     <section aria-labelledby="stock-title">
+      <StockPrintList stoves={stoves} />
       <div className="stock-toolbar">
         <h1 id="stock-title">Voorraad</h1>
+        <button type="button" className="secondary-button" onClick={() => window.print()} disabled={stoves.length === 0}>
+          Afdrukken
+        </button>
         <div className="kind-tabs" role="group" aria-label="Soort kachel">
           {(Object.keys(KIND_LABELS) as Kind[]).map((key) => (
             <button key={key} type="button" aria-pressed={kind === key} onClick={() => setKind(key)}>

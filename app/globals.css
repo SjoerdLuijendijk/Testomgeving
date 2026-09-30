@@ -1785,3 +1785,102 @@ a {
 .app-dialog .field-error {
   color: var(--sold);
 }
+
+/* Stock print list: hidden on screen; when printing it replaces the whole page (A4 landscape). */
+.print-stock {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+
+  body {
+    background: white;
+  }
+
+  .site-header,
+  .page-main > section > :not(.print-stock) {
+    display: none !important;
+  }
+
+  .app-shell,
+  .page-main {
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+  }
+
+  .print-stock {
+    display: block;
+    color: black;
+    font-size: 10pt;
+  }
+
+  .print-stock header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6mm;
+  }
+
+  .print-stock h1 {
+    margin: 0;
+    font-size: 16pt;
+  }
+
+  .print-stock header p {
+    margin: 0;
+  }
+
+  .print-stock h2 {
+    margin: 0 0 3mm;
+    font-size: 13pt;
+  }
+
+  .print-stock h2 span {
+    font-weight: normal;
+  }
+
+  .print-section + .print-section {
+    break-before: page;
+  }
+
+  .print-stock table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .print-stock th,
+  .print-stock td {
+    padding: 1.5mm 2mm;
+    border-bottom: 0.5pt solid #999;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .print-stock th {
+    border-bottom: 1pt solid black;
+  }
+
+  .print-stock thead {
+    display: table-header-group;
+  }
+
+  .print-stock tr {
+    break-inside: avoid;
+  }
+
+  .print-stock tfoot td {
+    border-top: 1pt solid black;
+    border-bottom: 0;
+    font-weight: bold;
+  }
+
+  .print-stock .cell-numeric {
+    text-align: right;
+  }
+}
