@@ -37,7 +37,7 @@ Development unless testing the sync on purpose.
 
 ## Matching
 
-The six-digit stove number is the product SKU. The product is found by the stored
+The stove number is the product SKU. The product is found by the stored
 `shop_product_id`, else by SKU; otherwise it is created. If two syncs race to create it,
 WooCommerce rejects the duplicate SKU and the second sync updates the first one's product.
 A product in the WordPress trash counts as deleted: it is not updated (which would restore it), and
@@ -55,8 +55,10 @@ products as stoves: one by its five-digit number ("Deze kachel importeren"), or 
 ("Alles importeren"):
 
 - A stove keeps its five-digit shop SKU as its stove number (e.g. 26118), which is also on the
-  stove itself. The database allows explicit numbers only in the five-digit range; six-digit numbers
-  stay assigned by the sequence (migration `20260930170000_allow_shop_stove_numbers.sql`).
+  stove itself. The database allows explicit numbers only in the five-digit range. Stoves added in
+  the app get the highest five-digit number ever used plus one, so they continue the shop's
+  numbering (migration `20260930233000_continue_shop_stove_numbers.sql`). A number that exists only
+  in the shop and not yet in the app can still be handed out; the sync then reports the duplicate SKU.
 - The stove records its product (`shop_product_id`, `shop_listed`) but starts **unlinked**
   (`shop_sync_enabled = false`, migration `20260930190000_add_shop_sync_enabled.sql`): the sync
   skips it entirely. The inventory shows "Koppelen" next to its Webshop checkbox; linking
