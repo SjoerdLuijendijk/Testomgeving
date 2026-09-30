@@ -29,11 +29,12 @@ At the beginning of every new working session, or after a substantial pause:
 1. Read this AGENTS.md completely.
 2. Read any relevant project documentation, including README.md and other instruction files.
 3. Inspect the repository structure when necessary.
-4. Run `git status`.
-5. Identify uncommitted changes before editing anything.
-6. Do not overwrite, discard, or revert existing work unless explicitly instructed.
-7. Report unexpected files, uncommitted changes, failed checks, unclear repository state, or possible conflicts before making risky changes.
-8. Briefly confirm in Dutch that the instructions have been read and that you understand the current repository state.
+4. Run `git fetch` and `git status`; if the current branch is behind its remote and the working tree allows it, update it with `git pull --ff-only`.
+5. Read the recent session logs as described in Session Log below.
+6. Identify uncommitted changes before editing anything.
+7. Do not overwrite, discard, or revert existing work unless explicitly instructed.
+8. Report unexpected files, uncommitted changes, failed checks, unclear repository state, or possible conflicts before making risky changes.
+9. Briefly confirm in Dutch that the instructions have been read and that you understand the current repository state, including relevant open items from the session logs.
 
 Do not perform broad repository exploration when the necessary context is already known. Gather only the information required for the task.
 
@@ -323,6 +324,15 @@ For changes involving authentication, authorization, database access, storage, u
 - dependency and supply-chain risk
 
 Security is part of implementation, not an optional later step.
+
+## Session Log
+
+The user works on several computers. `docs/log/` is the shared logbook that tells every session what happened elsewhere; its format is described in `docs/log/README.md`.
+
+- Reading (at session start): after `git fetch`, read the logs of the last 7 days that exist on any remote branch, not only the current one, because logs on unmerged feature branches are only visible there. For example, list them with `git log --remotes --since="7 days ago" --name-only --format="%h %D" -- docs/log/` and read each file with `git show <branch>:<path>`.
+- Writing: at the end of a session, or when the user asks, write one file per session at `docs/log/<YYYY-MM-DD>/<HHMM>-<machine>.md` (local time, short non-personal machine label). Update the same file if the session continues.
+- Commit the log on the branch the session worked on, together with or right after the work. Propose pushing it, because other computers only see pushed logs; pushing still requires the user's approval.
+- Never write secrets, credentials, environment values, or personal data in a log.
 
 ## Documentation
 

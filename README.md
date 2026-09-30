@@ -17,6 +17,7 @@ Built with Next.js (App Router) and Supabase (Auth, Postgres, Storage).
 
 Production runs on https://bouwstream.nl (branch `main`), staging on https://staging.bouwstream.nl
 (branch `staging`). See `docs/environments.md` for the branch workflow and the shared database.
+Work sessions from all computers are recorded in `docs/log/` (see `docs/log/README.md`).
 
 ## Supabase setup
 
