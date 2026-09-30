@@ -10,12 +10,22 @@ type ConfirmOptions = {
   danger?: boolean;
 };
 
+type ChooseOptions<T extends string> = {
+  title: string;
+  message?: string;
+  /** Shown after "Annuleren"; the last one is the primary button. */
+  choices: { value: T; label: string }[];
+};
+
 type DialogRequest =
   | ({ kind: "confirm"; resolve: (confirmed: boolean) => void } & ConfirmOptions)
+  | ({ kind: "choose"; resolve: (value: string | null) => void } & ChooseOptions<string>)
   | { kind: "notice"; title: string; message: string; resolve: (confirmed: boolean) => void };
 
 type DialogApi = {
   confirm: (options: ConfirmOptions) => Promise<boolean>;
+  /** Resolves with the chosen value, or null when cancelled. */
+  choose: <T extends string>(options: ChooseOptions<T>) => Promise<T | null>;
   notify: (message: string, title?: string) => Promise<void>;
 };
 
@@ -40,6 +50,13 @@ export default function DialogProvider({ children }: { children: React.ReactNode
     (options: ConfirmOptions) => new Promise<boolean>((resolve) => setRequest({ kind: "confirm", ...options, resolve })),
     [],
   );
+  const choose = useCallback(
+    <T extends string>(options: ChooseOptions<T>) =>
+      new Promise<T | null>((resolve) =>
+        setRequest({ kind: "choose", ...options, resolve: (value) => resolve(value as T | null) }),
+      ),
+    [],
+  );
   const notify = useCallback(
     (message: string, title = "Er ging iets mis") =>
       new Promise<void>((resolve) => setRequest({ kind: "notice", title, message, resolve: () => resolve() })),
@@ -47,13 +64,20 @@ export default function DialogProvider({ children }: { children: React.ReactNode
   );
 
   function answer(confirmed: boolean) {
-    request?.resolve(confirmed);
+    if (request?.kind === "choose") request.resolve(null);
+    else request?.resolve(confirmed);
+    setRequest(null);
+    dialogRef.current?.close();
+  }
+
+  function pick(value: string) {
+    if (request?.kind === "choose") request.resolve(value);
     setRequest(null);
     dialogRef.current?.close();
   }
 
   return (
-    <DialogContext.Provider value={{ confirm, notify }}>
+    <DialogContext.Provider value={{ confirm, choose, notify }}>
       {children}
       <dialog
         ref={dialogRef}
@@ -69,7 +93,21 @@ export default function DialogProvider({ children }: { children: React.ReactNode
             <h2 id="app-dialog-title">{request.title}</h2>
             {request.message && <p>{request.message}</p>}
             <div className="button-row dialog-actions">
-              {request.kind === "confirm" ? (
+              {request.kind === "choose" ? (
+                <>
+                  <button type="button" className="secondary-button" onClick={() => answer(false)}>
+                    Annuleren
+                  </button>
+                  {request.choices.map(({ value, label }, index) => {
+                    const primary = index === request.choices.length - 1;
+                    return (
+                      <button key={value} type="button" className={primary ? "primary-button" : "secondary-button"} onClick={() => pick(value)} autoFocus={primary}>
+                        {label}
+                      </button>
+                    );
+                  })}
+                </>
+              ) : request.kind === "confirm" ? (
                 <>
                   <button type="button" className="secondary-button" onClick={() => answer(false)} autoFocus={request.danger}>
                     Annuleren
