@@ -125,15 +125,22 @@ export async function importShopBatch(supabase: SupabaseClient, onlySku?: string
   if (onlySku && products.length === 0) throw new WooCommerceError(`Geen online product met webshopnummer ${onlySku} gevonden.`);
   const result: ImportBatchResult = { imported: [], warnings: [], failed: [], skipped: [], remaining: 0 };
 
+  // A product is already in the app when a stove has its number or is linked to it.
   const numbers = products.map((product) => Number(product.sku)).filter(Number.isSafeInteger);
-  const { data: existing, error } = await supabase.from("stoves").select("number").in("number", numbers);
-  if (error) throw error;
-  const existingNumbers = new Set(existing.map((stove) => stove.number));
-  if (onlySku && existingNumbers.has(Number(onlySku))) throw new WooCommerceError(`Kachel ${onlySku} staat al in de app.`);
+  const [byNumber, byProduct] = await Promise.all([
+    supabase.from("stoves").select("number").in("number", numbers),
+    supabase.from("stoves").select("shop_product_id").in("shop_product_id", products.map((product) => product.id)),
+  ]);
+  if (byNumber.error) throw byNumber.error;
+  if (byProduct.error) throw byProduct.error;
+  const existingNumbers = new Set(byNumber.data.map((stove) => stove.number));
+  const linkedProducts = new Set(byProduct.data.map((stove) => stove.shop_product_id));
+  const inApp = (product: ShopProduct) => existingNumbers.has(Number(product.sku)) || linkedProducts.has(product.id);
+  if (onlySku && products.some(inApp)) throw new WooCommerceError(`Kachel ${onlySku} staat al in de app.`);
 
   const pending: ShopProduct[] = [];
   for (const product of products) {
-    if (existingNumbers.has(Number(product.sku))) continue;
+    if (inApp(product)) continue;
     const mapping = mapShopProduct(product);
     if (mapping.ok) pending.push(product);
     else result.skipped.push({ sku: product.sku, name: decodeEntities(product.name), reason: mapping.reason });

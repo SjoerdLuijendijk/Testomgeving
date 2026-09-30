@@ -52,7 +52,8 @@ export function stoveChangesFromShop(product: ShopProductState, stove: CurrentSt
 
   const condition = (changes.condition as CurrentStove["condition"] | undefined) ?? stove.condition;
   Object.assign(changes, stockChanges(product, condition, stove.stock_quantity));
-  changes.shop_listed = product.status === "publish";
+  // The database unlists sold-out stoves anyway; saying so here keeps the changes accurate.
+  changes.shop_listed = product.status === "publish" && (changes.made_to_order === true || changes.stock_quantity !== 0);
   return changes;
 }
 

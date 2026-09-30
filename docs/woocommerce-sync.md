@@ -55,8 +55,8 @@ Rule: nothing in the shop changes without an explicit action by a team member. T
 reads from the shop.
 
 Admin → Webshop (`lib/woocommerce/import.ts`, `import-mapping.ts`) takes over published
-products as stoves: one by its five-digit number ("Deze kachel importeren"), or all of them
-("Alles importeren"):
+products as stoves: one by its five-digit number ("Deze kachel importeren"), or all of them as the
+second step of "Alles uit webshop ophalen":
 
 - A stove keeps its five-digit shop SKU as its stove number (e.g. 26118), which is also on the
   stove itself. The database allows explicit numbers only in the five-digit range. Stoves added in
@@ -124,14 +124,21 @@ below), so they are only lost when the app is changed at the same moment.
   wins, which may briefly be the older data until the next change.
 - Background syncs finish after the page has refreshed; a failure shows up on the next page load.
 
-## Taking over the shop's stock by hand
+## Fetching everything from the shop by hand
 
-Admin → Webshop → "Voorraad uit webshop overnemen" (`lib/woocommerce/stock-refresh.ts`) sets the
-stock of every stove with a shop product to the shop's stock in one go, with the same rules as the
-webhook (a stove at 0 becomes sold; "op bestelling" in the shop makes it made to order). It only reads
-from the shop, runs with the team member's own login and changes nothing else of the stove. Stoves
-with a pending shop error (⚠) are skipped, because the shop has not received their latest change yet;
-trashed or deleted products are skipped as well. Useful after the webhook has been off for a while.
+Admin → Webshop → "Alles uit webshop ophalen" does two things after a confirmation, and only reads
+from the shop:
+
+1. Existing stoves (`lib/woocommerce/shop-refresh.ts`): every stove with a shop product gets the
+   shop's stock, title, price, attributes and online status, with the same rules as the webhook
+   (values the shop leaves empty keep the app's value; a stove at 0 becomes sold). It runs with the
+   team member's own login and shows per stove what changed. Stoves with a pending shop error (⚠)
+   are skipped, because the shop has not received their latest change yet; trashed or deleted
+   products are skipped as well.
+2. New products: the import below, in batches. A product counts as already in the app when a stove
+   has its SKU as number or is linked to it (`shop_product_id`), so nothing is imported twice.
+
+Useful after the webhook has been off for a while.
 
 ## Shop changes back to the app (webhook)
 

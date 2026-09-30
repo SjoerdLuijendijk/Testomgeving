@@ -2,8 +2,9 @@
 
 import { useId, useState, useTransition } from "react";
 import type { ImportIssue } from "../lib/woocommerce/import";
+import type { ShopRefreshResult } from "../lib/woocommerce/shop-refresh";
 import { useDialog } from "./DialogProvider";
-import { importShopStoves } from "./import-actions";
+import { importShopStoves, refreshStovesFromShopAction } from "./import-actions";
 
 type Progress = { imported: number; remaining: number | null; warnings: ImportIssue[]; failed: ImportIssue[]; skipped: ImportIssue[] };
 
@@ -25,11 +26,13 @@ function IssueList({ title, issues }: { title: string; issues: ImportIssue[] }) 
   );
 }
 
-// Imports published web shop stoves: one by its number, or all of them in batches with progress.
-// Importing only reads from the shop; imported stoves stay unlinked until linked in the inventory.
+// Fetches the web shop into the app: one new stove by its number, or everything at once (existing
+// stoves are brought up to date, then new products are imported in batches with progress). Only
+// reads from the shop; imported stoves stay unlinked until linked in the inventory.
 export default function ShopImportPanel() {
   const id = useId();
   const [sku, setSku] = useState("");
+  const [refreshed, setRefreshed] = useState<ShopRefreshResult | null>(null);
   const [progress, setProgress] = useState<Progress>(EMPTY);
   const [error, setError] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
@@ -41,21 +44,31 @@ export default function ShopImportPanel() {
     run(sku.trim());
   }
 
-  async function importAll() {
+  async function fetchAll() {
     const confirmed = await confirm({
-      title: "Alle webshopkachels importeren?",
+      title: "Alles uit de webshop ophalen?",
       message:
-        "Alle kachels die online staan en nog niet in de app zitten, worden met foto's overgenomen. Ze houden hun webshopnummer. De webshop verandert niet: de kachels blijven ontkoppeld tot je ze zelf koppelt.",
-      confirmLabel: "Alles importeren",
+        "Kachels die al in de app staan, krijgen de voorraad, titel, prijs, kenmerken en online-status uit de webshop; kachels met een ⚠-melding worden overgeslagen. Daarna worden producten die online staan en nog niet in de app zitten met foto's overgenomen. Niets wordt dubbel geïmporteerd. De webshop verandert niet.",
+      confirmLabel: "Alles ophalen",
     });
-    if (confirmed) run();
+    if (confirmed) run(undefined, true);
   }
 
-  function run(onlySku?: string) {
+  function run(onlySku?: string, refreshFirst = false) {
     setError(null);
     setFinished(false);
+    setRefreshed(null);
     setProgress(EMPTY);
     startTransition(async () => {
+      if (refreshFirst) {
+        const outcome = await refreshStovesFromShopAction();
+        if (!outcome.ok) {
+          setError(outcome.error);
+          setFinished(true);
+          return;
+        }
+        setRefreshed(outcome);
+      }
       let total = EMPTY;
       // Each call imports one stove or a small batch; stop when nothing is left or a batch makes no progress.
       for (;;) {
@@ -82,8 +95,8 @@ export default function ShopImportPanel() {
   return (
     <>
       <p className="muted">
-        Neem kachels over die nu online staan in de webshop, met hun webshopnummer en foto&apos;s. Importeren leest alleen: de
-        webshop verandert niet. Geïmporteerde kachels zijn niet gekoppeld; de app past hun webshopproduct pas aan als je bij de
+        Haal de webshop op in de app: bestaande kachels krijgen de actuele voorraad en gegevens, nieuwe kachels worden met hun
+        webshopnummer en foto&apos;s overgenomen. Dit leest alleen: de webshop verandert niet. Geïmporteerde kachels zijn niet gekoppeld; de app past hun webshopproduct pas aan als je bij de
         kachel op &ldquo;Koppelen&rdquo; klikt. Afmetingen en maat afvoer staan meestal niet in de webshop: die vul je aan bij het bewerken.
       </p>
       <form className="form-stack" onSubmit={importOne}>
@@ -103,11 +116,37 @@ export default function ShopImportPanel() {
           <button type="submit" className="primary-button" disabled={pending}>
             {pending ? "Bezig met importeren…" : "Deze kachel importeren"}
           </button>
-          <button type="button" className="secondary-button" onClick={importAll} disabled={pending}>
-            Alles importeren
+          <button type="button" className="secondary-button" onClick={fetchAll} disabled={pending}>
+            Alles uit webshop ophalen
           </button>
         </div>
       </form>
+      {refreshed && (
+        <>
+          <p role="status">
+            Bestaande kachels: {refreshed.changed.length} bijgewerkt, {refreshed.unchanged} al gelijk
+            {refreshed.skipped.length > 0 ? `, ${refreshed.skipped.length} overgeslagen` : ""}.
+          </p>
+          {refreshed.changed.length > 0 && (
+            <ul className="import-issues">
+              {refreshed.changed.map(({ number, fields }) => (
+                <li key={number}>
+                  <strong>{number}</strong>: {fields.join(", ")}
+                </li>
+              ))}
+            </ul>
+          )}
+          {refreshed.skipped.length > 0 && (
+            <ul className="import-issues">
+              {refreshed.skipped.map(({ number, reason }) => (
+                <li key={number}>
+                  <strong>{number}</strong> overgeslagen: {reason}
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
       {(pending || finished) && (
         <p role="status" className={finished && !error ? "field-success" : undefined}>
           {imported} kachel{imported === 1 ? "" : "s"} geïmporteerd
