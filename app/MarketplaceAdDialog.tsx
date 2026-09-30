@@ -112,7 +112,13 @@ export default function MarketplaceAdDialog({ stoveNumber }: { stoveNumber: numb
   const loading = pending && saved === null;
   return (
     <>
-      <button type="button" className="text-button desktop-only" onClick={open}>Advertentie</button>
+      <button type="button" className="icon-button desktop-only" onClick={open} title="Advertentie" aria-label={`Advertentie voor kachel ${stoveNumber}`}>
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 11v2a1 1 0 0 0 1 1h3l6 5V5L7 10H4a1 1 0 0 0-1 1Z" />
+          <path d="M17 9a4 4 0 0 1 0 6" />
+          <path d="M19.5 6.5a8 8 0 0 1 0 11" />
+        </svg>
+      </button>
       <dialog
         ref={dialogRef}
         className="edit-dialog ad-dialog"

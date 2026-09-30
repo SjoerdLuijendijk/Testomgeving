@@ -14,6 +14,7 @@ type Filter = "available" | "sold";
 
 const KIND_LABELS: Record<Kind, string> = { used: "Gereviseerd", new: "Nieuw", order: "Op bestelling" };
 const FILTER_LABELS: Record<Filter, string> = { available: "Te koop", sold: "Verkocht" };
+const ACTION_LABELS = ["Bewerken", "Factuur", "Advertentie", "Verwijderen"];
 
 function matchesSearch(stove: Stove, query: string) {
   if (!query) return true;
@@ -143,7 +144,9 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
                   <th key={channel} scope="col">{LISTING_CHANNELS[channel].label}</th>
                 ))}
                 {header("Toegevoegd", "createdAt")}
-                <th scope="col"><span className="visually-hidden">Acties</span></th>
+                {ACTION_LABELS.map((label) => (
+                  <th key={label} scope="col" className="cell-actions"><span className="visually-hidden">{label}</span></th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -153,7 +156,7 @@ export default function StoveTable({ stoves }: { stoves: Stove[] }) {
               <tr>
                 <td colSpan={7}>{visibleUnits} {visibleUnits === 1 ? "kachel" : "kachels"}</td>
                 <td className="cell-numeric">{formatPrice(visibleCents)}</td>
-                <td colSpan={3 + Object.keys(LISTING_CHANNELS).length} className="muted">incl. btw</td>
+                <td colSpan={2 + ACTION_LABELS.length + Object.keys(LISTING_CHANNELS).length} className="muted">incl. btw</td>
               </tr>
             </tfoot>
           </table>

@@ -669,13 +669,6 @@ a {
 
 /* Invoice dialog */
 
-.row-actions {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 12px;
-}
-
 .invoice-links {
   display: inline-flex;
   gap: 6px;
@@ -1424,6 +1417,17 @@ a {
     z-index: 3;
   }
 
+  /* Narrow action columns; icons sit at the same spot in every row. */
+  .stove-table .cell-actions {
+    width: 1%;
+    padding-inline: 2px;
+  }
+
+  .stove-table td.cell-actions .invoice-links {
+    margin-inline: 4px 8px;
+    vertical-align: middle;
+  }
+
   .stove-table tfoot td {
     position: sticky;
     bottom: 0;
@@ -1689,6 +1693,12 @@ a {
   .stove-table tbody .cell-detail {
     grid-column: 1 / -1;
     padding: 4px 0;
+  }
+
+  /* The action cells share one line at the bottom of the expanded card. */
+  .stove-table tbody .cell-actions {
+    grid-column: auto;
+    padding-top: 8px;
   }
 
   .stove-table .status-pill {
