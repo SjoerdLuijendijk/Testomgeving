@@ -1,7 +1,8 @@
 # WooCommerce sync
 
-Status: the app pushes stoves to the WooCommerce shop (woonwarmer.nl), and a webhook takes changes
-made in the shop (title, price, stock, attributes, status, orders and new products) back into the app.
+Status: the app pushes stoves to the WooCommerce shop (woonwarmer.nl). Changes made in the shop
+(stock, price, attributes, status, new products) come back into the app only when a team member
+uses "Alles uit webshop ophalen"; there is no automatic sync from the shop to the app.
 
 ## Configuration
 
@@ -91,8 +92,8 @@ and images with the app's data.
 ## Field mapping (app → WooCommerce)
 
 Every sync replaces the product's name, price, description, categories, attributes, images and
-stock with the app's data. Edits made in WordPress reach the app first through the webhook (see
-below), so they are only lost when the app is changed at the same moment.
+stock with the app's data. Edits made in WordPress are overwritten unless they were fetched into the
+app first ("Alles uit webshop ophalen").
 
 | App | WooCommerce product | Notes |
 | --- | --- | --- |
@@ -132,63 +133,10 @@ from the shop:
 
 1. Existing stoves (`lib/woocommerce/shop-refresh.ts`): every stove with a shop product gets the
    shop's stock, price, attributes and online status (not the title: the app names products after
-   brand and model), with the same rules as the webhook
-   (values the shop leaves empty keep the app's value; a stove at 0 becomes sold). It runs with the
+   brand and model). Values the shop leaves empty keep the app's value; a stove at 0 becomes sold;
+   "op bestelling" in the shop makes it made to order. It runs with the
    team member's own login and shows per stove what changed. Stoves with a pending shop error (⚠)
    are skipped, because the shop has not received their latest change yet; trashed or deleted
    products are skipped as well.
 2. New products: the import below, in batches. A product counts as already in the app when a stove
    has its SKU as number or is linked to it (`shop_product_id`), so nothing is imported twice.
-
-Useful after the webhook has been off for a while.
-
-## Shop changes back to the app (webhook)
-
-`app/api/woocommerce/webhook/route.ts` receives WooCommerce webhooks at
-`https://bouwstream.nl/api/woocommerce/webhook`. The proxy lets this one route through without a
-login; every delivery must carry a valid `X-WC-Webhook-Signature` (HMAC-SHA256 of the body with
-`WOOCOMMERCE_WEBHOOK_SECRET`), otherwise it is rejected with 401. The route answers at once and does
-the work afterwards with `after()`.
-
-For each product in the delivery (`lib/woocommerce/shop-to-app.ts`) the product is fetched from the
-shop again, and:
-
-| Shop event | App |
-| --- | --- |
-| Product changed (title, price, stock, attributes, description, status) | The linked stove is updated. Values the shop leaves empty or that cannot be read keep the app's value; the model is not taken from the title. Published → "Webshop" ticked; draft, private or trash → unticked. |
-| Order created or changed | Only the stock of the ordered products is taken over, so a web shop sale counts down in the app (the database marks the stove sold at 0). |
-| New product published | Imported as a stove like "Deze kachel importeren", unlinked, with its five-digit SKU as number. Fire bowls, other SKUs and sold-out products are skipped. |
-| Product deleted permanently or trashed | "Webshop" unticked; the stove stays. |
-
-A product belongs to a stove through `shop_product_id`, or through the `woonwarmer_stove_number`
-marker (see Matching). Parsing reuses the import's `shopProductDetails()`; the mapping itself is in
-`lib/woocommerce/shop-changes.ts`.
-
-Echoes: every push by the app also triggers a "product updated" delivery. A product whose
-`date_modified_gmt` is not later than the stove's `shop_synced_at` is the app's own push and is
-skipped. Changes the webhook makes are not pushed back to the shop.
-
-Database access: there is no signed-in user, so the route uses the Supabase secret key
-(`SUPABASE_SECRET_KEY`, server-only, `lib/supabase/admin.ts`), which bypasses RLS. It is only used
-after the signature check and only writes the columns above plus the import of new products.
-
-### Setup
-
-1. Vercel → Settings → Environment Variables, Production only (staging shares the database, so one
-   receiver is enough): `SUPABASE_SECRET_KEY` (Supabase → Project Settings → API Keys → Secret keys;
-   create one named `woocommerce_webhook`) and `WOOCOMMERCE_WEBHOOK_SECRET` (a long random value).
-   Redeploy afterwards.
-2. WordPress → WooCommerce → Settings → Advanced → Webhooks: add four webhooks, each with status
-   Active, delivery URL `https://bouwstream.nl/api/woocommerce/webhook`, the same secret as
-   `WOOCOMMERCE_WEBHOOK_SECRET` and API version WP REST API Integration v3. Topics: Product created,
-   Product updated, Product deleted, Order updated.
-3. Check under the webhook's logs that deliveries return 202 (or 204 for the first ping).
-
-### Limitations
-
-- The shop and the app changing the same stove within seconds: the last change wins.
-- A WordPress change arrives when WooCommerce delivers it (usually within a minute, through its
-  scheduled actions); failed deliveries are retried by WooCommerce and, after repeated failures,
-  the webhook is disabled there.
-- Photos changed in WordPress are not taken over.
-- Removing a value in WordPress (for example deleting an attribute) does not clear it in the app.

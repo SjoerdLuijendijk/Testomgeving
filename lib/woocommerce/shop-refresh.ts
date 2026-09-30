@@ -4,7 +4,7 @@ import { stoveChangesFromShop, type CurrentStove, type ShopProductState } from "
 
 // Server-only. Brings every stove with a web shop product in line with the shop in one go (stock,
 // title, price, attributes, online status), with the team member's own client. Only reads from the
-// shop. Uses the same rules as the webhook (shop-changes.ts); new products are imported separately.
+// shop. The rules are in shop-changes.ts; new products are imported separately.
 
 type StoveRow = CurrentStove & Record<string, unknown> & { number: number; shop_product_id: number; shop_sync_error: string | null };
 

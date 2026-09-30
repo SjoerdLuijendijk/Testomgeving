@@ -2,9 +2,9 @@ import { STOCK_QUANTITY } from "../stoves";
 import { shopProductDetails, type ShopProductForImport } from "./import-mapping";
 
 // Turns a WooCommerce product into changes for the stove it belongs to. Pure, so it can be tested
-// without the shop; see docs/woocommerce-sync.md ("Shop changes back to the app").
+// without the shop; see docs/woocommerce-sync.md ("Fetching everything from the shop by hand").
 
-export type ShopProductState = ShopProductForImport & { status: string; date_modified_gmt?: string | null };
+export type ShopProductState = ShopProductForImport & { status: string };
 
 export type CurrentStove = {
   condition: "new" | "used" | null;
@@ -26,11 +26,6 @@ function stockChanges(product: ShopProductState, condition: CurrentStove["condit
   return { made_to_order: false, stock_quantity: quantity };
 }
 
-// Only the stock, for orders: the rest of the product did not change.
-export function stockChangesFromShop(product: ShopProductState, stove: CurrentStove): StoveChanges {
-  return stockChanges(product, stove.condition, stove.stock_quantity);
-}
-
 // Everything the shop describes. Values the shop leaves empty or that cannot be read keep the app's
 // value, so a stove never loses details through a shop edit. The title is not taken over: the app
 // names products after brand and model, and the model is not derived from the title.
@@ -47,12 +42,4 @@ export function stoveChangesFromShop(product: ShopProductState, stove: CurrentSt
   // The database unlists sold-out stoves anyway; saying so here keeps the changes accurate.
   changes.shop_listed = product.status === "publish" && (changes.made_to_order === true || changes.stock_quantity !== 0);
   return changes;
-}
-
-// True when the product was last changed before (or by) the app's own latest push to the shop, so
-// the delivery is only the echo of that push and the app already has these values.
-export function isEchoOfAppPush(product: ShopProductState, shopSyncedAt: string | null) {
-  if (!shopSyncedAt || !product.date_modified_gmt) return false;
-  const modified = Date.parse(`${product.date_modified_gmt}Z`);
-  return Number.isFinite(modified) && modified <= Date.parse(shopSyncedAt);
 }

@@ -10,7 +10,7 @@ import { decodeEntities, mapShopProduct, type ShopProductForImport } from "./imp
 // imported stoves start unlinked (shop_sync_enabled false), so the shop does not change.
 
 type Config = NonNullable<ReturnType<typeof getWooCommerceConfig>>;
-export type ShopProduct = ShopProductForImport & { images: { id: number }[] };
+type ShopProduct = ShopProductForImport & { images: { id: number }[] };
 type StoreImage = { id: number; src: string; srcset: string };
 
 export type ImportIssue = { sku: string; name: string; reason: string };
@@ -76,7 +76,7 @@ async function downloadPhoto(config: Config, image: StoreImage): Promise<Uint8Ar
   return null;
 }
 
-export async function importProduct(supabase: SupabaseClient, config: Config, product: ShopProduct, result: ImportBatchResult) {
+async function importProduct(supabase: SupabaseClient, config: Config, product: ShopProduct, result: ImportBatchResult) {
   const mapping = mapShopProduct(product);
   const issue = { sku: product.sku, name: decodeEntities(product.name) };
   if (!mapping.ok) {

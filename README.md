@@ -65,9 +65,9 @@ time, so concurrent sales cannot overwrite each other.
 
 Each stove has a "Webshop" checkbox (`shop_listed`) for the WooCommerce web shop, off by default.
 When a stove sells out the database unticks it, and it cannot be ticked while it is sold out.
-Changes to a stove are pushed to the WooCommerce shop in the background, and a webhook takes shop
-changes (title, price, stock, attributes, orders, new products) back into the app. Configuration
-and field mapping: `docs/woocommerce-sync.md`.
+Changes to a stove are pushed to the WooCommerce shop in the background. Shop changes (stock,
+price, attributes, new products) are fetched on request with Admin → Webshop → "Alles uit webshop
+ophalen"; nothing comes back automatically. Configuration and field mapping: `docs/woocommerce-sync.md`.
 
 Marktplaats and 2dehands are linked from WooCommerce itself and are not part of the app. The
 former columns `marketplace_listed` and `secondhand_listed` are no longer used.
