@@ -31,8 +31,6 @@ export type StoveFieldValues = {
   flue_diameter_mm: number;
   price_cents: number;
   shop_listed: boolean;
-  marketplace_listed: boolean;
-  secondhand_listed: boolean;
   made_to_order: boolean;
   product_name: string | null;
   stove_type: StoveType | null;
@@ -186,8 +184,6 @@ export function parseStoveFields(formData: FormData): ParseResult {
       price_cents: price,
       // An unticked (or disabled) checkbox is left out of the form data.
       shop_listed: formData.get("shopListed") === "on",
-      marketplace_listed: formData.get("marketplaceListed") === "on",
-      secondhand_listed: formData.get("secondhandListed") === "on",
       // Only new stoves can be made to order.
       made_to_order: condition === "new" && supply === "order",
       product_name: productName,

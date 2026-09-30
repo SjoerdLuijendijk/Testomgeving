@@ -62,20 +62,21 @@ time, so concurrent sales cannot overwrite each other.
 
 ## Web shop
 
-Each stove has a "Webshop" checkbox (`shop_listed`) for the WooCommerce web shop and a
-"Marktplaats" (`marketplace_listed`) and "2dehands" (`secondhand_listed`, 2dehands.be) checkboxes,
-all off by default. When a stove sells out the database unticks all of them, and they cannot be
-ticked while it is sold out.
+Each stove has a "Webshop" checkbox (`shop_listed`) for the WooCommerce web shop, off by default.
+When a stove sells out the database unticks it, and it cannot be ticked while it is sold out.
 Changes to a stove are pushed to the WooCommerce shop in the background, and a webhook takes shop
-changes (title, price, stock, attributes, orders, new products) back into the app. Configuration and field mapping: `docs/woocommerce-sync.md`. Marktplaats and
-2dehands have no integration; their checkboxes are reminders, with an AI-written ad text.
+changes (title, price, stock, attributes, orders, new products) back into the app. Configuration
+and field mapping: `docs/woocommerce-sync.md`.
+
+Marktplaats and 2dehands are linked from WooCommerce itself and are not part of the app. The
+former columns `marketplace_listed` and `secondhand_listed` are no longer used.
 
 ## Deleting stoves
 
 The bin icon in the inventory deletes a stove with its photos. Its invoices are kept: they only
-record the stove number (migration `20260930230000_keep_invoices_of_deleted_stoves.sql`). The dialog offers to move its web shop product to the WordPress trash as well; if that
-fails, nothing is deleted. Marktplaats and 2dehands ads must be removed by hand; the dialog reminds
-when those checkboxes are ticked.
+record the stove number (migration `20260930230000_keep_invoices_of_deleted_stoves.sql`). The
+dialog offers to move its web shop product to the WordPress trash as well; if that fails, nothing is
+deleted.
 
 ## Invoices
 

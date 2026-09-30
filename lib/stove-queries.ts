@@ -3,7 +3,7 @@ import { signPhotoUrls } from "./stove-photos";
 import type { Stove, StoveDetails, StoveInvoice } from "./stoves";
 
 const DETAIL_COLUMNS =
-  "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, product_name, stove_type, power_kw, min_power_kw, max_power_kw, weight_kg, flue_center_height_cm, external_air_supply, new_firebox, thermostat, efficiency_percent, energy_label, warranty_years, material, description, shop_listed, shop_sync_error, shop_sync_enabled, shop_product_id, marketplace_listed, secondhand_listed, made_to_order, stock_quantity, sold_at, created_at";
+  "number, brand, model, condition, height_cm, width_cm, depth_cm, flue_outlet, flue_diameter_mm, price_cents, product_name, stove_type, power_kw, min_power_kw, max_power_kw, weight_kg, flue_center_height_cm, external_air_supply, new_firebox, thermostat, efficiency_percent, energy_label, warranty_years, material, description, shop_listed, shop_sync_error, shop_sync_enabled, shop_product_id, made_to_order, stock_quantity, sold_at, created_at";
 
 type DetailsRow = {
   number: number;
@@ -35,8 +35,6 @@ type DetailsRow = {
   shop_sync_error: string | null;
   shop_sync_enabled: boolean;
   shop_product_id: number | null;
-  marketplace_listed: boolean;
-  secondhand_listed: boolean;
   made_to_order: boolean;
   stock_quantity: number;
   sold_at: string | null;
@@ -74,8 +72,6 @@ function toStoveDetails(row: DetailsRow): StoveDetails {
     shopSyncError: row.shop_sync_error,
     shopSyncEnabled: row.shop_sync_enabled,
     shopProductId: row.shop_product_id,
-    marketplaceListed: row.marketplace_listed,
-    secondhandListed: row.secondhand_listed,
     madeToOrder: row.made_to_order,
     stockQuantity: row.stock_quantity,
     soldAt: row.sold_at,

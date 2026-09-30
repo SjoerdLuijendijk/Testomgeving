@@ -38,23 +38,11 @@ export const COMMON_FLUE_DIAMETERS_MM = [100, 120, 125, 130, 150, 180, 200];
 // Keep in sync with the stock quantity migration. Used stoves are always a single unit.
 export const STOCK_QUANTITY = { min: 1, max: 10000 } as const;
 
-// Sales channels a stove can be offered on. The database unticks all of them once a stove is sold out.
+// Sales channels a stove can be offered on. The database unticks them once a stove is sold out.
+// Marktplaats and 2dehands are linked from WooCommerce itself, so the app no longer tracks them
+// (the columns marketplace_listed and secondhand_listed remain unused in the database).
 export const LISTING_CHANNELS = {
   shop: { column: "shop_listed", field: "shopListed", label: "Webshop", description: "Online zetten in de webshop", target: "online in de webshop" },
-  marketplace: {
-    column: "marketplace_listed",
-    field: "marketplaceListed",
-    label: "Marktplaats",
-    description: "Plaatsen op Marktplaats",
-    target: "op Marktplaats",
-  },
-  secondhand: {
-    column: "secondhand_listed",
-    field: "secondhandListed",
-    label: "2dehands",
-    description: "Plaatsen op 2dehands.be",
-    target: "op 2dehands.be",
-  },
 } as const;
 export type ListingChannel = keyof typeof LISTING_CHANNELS;
 
@@ -96,8 +84,6 @@ export type Stove = {
   shopSyncEnabled: boolean;
   /** The linked WooCommerce product, once the stove has been in the shop. */
   shopProductId: number | null;
-  marketplaceListed: boolean;
-  secondhandListed: boolean;
   /** New stove sold without stock; always available, stock is not tracked. */
   madeToOrder: boolean;
   /** Units in stock; 0 exactly when soldAt is set. */

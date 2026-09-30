@@ -4,8 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import type { Stove } from "../lib/stoves";
 import { deleteStoveAction } from "./actions";
 
-// Deletes a stove after asking where else it should go. Only the web shop can be changed by the
-// app; Marktplaats and 2dehands have no integration, so the dialog reminds to remove those ads by hand.
+// Deletes a stove after asking whether its web shop product should go as well.
 export default function DeleteStoveDialog({ stove }: { stove: Stove }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [fromShop, setFromShop] = useState(false);
@@ -13,7 +12,6 @@ export default function DeleteStoveDialog({ stove }: { stove: Stove }) {
   const [pending, startTransition] = useTransition();
 
   const inShop = stove.shopProductId !== null || stove.shopListed;
-  const manualChannels = [stove.marketplaceListed && "Marktplaats", stove.secondhandListed && "2dehands"].filter(Boolean).join(" en ");
   const titleId = `delete-stove-${stove.number}`;
 
   function open() {
@@ -55,12 +53,6 @@ export default function DeleteStoveDialog({ stove }: { stove: Stove }) {
               <input type="checkbox" checked={fromShop} onChange={(event) => setFromShop(event.target.checked)} />
               <span>Ook uit de webshop halen (naar de prullenbak in WordPress)</span>
             </label>
-          )}
-
-          {manualChannels && (
-            <p className="field-error">
-              Deze kachel staat aangevinkt voor {manualChannels}. Daar kan de app niets verwijderen: haal de advertentie zelf weg.
-            </p>
           )}
 
           {error && <p className="field-error" role="alert">{error}</p>}
