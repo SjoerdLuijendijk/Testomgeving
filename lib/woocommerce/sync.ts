@@ -7,7 +7,7 @@ import { ShopTaxonomy } from "./taxonomy";
 
 // Server-only. Pushes one stove to the WooCommerce shop with the caller's (team member's) client.
 
-type ShopProduct = { id: number; images: ShopImage[] };
+type ShopProduct = { id: number; status: string; images: ShopImage[] };
 type Config = NonNullable<ReturnType<typeof getWooCommerceConfig>>;
 
 const NOT_CONFIGURED = "De webshopkoppeling is nog niet ingesteld.";
@@ -18,14 +18,16 @@ const DUPLICATE_SKU = "product_invalid_sku";
 async function findProduct(config: Config, productId: number | null, sku: string): Promise<ShopProduct | null> {
   if (productId) {
     try {
-      return await wooRequest<ShopProduct>(config, "GET", `/products/${productId}`);
+      const product = await wooRequest<ShopProduct>(config, "GET", `/products/${productId}`);
+      // A product moved to the trash in WordPress counts as deleted; updating it would restore it.
+      if (product.status !== "trash") return product;
     } catch (error) {
       // Deleted in WordPress: fall back to the SKU, and otherwise create it again.
       if (!(error instanceof WooCommerceError && error.status === 404)) throw error;
     }
   }
   const matches = await wooRequest<ShopProduct[]>(config, "GET", `/products?sku=${encodeURIComponent(sku)}`);
-  return matches[0] ?? null;
+  return matches.find((product) => product.status !== "trash") ?? null;
 }
 
 async function signedPhotos(supabase: SupabaseClient, stoveNumber: number): Promise<ShopPhoto[]> {

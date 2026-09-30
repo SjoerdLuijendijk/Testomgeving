@@ -40,6 +40,10 @@ Development unless testing the sync on purpose.
 The six-digit stove number is the product SKU. The product is found by the stored
 `shop_product_id`, else by SKU; otherwise it is created. If two syncs race to create it,
 WooCommerce rejects the duplicate SKU and the second sync updates the first one's product.
+A product in the WordPress trash counts as deleted: it is not updated (which would restore it), and
+ticking "Webshop" again creates a new product. WooCommerce does not count trashed products when
+checking SKUs; should a shop reject the SKU anyway, the sync reports `product_invalid_sku` until the
+trashed product is deleted permanently.
 
 ## Existing shop products
 
