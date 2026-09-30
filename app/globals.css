@@ -7,6 +7,7 @@
   --available: #00a36c;
   --sold: #e2445c;
   --line: #e8e1dc;
+  --line-soft: #f1ece8;
   --row-hover: #faf6f3;
   --paper: #ffffff;
   --background: #f6f3f0;
@@ -1279,15 +1280,26 @@ a {
   min-width: 104px;
   min-height: 36px;
   padding: 6px 14px;
-  border: 0;
-  border-radius: 6px;
-  background: var(--available);
-  color: white;
+  border: 1px solid #bfe3d2;
+  border-radius: 999px;
+  background: #ecf7f1;
+  color: #0b6b47;
   font-weight: 600;
+  cursor: pointer;
+}
+
+.status-pill:not(:disabled):hover {
+  border-color: #8fceb2;
 }
 
 .status-pill--sold {
-  background: var(--sold);
+  border-color: #f3c4cb;
+  background: #fdf0f2;
+  color: #a3202f;
+}
+
+.status-pill--sold:not(:disabled):hover {
+  border-color: #e8959f;
 }
 
 .photo-cell {
@@ -1396,7 +1408,8 @@ a {
   .table-wrap {
     max-height: calc(100dvh - 190px);
     overflow: auto;
-    border-radius: 8px;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgb(42 33 29 / 4%), 0 6px 20px rgb(42 33 29 / 4%);
   }
 
   .stove-table {
@@ -1409,35 +1422,40 @@ a {
     text-align: right;
   }
 
+  /* No vertical grid lines; rows are separated by a soft horizontal rule. */
   .stove-table th,
   .stove-table td {
-    padding: 5px 10px;
-    border-right: 1px solid var(--line);
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line-soft);
     background: var(--paper);
     white-space: nowrap;
-  }
-
-  .stove-table th:last-child,
-  .stove-table td:last-child {
-    border-right: 0;
   }
 
   .stove-table thead th {
     position: sticky;
     top: 0;
     z-index: 2;
-    padding-block: 8px;
-    border-bottom: 2px solid var(--line);
-    background: #f8f5f2;
-    color: var(--ink);
+    padding-block: 11px;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
-  .stove-table tbody tr:nth-child(even) td {
-    background: #fcfaf9;
+  .stove-table .sort-indicator {
+    opacity: 0.5;
+  }
+
+  .stove-table th:hover .sort-indicator,
+  .stove-table [aria-sort="ascending"] .sort-indicator,
+  .stove-table [aria-sort="descending"] .sort-indicator {
+    opacity: 1;
   }
 
   .stove-table tbody tr:hover td {
-    background: #fdf1ec;
+    background: var(--row-hover);
   }
 
   .stove-table th:first-child,
@@ -1445,7 +1463,30 @@ a {
     position: sticky;
     left: 0;
     z-index: 1;
-    border-right: 2px solid var(--line);
+    padding-left: 16px;
+  }
+
+  .stove-table .cell-number {
+    font-weight: 700;
+  }
+
+  .stove-table .cell-brand {
+    font-weight: 600;
+  }
+
+  /* Secondary information: specifications and the date added. */
+  .stove-table td.cell-detail {
+    color: #5e524c;
+  }
+
+  .stove-table td.muted {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .stove-table .listing-toggle {
+    width: 18px;
+    height: 18px;
   }
 
   .stove-table thead th:first-child {
@@ -1455,7 +1496,34 @@ a {
   /* Narrow action columns; icons sit at the same spot in every row. */
   .stove-table .cell-actions {
     width: 1%;
-    padding-inline: 2px;
+    padding-inline: 3px;
+  }
+
+  .stove-table :not(.cell-actions) + .cell-actions {
+    padding-left: 16px;
+  }
+
+  .stove-table th.cell-actions:last-child,
+  .stove-table td.cell-actions:has(+ .cell-toggle) {
+    padding-right: 16px;
+  }
+
+  .stove-table .cell-actions .icon-button {
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 8px;
+    color: #9a8d86;
+    transition: background-color 0.15s, color 0.15s;
+  }
+
+  .stove-table .cell-actions .icon-button:hover {
+    background: #f6ede8;
+    color: var(--accent);
+  }
+
+  .stove-table .cell-actions .icon-button--danger:hover {
+    background: #fdecea;
+    color: #b3261e;
   }
 
   .stove-table td.cell-actions .invoice-links {
@@ -1466,19 +1534,18 @@ a {
   .stove-table tfoot td {
     position: sticky;
     bottom: 0;
-    border-top: 2px solid var(--line);
+    border-top: 1px solid var(--line);
     border-bottom: 0;
-    background: #f8f5f2;
+    background: #fbf9f7;
     font-weight: 600;
   }
 
   .stove-table .status-pill {
     width: 100%;
-    min-width: 88px;
+    min-width: 84px;
     min-height: 26px;
     padding: 3px 10px;
-    border-radius: 4px;
-    font-size: 13px;
+    font-size: 12.5px;
   }
 
   .stove-table .stock-control {
@@ -1507,8 +1574,9 @@ a {
   .stove-table .thumb-missing,
   .stove-table .thumb-more,
   .stove-table .thumb-add {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
   }
 
   .stove-table .thumb-more {
