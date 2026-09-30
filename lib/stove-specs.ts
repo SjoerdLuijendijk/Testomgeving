@@ -1,4 +1,4 @@
-import { CONDITION_LABELS, FLUE_OUTLET_LABELS, STOVE_TYPE_LABELS, type StoveDetails } from "./stoves";
+import { CONDITION_LABELS, FLUE_OUTLET_LABELS, stoveTypeLabel, type StoveDetails } from "./stoves";
 
 export type StoveSpecKey =
   | "condition"
@@ -34,7 +34,7 @@ function withUnit(value: number | null, unit: string) {
 
 // The web shop name is the brand plus the stove type ("Hwam Houtkachel"), or only the brand.
 export function stoveProductName(stove: Pick<StoveDetails, "brand" | "stoveType">) {
-  return [stove.brand, stove.stoveType && STOVE_TYPE_LABELS[stove.stoveType]].filter(Boolean).join(" ");
+  return [stove.brand, stoveTypeLabel(stove.stoveType)].filter(Boolean).join(" ");
 }
 
 // The stove's product details in display order, leaving out what is not filled in.
@@ -42,7 +42,7 @@ export function stoveSpecs(stove: StoveDetails): StoveSpec[] {
   const { heightCm, widthCm, depthCm } = stove;
   const specs: [StoveSpecKey, string, string | null][] = [
     ["condition", "Staat kachel", stove.condition && CONDITION_LABELS[stove.condition]],
-    ["stoveType", "Type kachel", stove.stoveType && STOVE_TYPE_LABELS[stove.stoveType]],
+    ["stoveType", "Type kachel", stoveTypeLabel(stove.stoveType)],
     ["power", "Vermogen", withUnit(stove.powerKw, "kW")],
     ["dimensions", "Afmetingen (h × b × d)", heightCm && widthCm && depthCm ? `${heightCm} × ${widthCm} × ${depthCm} cm` : null],
     ["weight", "Gewicht", withUnit(stove.weightKg, "kg")],

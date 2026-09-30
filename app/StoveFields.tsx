@@ -12,12 +12,12 @@ import {
   MAX_TEXT_LENGTH,
   STOCK_QUANTITY,
   STOVE_TYPE_LABELS,
+  stoveTypeLabel,
   SUPPLY_LABELS,
   type Stove,
 } from "../lib/stoves";
 import ChoiceGroup from "./ChoiceGroup";
 import NumberField from "./NumberField";
-import SelectField from "./SelectField";
 import StoveSpecFields from "./StoveSpecFields";
 
 const DIMENSION_FIELDS = [
@@ -62,7 +62,20 @@ export default function StoveFields({ brands, stove }: StoveFieldsProps) {
         {brands.map((brand) => <option key={brand} value={brand} />)}
       </datalist>
 
-      <SelectField name="stoveType" label="Type kachel" options={STOVE_TYPE_LABELS} defaultValue={stove?.stoveType} />
+      {/* Pick a suggestion or type a type of your own. */}
+      <label htmlFor={`${id}-stove-type`}>Type kachel <span className="muted">(optioneel)</span></label>
+      <input
+        id={`${id}-stove-type`}
+        name="stoveType"
+        list={`${id}-stove-types`}
+        maxLength={MAX_TEXT_LENGTH}
+        autoComplete="off"
+        placeholder="Kies of typ, bijv. Houtkachel"
+        defaultValue={stoveTypeLabel(stove?.stoveType ?? null) ?? undefined}
+      />
+      <datalist id={`${id}-stove-types`}>
+        {Object.values(STOVE_TYPE_LABELS).map((label) => <option key={label} value={label} />)}
+      </datalist>
 
       {/* display: contents keeps the form's spacing while following the condition and supply choices. */}
       <div className="field-contents" onChange={handleChoice}>

@@ -49,7 +49,9 @@ a stove has optional product details that the web shop shows: stove type, power
 (kW), weight, rear flue centre height, external air supply, new firebox, thermostat, and under
 "Meer productgegevens" minimum/maximum power, efficiency, energy label, warranty, material and a
 description. The flue outlet can be top, rear or both.
-The web shop name is always the brand plus the stove type ("Hwam Houtkachel"), or only the brand
+"Type kachel" is free text with suggestions (Houtkachel, Speksteenkachel, ...); a known type is
+stored as a key, anything else as typed. The web shop name is always the brand plus the stove type
+("Hwam Houtkachel"), or only the brand
 when no type is chosen. The model is no longer entered (migration `20260930240000_optional_stove_model.sql`).
 
 ## Stock

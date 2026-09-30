@@ -12,7 +12,9 @@ import {
   WEIGHT_KG,
   type EnergyLabel,
   type FlueOutlet,
+  parseStoveType,
   type StoveType,
+  type StoveTypeKey,
 } from "../stoves";
 
 // Maps a published WooCommerce product (REST API v3) to a stove row. Pure, so it can be tested
@@ -129,12 +131,13 @@ function attributeValue(product: ShopProductForImport, ...names: string[]) {
   return attributeValues(product, ...names)[0];
 }
 
+// A known type becomes its key; otherwise the shop's own text is kept.
 function stoveType(values: string[]): StoveType | null {
   for (const value of values) {
-    const type = (Object.keys(STOVE_TYPE_LABELS) as StoveType[]).find((key) => normalise(STOVE_TYPE_LABELS[key]) === normalise(value));
+    const type = (Object.keys(STOVE_TYPE_LABELS) as StoveTypeKey[]).find((key) => normalise(STOVE_TYPE_LABELS[key]) === normalise(value));
     if (type) return type;
   }
-  return null;
+  return values[0] ? parseStoveType(values[0]) : null;
 }
 
 function flueOutlet(values: string[]): FlueOutlet | null {

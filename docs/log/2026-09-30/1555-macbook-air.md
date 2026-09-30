@@ -19,6 +19,7 @@ Branches: `feature/session-log`, `feature/photo-preview-count`, `feature/admin-i
 - Admin → Webshop → "Alles uit webshop ophalen": updates existing stoves (stock, price, attributes,
   online status) and imports new shop products, never twice.
 - Removed the Marktplaats and 2dehands checkboxes (linked from WooCommerce itself).
+- "Type kachel" is free text with suggestions; known types keep their key.
 - Print: the "Aantal" column is left off the printout; the print button is a printer icon at the top
   right of the stock page.
 - Web shop name is now brand + stove type ("Hwam Houtkachel"); the "Naam in webshop" and "Model"
@@ -41,6 +42,7 @@ Branches: `feature/session-log`, `feature/photo-preview-count`, `feature/admin-i
   (number 26xxx), and "Alles uit webshop ophalen".
 
 ## Manual steps and migrations
+- `20260930250000_free_stove_type.sql` must be applied before the release of `feature/free-stove-type`.
 - `20260930240000_optional_stove_model.sql` must be applied before the release of
   `feature/remove-model` (new stoves are saved without a model).
 - The six migrations of 2026-09-30 (`20260930120000` to `20260930211000`) and the WooCommerce and

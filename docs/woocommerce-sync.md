@@ -103,7 +103,7 @@ app first ("Alles uit webshop ophalen").
 | `condition` + `stove_type` | `categories` | New: "Nieuwe kachels". Gereviseerd: "Gereviseerde kachels" plus "Houtkachels" or "Speksteenkachels". Matched by slug; a missing category is skipped. |
 | `brand` | global attribute "Merk" (`pa_merk`) | Existing terms are matched ignoring case and spaces; a new brand is added as a term. |
 | `condition` | global attribute "Staat kachel" (`pa_staat`) | Nieuw / Gereviseerd. |
-| `stove_type` | global attribute "Type kachel" (`pa_type-kachel`) | |
+| `stove_type` | global attribute "Type kachel" (`pa_type-kachel`) | Free text with suggestions. Known types are stored as a key (`wood`, `soapstone`, `pot`, `wood_central_heating`) and sent as their label; any other type is sent as typed and added as a new term (migration `20260930250000_free_stove_type.sql`). The import keeps an unknown shop type as text. |
 | `flue_outlet` | global attribute "Aansluiting" (`pa_aansluiting`) | Bovenaansluiting, Achteraansluiting, or both. |
 | `power_kw` | global attribute "Vermogen" (`pa_vermogen`) | Matches existing terms such as "8kW" or "6,5 kw"; otherwise adds e.g. "7,5 kW". |
 | dimensions, `weight_kg`, `flue_diameter_mm`, `flue_center_height_cm`, yes/no fields, min/max power, efficiency, energy label, warranty, material | product attributes | Labels as in the app's Marktplaats ad details (`lib/stove-specs.ts`), e.g. "Harthoogte achter: 94 cm". Unknown values are left out. WooCommerce's own `dimensions` and `weight` are not used, because their units depend on shop settings. |

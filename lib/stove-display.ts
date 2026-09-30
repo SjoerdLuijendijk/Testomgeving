@@ -1,4 +1,4 @@
-import { FLUE_OUTLET_LABELS, STOVE_TYPE_LABELS, type Stove } from "./stoves";
+import { FLUE_OUTLET_LABELS, stoveTypeLabel, type Stove } from "./stoves";
 
 export type StoveKind = "used" | "new" | "order";
 
@@ -20,7 +20,7 @@ export function formatDimensions({ heightCm, widthCm, depthCm }: Stove) {
 const KW_FORMAT = new Intl.NumberFormat("nl-NL", { maximumFractionDigits: 1 });
 
 export function formatType({ stoveType, powerKw }: Stove) {
-  const parts = [stoveType && STOVE_TYPE_LABELS[stoveType], powerKw && `${KW_FORMAT.format(powerKw)} kW`].filter(Boolean);
+  const parts = [stoveTypeLabel(stoveType), powerKw && `${KW_FORMAT.format(powerKw)} kW`].filter(Boolean);
   return parts.length > 0 ? parts.join(", ") : MISSING;
 }
 

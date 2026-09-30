@@ -10,7 +10,7 @@ import {
   MAX_TEXT_LENGTH,
   POWER_KW,
   STOCK_QUANTITY,
-  STOVE_TYPE_LABELS,
+  parseStoveType,
   SUPPLY_LABELS,
   WARRANTY_YEARS,
   WEIGHT_KG,
@@ -130,7 +130,8 @@ export function parseStoveFields(formData: FormData): ParseResult {
   }
   if (!price) return { ok: false, error: "Vul een geldige verkoopprijs in, bijvoorbeeld 1.250 of 1250,50." };
 
-  const stoveType = readOptionalChoice(formData, "stoveType", Object.keys(STOVE_TYPE_LABELS) as StoveType[]);
+  const stoveTypeText = readOptionalText(formData, "stoveType");
+  const stoveType = stoveTypeText === INVALID ? INVALID : stoveTypeText === null ? null : parseStoveType(stoveTypeText);
   const power = readOptionalDecimal(formData, "power", POWER_KW);
   const minPower = readOptionalDecimal(formData, "minPower", POWER_KW);
   const maxPower = readOptionalDecimal(formData, "maxPower", POWER_KW);
@@ -145,7 +146,7 @@ export function parseStoveFields(formData: FormData): ParseResult {
   const material = readOptionalText(formData, "material");
   const description = readOptionalText(formData, "description", MAX_DESCRIPTION_LENGTH);
 
-  if (stoveType === INVALID) return { ok: false, error: "Kies een geldig type kachel." };
+  if (stoveType === INVALID) return { ok: false, error: `Het type kachel mag maximaal ${MAX_TEXT_LENGTH} tekens zijn.` };
   if (power === INVALID || minPower === INVALID || maxPower === INVALID) {
     return { ok: false, error: `Vul het vermogen in kW in, bijvoorbeeld 8 of 5,5 (${POWER_KW.min}–${POWER_KW.max}).` };
   }

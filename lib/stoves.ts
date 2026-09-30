@@ -11,7 +11,8 @@ export const MAX_TEXT_LENGTH = 100;
 // "used" is called "Gereviseerd", as in the web shop.
 export const CONDITION_LABELS = { new: "Nieuw", used: "Gereviseerd" } as const;
 export const FLUE_OUTLET_LABELS = { top: "Boven", rear: "Achter", both: "Boven én achter" } as const;
-// The WooCommerce shop's "Type kachel" attribute.
+// The WooCommerce shop's "Type kachel" attribute. These are suggestions: a stove can also have a
+// type of its own, stored as the text itself (a known type is stored as its key).
 export const STOVE_TYPE_LABELS = {
   soapstone: "Speksteenkachel",
   wood: "Houtkachel",
@@ -23,7 +24,25 @@ export const ENERGY_LABELS = ["A++", "A+", "A", "B", "C", "D", "E", "F", "G"] as
 export const SUPPLY_LABELS = { stock: "Uit voorraad", order: "Op bestelling" } as const;
 export type Condition = keyof typeof CONDITION_LABELS;
 export type FlueOutlet = keyof typeof FLUE_OUTLET_LABELS;
-export type StoveType = keyof typeof STOVE_TYPE_LABELS;
+export type StoveTypeKey = keyof typeof STOVE_TYPE_LABELS;
+/** A key of STOVE_TYPE_LABELS, or a type of the stove's own as free text. */
+export type StoveType = string;
+
+export function isStoveTypeKey(value: string | null): value is StoveTypeKey {
+  return value !== null && Object.hasOwn(STOVE_TYPE_LABELS, value);
+}
+
+export function stoveTypeLabel(value: StoveType | null) {
+  return value === null ? null : isStoveTypeKey(value) ? STOVE_TYPE_LABELS[value] : value;
+}
+
+// Typed text becomes the key of a known type when it matches its label ("houtkachel" → "wood").
+export function parseStoveType(text: string): StoveType | null {
+  const value = text.replace(/\s+/g, " ").trim();
+  if (!value) return null;
+  const known = (Object.keys(STOVE_TYPE_LABELS) as StoveTypeKey[]).find((key) => STOVE_TYPE_LABELS[key].toLowerCase() === value.toLowerCase());
+  return known ?? value.slice(0, MAX_TEXT_LENGTH).trim();
+}
 export type EnergyLabel = (typeof ENERGY_LABELS)[number];
 
 // Keep in sync with the check constraints in the stove specifications and web shop product fields migrations.

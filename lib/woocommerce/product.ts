@@ -1,4 +1,4 @@
-import { CONDITION_LABELS, STOVE_TYPE_LABELS, type StoveDetails } from "../stoves";
+import { CONDITION_LABELS, stoveTypeLabel, type StoveDetails } from "../stoves";
 import { stoveProductName, stoveSpecs, type StoveSpecKey } from "../stove-specs";
 import type { ShopTaxonomy } from "./taxonomy";
 
@@ -31,10 +31,11 @@ function categorySlugs(stove: StoveDetails) {
 }
 
 async function globalAttributes(stove: StoveDetails, taxonomy: ShopTaxonomy) {
+  const typeLabel = stoveTypeLabel(stove.stoveType);
   const wanted: [string, string[]][] = [
     ["pa_merk", [stove.brand]],
     ["pa_staat", stove.condition ? [CONDITION_LABELS[stove.condition]] : []],
-    ["pa_type-kachel", stove.stoveType ? [STOVE_TYPE_LABELS[stove.stoveType]] : []],
+    ["pa_type-kachel", typeLabel ? [typeLabel] : []],
     ["pa_aansluiting", stove.flueOutlet ? [...FLUE_TERMS[stove.flueOutlet]] : []],
     ["pa_vermogen", stove.powerKw === null ? [] : [`${DECIMAL.format(stove.powerKw)} kW`]],
   ];
