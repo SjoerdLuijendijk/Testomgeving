@@ -28,7 +28,12 @@ export default async function Page({ searchParams }: PageProps) {
         <BrandLogo />
         {isMember && (
           <nav className="tabs" aria-label="Hoofdmenu">
-            <Link href="/" aria-current={activeTab === "toevoegen" ? "page" : undefined}>Kachel toevoegen</Link>
+            <Link href="/" aria-current={activeTab === "toevoegen" ? "page" : undefined}>
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Kachel toevoegen
+            </Link>
             <Link href="/?tab=voorraad" aria-current={activeTab === "voorraad" ? "page" : undefined}>Voorraad</Link>
           </nav>
         )}

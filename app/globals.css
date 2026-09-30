@@ -76,7 +76,7 @@ a {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 24px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   background: var(--paper);
   border-bottom: 1px solid var(--line);
 }
@@ -96,6 +96,15 @@ a {
   height: 52px;
 }
 
+/* About 18% larger in the header, with less badge padding so the header keeps its height. */
+.site-header .brand-logo {
+  padding: 3px 10px;
+}
+
+.site-header .brand-logo img {
+  height: 61px;
+}
+
 .login-card .brand-logo {
   padding: 12px 18px;
 }
@@ -104,25 +113,48 @@ a {
   height: 96px;
 }
 
+/* Two equal navigation buttons: the current page filled in the brand colour, the other outlined. */
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   order: 3;
   width: 100%;
 }
 
 .tabs a {
+  display: inline-flex;
   flex: 1;
-  padding: 10px 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--control-height);
+  padding: 0 18px;
+  border: 1px solid var(--field-border);
   border-radius: var(--radius);
+  background: var(--paper);
   color: var(--ink);
+  font-size: 15px;
   font-weight: 600;
-  text-align: center;
   text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.tabs a:hover {
+  border-color: var(--accent);
+  background: #fdf8f6;
+  color: var(--accent-dark);
 }
 
 .tabs a[aria-current="page"] {
+  border-color: var(--accent);
   background: var(--accent);
+  color: white;
+}
+
+.tabs a[aria-current="page"]:hover {
+  border-color: var(--accent-dark);
+  background: var(--accent-dark);
   color: white;
 }
 
@@ -1665,20 +1697,19 @@ a {
   /* Compact header: the logo and tabs stay, the signed-in e-mail address is left out. */
   .site-header {
     gap: 8px 12px;
-    padding-block: 8px;
+    padding-block: 5px 7px;
   }
 
-  .brand-logo {
-    padding: 4px 8px;
+  .site-header .brand-logo {
+    padding: 2px 8px;
   }
 
-  .brand-logo img {
-    height: 48px;
+  .site-header .brand-logo img {
+    height: 56px;
   }
 
   .tabs a {
-    padding: 8px 6px;
-    font-size: 15px;
+    padding: 0 8px;
   }
 
   .page-main {
