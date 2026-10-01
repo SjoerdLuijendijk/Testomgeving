@@ -9,6 +9,8 @@ const NO_ACCESS = { ok: false, error: "Je hebt geen toegang tot de artikelen." }
 const FAILED = { ok: false, error: "Er ging iets mis. Probeer het opnieuw." } as const;
 // Postgres error code for a duplicate key (here: the SKU).
 const UNIQUE_VIOLATION = "23505";
+// Upper bound for one bulk delete, so the id filter stays well within request URL limits.
+const MAX_BULK_DELETE = 500;
 
 function isPositiveId(value: unknown): value is number {
   return Number.isSafeInteger(value) && (value as number) > 0;
@@ -47,6 +49,19 @@ export async function deleteArticle(id: number): Promise<ActionResult> {
   if (!isMember) return NO_ACCESS;
 
   const { error } = await supabase.from("articles").delete().eq("id", id);
+  if (error) return FAILED;
+  revalidatePath("/");
+  return { ok: true };
+}
+
+// Deletes the articles selected in the article list in one go.
+export async function deleteArticles(ids: number[]): Promise<ActionResult> {
+  if (!Array.isArray(ids) || ids.length === 0 || !ids.every(isPositiveId)) return { ok: false, error: "Onbekende artikelen." };
+  if (ids.length > MAX_BULK_DELETE) return { ok: false, error: `Verwijder maximaal ${MAX_BULK_DELETE} artikelen tegelijk.` };
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+
+  const { error } = await supabase.from("articles").delete().in("id", ids);
   if (error) return FAILED;
   revalidatePath("/");
   return { ok: true };

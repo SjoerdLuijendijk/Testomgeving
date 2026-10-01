@@ -2694,3 +2694,82 @@ a {
     border-radius: 10px;
   }
 }
+
+/* Selection checkboxes in the article list; selected articles are deleted together. */
+.row-check {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.article-group-head {
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+}
+
+.article-group-head button {
+  padding-left: 12px;
+}
+
+.article-table .cell-select {
+  width: 1%;
+  padding: 0;
+}
+
+.article-table td.cell-select label {
+  display: flex;
+  align-items: center;
+  padding: 10px 4px 10px 16px;
+  cursor: pointer;
+}
+
+.selection-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbf9f7;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.selection-bar span {
+  margin-right: auto;
+}
+
+@media (max-width: 719px) {
+  /* On a card the checkbox sits in the top right corner, next to the name. */
+  .article-table tbody tr:not(.article-group) {
+    position: relative;
+  }
+
+  .stove-table.article-table tbody td.cell-select {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 0;
+  }
+
+  .stove-table.article-table tbody td.cell-select::before {
+    content: none;
+  }
+
+  .article-table td.cell-select label {
+    padding: 12px;
+  }
+
+  .article-table tbody td.cell-brand {
+    padding-right: 48px;
+  }
+
+  .article-group-head {
+    padding-left: 12px;
+  }
+}
