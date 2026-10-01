@@ -1,5 +1,5 @@
 import { MAX_INVOICE_LINES, VAT_RATES, type VatRate } from "../lib/invoice";
-import { emptyLine, type DraftLine } from "../lib/invoice-draft";
+import { emptyLine, montageLine, type DraftLine } from "../lib/invoice-draft";
 
 type InvoiceLinesEditorProps = {
   lines: DraftLine[];
@@ -9,9 +9,12 @@ type InvoiceLinesEditorProps = {
   allowSaveAsArticle?: boolean;
   /** Extra controls next to "Regel toevoegen", such as picking a stove or article. */
   children?: React.ReactNode;
+  /** Hourly rate excluding VAT for "＋ Montage": null when not set (the price stays empty), undefined while loading. */
+  hourlyRateExCents?: number | null;
 };
 
-export default function InvoiceLinesEditor({ lines, invalid, onChange, allowSaveAsArticle, children }: InvoiceLinesEditorProps) {
+export default function InvoiceLinesEditor({ lines, invalid, onChange, allowSaveAsArticle, children, hourlyRateExCents }: InvoiceLinesEditorProps) {
+  const full = lines.length >= MAX_INVOICE_LINES;
   const update = (key: string, patch: Partial<DraftLine>) =>
     onChange(lines.map((line) => (line.key === key ? { ...line, ...patch } : line)));
 
@@ -59,10 +62,14 @@ export default function InvoiceLinesEditor({ lines, invalid, onChange, allowSave
       </ul>
       <div className="line-actions">
         {children}
-        <button type="button" className="secondary-button" onClick={() => onChange([...lines, emptyLine()])} disabled={lines.length >= MAX_INVOICE_LINES}>
+        <button type="button" className="secondary-button" onClick={() => onChange([...lines, montageLine(hourlyRateExCents)])} disabled={full}>
+          ＋ Montage
+        </button>
+        <button type="button" className="secondary-button" onClick={() => onChange([...lines, emptyLine()])} disabled={full}>
           ＋ Losse regel
         </button>
       </div>
+      {hourlyRateExCents === null && <p className="form-hint muted">Stel het uurtarief voor montage in bij Instellingen → Bedrijfsgegevens; dan vult ＋ Montage de prijs vanzelf in.</p>}
     </fieldset>
   );
 }
