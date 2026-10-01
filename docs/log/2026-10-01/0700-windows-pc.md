@@ -20,7 +20,14 @@ Branch: `feature/stove-notes`
   list leaves those stoves out. The note dialog closes on a click outside it while unchanged.
 - "Agenda" in the account menu: pickups and deliveries per day. Times are chosen per quarter of an
   hour. A "Bezichtiging" kind was tried and removed again at the user's request.
-- Released to staging.
+- New stoves: stock in its own "Voorraad" column (− / +); no status label but a green "Verkoop
+  plaatsen" button (dialog: "1 verkocht" or "In onderhandeling"); their notes only appear in the
+  lists, not in the row. Taking the last unit asks: in archief plaatsen or op bestelling leverbaar.
+- Menu: Agenda, Af te leveren, In onderhandeling (was Notities), Verkocht archief, Facturen and
+  Instellingen (Bedrijfsgegevens, Prompt instellen, Webshop). The stock page is called "Aanbod".
+- Facturen and all note lists use the stock table layout; rows in the note lists open the note.
+- Form fixes: selects and textareas inherit the page font; note dialog fields match in size.
+- Released to staging and production.
 
 ## Decisions
 - No "Gereserveerd" status: negotiating keeps the stove for sale and in the web shop.
@@ -31,8 +38,11 @@ Branch: `feature/stove-notes`
 - The menu item is called "Notities".
 
 ## Open items
-- Test on staging: the status list, selling delivered now / to deliver, a negotiation, the last unit
-  of a new stove (archive / made to order), cancelling a sale with restock, Af te leveren, Notities.
+- Test on production: selling a used stove (delivered now / to deliver), Verkoop plaatsen on a new
+  stove, the last-unit choice, cancelling a sale with restock, Agenda, Af te leveren, In
+  onderhandeling, Facturen, and the web shop stock after a sale.
+- Unknown whether the removed viewing migration was applied; if so, restore the handover check to
+  ('pickup', 'delivery').
 - Then release to production.
 - Possible follow-up: prefill the invoice dialog with the buyer from a sold note.
 - This Windows computer still has a `.env.local`; per the 2026-09-30 decision it may be removed.
