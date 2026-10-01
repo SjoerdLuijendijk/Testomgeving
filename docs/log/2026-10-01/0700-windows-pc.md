@@ -31,6 +31,11 @@ Branches: `feature/stove-notes`, `feature/quotes`
 - Quotes (menu → Offertes, numbering O2026-0001): lines from stoves, articles or typed (optionally
   saved as article), status Concept/Verstuurd/Geaccepteerd/Afgewezen, an accepted quote opens a
   concept invoice. Articles (Instellingen → Artikelen) with CSV import keyed on SKU. Logo on PDFs.
+- Articles grouped per category, article numbers hidden (still the CSV import key); quote lines are
+  picked from scrollable lists, picking again raises the quantity; preview shows lines without price.
+- Market prices researched for all 231 articles (Dutch web shops, other diameters derived by a
+  factor) and written to a new CSV on the user's desktop for import; roof outlets got unique SKUs.
+- "＋ Montage" in quotes and invoices at the hourly rate (excl. VAT) under Bedrijfsgegevens.
 - Released to staging and production.
 
 ## Decisions
@@ -59,6 +64,6 @@ Branches: `feature/stove-notes`, `feature/quotes`
 ## Manual steps and migrations
 - `20261001120000_create_stove_notes.sql`: applied by the user.
 - `20261001170000_allow_invoices_without_stove.sql` and `20261001190000_create_articles_and_quotes.sql`:
-  applied by the user.
+  applied by the user. `20261001210000_add_hourly_rate.sql`: applied by the user.
 - The viewing migration was removed from the repository again; if it was applied, its constraint
   change has to be undone (see the chat of this session).
