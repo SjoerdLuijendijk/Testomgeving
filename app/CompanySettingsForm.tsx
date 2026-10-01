@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { Company } from "../lib/invoice";
+import { formatPriceInput } from "../lib/price";
 import { saveCompanySettings } from "./invoice-actions";
 
 const FIELDS: { name: keyof Company; label: string; required?: boolean; type?: string; inputMode?: "numeric" | "email" | "tel"; autoComplete?: string }[] = [
@@ -47,6 +48,15 @@ export default function CompanySettingsForm({ company }: { company: Company | nu
             />
           </label>
         ))}
+        <label className="stacked-label">
+          <span>Uurtarief montage excl. btw (€, optioneel)</span>
+          <input
+            name="hourly_rate_ex"
+            inputMode="decimal"
+            placeholder="bijv. 55"
+            defaultValue={company?.hourly_rate_ex_cents != null ? formatPriceInput(company.hourly_rate_ex_cents) : ""}
+          />
+        </label>
         <label className="stacked-label">
           <span>Betaaltermijn (dagen)</span>
           <input name="payment_term_days" type="number" inputMode="numeric" min={0} max={365} step={1} required defaultValue={company?.payment_term_days ?? 14} />

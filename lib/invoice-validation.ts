@@ -1,5 +1,5 @@
 import { isVatRate, MAX_INVOICE_LINES, MAX_QUANTITY, type Company, type Customer, type InvoiceLine } from "./invoice";
-import { MAX_PRICE_CENTS } from "./price";
+import { MAX_PRICE_CENTS, parsePriceToCents } from "./price";
 
 type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 
@@ -12,6 +12,12 @@ function optionalText(value: unknown, max: number): string | null | undefined {
   const trimmed = typeof value === "string" ? value.trim() : "";
   if (trimmed === "") return null;
   return trimmed.length <= max ? trimmed : undefined;
+}
+
+function optionalMoney(value: unknown): number | null | undefined {
+  const trimmed = typeof value === "string" ? value.trim() : "";
+  if (trimmed === "") return null;
+  return parsePriceToCents(trimmed, { allowZero: true }) ?? undefined;
 }
 
 // Validates untrusted company settings from the settings form.
@@ -27,6 +33,7 @@ export function parseCompany(formData: FormData): Result<Company> {
     email: optionalText(formData.get("email"), 320),
     phone: optionalText(formData.get("phone"), 40),
     payment_term_days: Number(formData.get("payment_term_days")),
+    hourly_rate_ex_cents: optionalMoney(formData.get("hourly_rate_ex")),
   };
   if (!value.name || !value.address || !value.postal_code || !value.city) {
     return { ok: false, error: "Vul bedrijfsnaam, adres, postcode en plaats in." };
@@ -36,6 +43,7 @@ export function parseCompany(formData: FormData): Result<Company> {
   if (!Number.isInteger(value.payment_term_days) || value.payment_term_days < 0 || value.payment_term_days > 365) {
     return { ok: false, error: "Vul een betaaltermijn in dagen in (0–365)." };
   }
+  if (value.hourly_rate_ex_cents === undefined) return { ok: false, error: "Vul het uurtarief in als bijvoorbeeld 55 of 52,50." };
   return { ok: true, value: value as Company };
 }
 

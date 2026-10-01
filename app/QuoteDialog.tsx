@@ -229,7 +229,7 @@ export default function QuoteDialog({ quote: initialQuote, onClose }: QuoteDialo
         <div className="invoice-layout">
           <form className="invoice-form" onSubmit={handleSave}>
             <CustomerFields customer={customer} onChange={setCustomer} addressOptional />
-            <InvoiceLinesEditor lines={lines} invalid={showLineErrors ? invalid : []} onChange={setLines} allowSaveAsArticle>
+            <InvoiceLinesEditor hourlyRateExCents={company ? (company.hourly_rate_ex_cents ?? null) : undefined} lines={lines} invalid={showLineErrors ? invalid : []} onChange={setLines} allowSaveAsArticle>
               <QuoteLinePicker stoves={sources?.stoves ?? []} articles={sources?.articles ?? []} onPick={addLine} disabled={!sources || lines.length >= MAX_INVOICE_LINES} />
             </InvoiceLinesEditor>
             <fieldset className="invoice-section">

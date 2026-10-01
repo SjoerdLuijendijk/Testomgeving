@@ -169,7 +169,7 @@ export default function InvoiceDialog({ stove, loadPrefill }: InvoiceDialogProps
           <div className="invoice-layout">
             <form className="invoice-form" onSubmit={handleCreate}>
               <CustomerFields customer={customer} onChange={setCustomer} />
-              <InvoiceLinesEditor lines={lines} invalid={showLineErrors ? invalid : []} onChange={setLines} />
+              <InvoiceLinesEditor hourlyRateExCents={company ? (company.hourly_rate_ex_cents ?? null) : undefined} lines={lines} invalid={showLineErrors ? invalid : []} onChange={setLines} />
               <dl className="invoice-totals">
                 <div><dt>Excl. btw</dt><dd>{formatPrice(totals.exclCents, { alwaysCents: true })}</dd></div>
                 <div><dt>Btw</dt><dd>{formatPrice(totals.vatCents, { alwaysCents: true })}</dd></div>

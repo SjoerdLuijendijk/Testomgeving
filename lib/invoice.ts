@@ -15,7 +15,12 @@ export type Company = {
   email: string | null;
   phone: string | null;
   payment_term_days: number;
+  /** Installation work per hour, excluding VAT; absent on invoices made before it existed. */
+  hourly_rate_ex_cents?: number | null;
 };
+
+/** VAT rate of installation work. */
+export const MONTAGE_VAT_RATE: VatRate = 21;
 
 export type Customer = {
   name: string;

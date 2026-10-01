@@ -1,5 +1,5 @@
 import { articleDescription, salePriceInclCents, type Article } from "./articles";
-import { DEFAULT_VAT_RATE, MAX_QUANTITY, type Customer, type InvoiceLine, type VatRate } from "./invoice";
+import { DEFAULT_VAT_RATE, MONTAGE_VAT_RATE, MAX_QUANTITY, type Customer, type InvoiceLine, type VatRate } from "./invoice";
 import { formatPriceInput, parsePriceToCents } from "./price";
 import { stoveProductName } from "./stove-specs";
 import { CONDITION_LABELS, type Stove } from "./stoves";
@@ -41,6 +41,18 @@ export function stoveLine(stove: Pick<Stove, "number" | "brand" | "stoveType" | 
     price: stove.priceCents ? formatPriceInput(stove.priceCents) : "",
     vatRate: DEFAULT_VAT_RATE,
     stoveNumber: stove.number,
+  };
+}
+
+/** One hour of installation work at the company's hourly rate (excluding VAT in the settings). */
+export function montageLine(hourlyRateExCents: number | null | undefined): DraftLine {
+  const incl = hourlyRateExCents == null ? null : Math.round((hourlyRateExCents * (100 + MONTAGE_VAT_RATE)) / 100);
+  return {
+    key: nextKey(),
+    description: "Montage (per uur)",
+    quantity: "1",
+    price: incl === null ? "" : formatPriceInput(incl),
+    vatRate: MONTAGE_VAT_RATE,
   };
 }
 

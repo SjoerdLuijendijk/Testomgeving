@@ -138,6 +138,10 @@ skipped and reported. Article prices are excluding VAT; quote lines use prices i
 show the logo top left (`lib/logo-paths.ts`, generated from `public/woonwarmer-logo.svg`).
 Migration: `20261001190000_create_articles_and_quotes.sql`.
 
+"＋ Montage" in the quote and invoice dialogs adds a line "Montage (per uur)" at the hourly rate set
+under Bedrijfsgegevens (excluding VAT, stored as `company_settings.hourly_rate_ex_cents`; migration
+`20261001210000_add_hourly_rate.sql`); the number of hours is the line's quantity.
+
 ## Marktplaats ad text
 
 When a stove is added or edited, the Server Action schedules an OpenAI call with Next.js `after()`

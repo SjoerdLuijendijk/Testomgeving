@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Company, Invoice } from "./invoice";
 
-const COMPANY_COLUMNS = "name, address, postal_code, city, kvk_number, vat_number, iban, email, phone, payment_term_days";
+const COMPANY_COLUMNS = "name, address, postal_code, city, kvk_number, vat_number, iban, email, phone, payment_term_days, hourly_rate_ex_cents";
 
 export async function getCompany(supabase: SupabaseClient): Promise<Company | null> {
   const { data, error } = await supabase.from("company_settings").select(COMPANY_COLUMNS).maybeSingle();
