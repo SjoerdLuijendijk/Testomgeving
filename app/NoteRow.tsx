@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatPrice } from "../lib/price";
 import type { StoveNoteWithStove } from "../lib/stove-note-queries";
+import { onRowClick } from "../lib/row-click";
 import { formatHandover, formatPayment, type NoteStatus } from "../lib/stove-notes";
 import NoteStatusMenu from "./NoteStatusMenu";
 
@@ -17,7 +18,7 @@ export default function NoteRow({ note, onOpenNote }: NoteRowProps) {
   const priceCents = note.priceCents ?? note.stove.priceCents;
 
   return (
-    <tr className={expanded ? "is-expanded" : undefined}>
+    <tr className={expanded ? "clickable-row is-expanded" : "clickable-row"} onClick={onRowClick(() => onOpenNote(note, note.status))}>
       <td data-label="Nr." className="cell-number">{note.stoveNumber}</td>
       <td data-label="Merk" className="cell-brand">{note.stove.brand}</td>
       <td data-label="Ophalen / bezorgen" className="cell-when cell-nowrap">{formatHandover(note) ?? "—"}</td>

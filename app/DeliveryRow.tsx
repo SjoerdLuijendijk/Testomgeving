@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatPrice } from "../lib/price";
+import { onRowClick } from "../lib/row-click";
 import type { StoveNoteWithStove } from "../lib/stove-note-queries";
 import { formatHandover, HANDOVER_LABELS, PAYMENT_METHOD_LABELS, type NoteStatus } from "../lib/stove-notes";
 import NoteStatusMenu from "./NoteStatusMenu";
@@ -32,7 +33,7 @@ export default function DeliveryRow({ note, amounts, today, onOpenNote }: Delive
   const rowClass = [overdue && "is-overdue", expanded && "is-expanded"].filter(Boolean).join(" ");
 
   return (
-    <tr className={rowClass || undefined}>
+    <tr className={["clickable-row", rowClass].filter(Boolean).join(" ")} onClick={onRowClick(() => onOpenNote(note, note.status))}>
       <td data-label="Nr." className="cell-number">{note.stoveNumber}</td>
       <td data-label="Merk" className="cell-brand">{note.stove.brand}</td>
       <td data-label="Wanneer" className="cell-when cell-nowrap">

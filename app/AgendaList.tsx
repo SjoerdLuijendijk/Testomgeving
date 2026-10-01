@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { onRowClick } from "../lib/row-click";
 import type { StoveNoteWithStove } from "../lib/stove-note-queries";
 import { byHandover, HANDOVER_LABELS, isOpenStatus, type NoteStatus } from "../lib/stove-notes";
 import { todayInNetherlands } from "../lib/today";
@@ -70,7 +71,7 @@ export default function AgendaList({ notes }: { notes: StoveNoteWithStove[] }) {
                 {dayNotes.map((note) => {
                   const address = [note.buyerAddress, [note.buyerPostalCode, note.buyerCity].filter(Boolean).join(" ")].filter(Boolean).join(", ");
                   return (
-                      <tr key={note.id}>
+                      <tr key={note.id} className="clickable-row" onClick={onRowClick(() => setOpenNote({ note, status: note.status }))}>
                         <td data-label="Tijd" className="cell-nowrap agenda-time">
                           {day === "past" && <span className="delivery-overdue">{SHORT_DAY_FORMAT.format(new Date(`${note.handoverDate}T00:00:00Z`))} </span>}
                           {note.handoverTime ?? "—"}

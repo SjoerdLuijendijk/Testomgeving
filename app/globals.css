@@ -2214,6 +2214,10 @@ a {
   margin-top: 10px;
 }
 
+.clickable-row {
+  cursor: pointer;
+}
+
 .status-menu-extra {
   margin-top: 4px;
   padding-top: 4px;
