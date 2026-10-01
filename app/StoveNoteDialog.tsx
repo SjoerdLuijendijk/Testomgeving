@@ -45,6 +45,7 @@ export default function StoveNoteDialog({ stove, note, status: givenStatus, onCl
   const [chosenStatus, setChosenStatus] = useState<NoteStatus>("sold");
   const status = givenStatus ?? chosenStatus;
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   // Set on the first change, so a click next to the dialog never throws away typed details.
   const changedRef = useRef(false);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(note?.paymentStatus ?? "open");
@@ -55,6 +56,10 @@ export default function StoveNoteDialog({ stove, note, status: givenStatus, onCl
   useEffect(() => {
     // Development runs effects twice; showModal throws on a dialog that is already open.
     if (!dialogRef.current?.open) dialogRef.current?.showModal();
+    // Start on the title instead of the first field, so phones neither jump to a field nor open the
+    // keyboard straight away.
+    titleRef.current?.focus({ preventScroll: true });
+    dialogRef.current?.scrollTo({ top: 0 });
   }, []);
 
   const becomesSold = status === "sold" && note?.status !== "sold";
@@ -108,7 +113,7 @@ export default function StoveNoteDialog({ stove, note, status: givenStatus, onCl
       <form onSubmit={handleSubmit} onChange={() => (changedRef.current = true)} className="form-stack">
         <input type="hidden" name="status" value={status} />
         <div>
-          <h2 id={titleId}>
+          <h2 id={titleId} ref={titleRef} tabIndex={-1} className="dialog-title">
             Kachel {stove.number} <span className="muted">{stove.brand}</span>
           </h2>
           {givenStatus === undefined && (
