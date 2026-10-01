@@ -12,6 +12,19 @@ import ShopLinkAllPanel from "./ShopLinkAllPanel";
 
 // One management page, opened from the account menu.
 export default async function AdminPanel({ supabase, section }: { supabase: SupabaseClient; section: AdminSection }) {
+  // The invoices are a wide table, laid out like the stock page.
+  if (section === "facturen") {
+    return (
+      <section aria-labelledby="admin-title">
+        <div className="stock-toolbar">
+          <div className="stock-title-row">
+            <h1 id="admin-title">Facturen</h1>
+          </div>
+        </div>
+        <InvoiceList invoices={await listInvoices(supabase)} />
+      </section>
+    );
+  }
   return (
     <section className="panel" aria-labelledby="admin-title">
       <h1 id="admin-title">{ADMIN_SECTIONS.find(({ key }) => key === section)?.label}</h1>
@@ -22,10 +35,8 @@ export default async function AdminPanel({ supabase, section }: { supabase: Supa
         </>
       ) : section === "advertentie" ? (
         <AdPromptForm prompt={(await getAdPrompt(supabase)) ?? DEFAULT_AD_PROMPT} />
-      ) : section === "bedrijf" ? (
-        <CompanySettingsForm company={await getCompany(supabase)} />
       ) : (
-        <InvoiceList invoices={await listInvoices(supabase)} />
+        <CompanySettingsForm company={await getCompany(supabase)} />
       )}
     </section>
   );
