@@ -253,6 +253,43 @@ a {
   font-weight: 600;
 }
 
+.account-submenu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.account-submenu-toggle:hover {
+  background: var(--row-hover);
+}
+
+.account-submenu-toggle svg {
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+
+.account-submenu-toggle[aria-expanded="true"] svg {
+  transform: rotate(90deg);
+}
+
+.account-dropdown .account-submenu {
+  padding: 0 0 0 12px;
+}
+
+.account-submenu[hidden] {
+  display: none;
+}
+
 .account-signout {
   padding-top: 6px;
   border-top: 1px solid var(--line-soft);
