@@ -18,7 +18,9 @@ export default function StoveNoteList({ notes }: { notes: StoveNoteWithStove[] }
   const [filter, setFilter] = useState<Filter>("open");
   const [openNote, setOpenNote] = useState<{ note: StoveNoteWithStove; status: NoteStatus } | null>(null);
 
-  const visible = notes.filter((note) => matchesFilter(note, filter));
+  // Sold stoves still to deliver have their own list (Af te leveren), so they are left out here.
+  const listed = notes.filter((note) => note.status !== "sold");
+  const visible = listed.filter((note) => matchesFilter(note, filter));
   if (filter === "open") visible.sort(byHandover);
 
   return (
@@ -26,14 +28,14 @@ export default function StoveNoteList({ notes }: { notes: StoveNoteWithStove[] }
       <div className="kind-tabs" role="group" aria-label="Welke notities">
         {(Object.keys(FILTERS) as Filter[]).map((key) => (
           <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}>
-            {FILTERS[key]} <span>{notes.filter((note) => matchesFilter(note, key)).length}</span>
+            {FILTERS[key]} <span>{listed.filter((note) => matchesFilter(note, key)).length}</span>
           </button>
         ))}
       </div>
 
       {visible.length === 0 ? (
         <p className="muted">
-          {filter === "open" ? "Geen open notities. Voeg er een toe met het notitie-icoon bij een kachel, of door een kachel op verkocht te zetten." : "Geen notities."}
+          {filter === "open" ? "Geen lopende onderhandelingen. Voeg er een toe via de status van een kachel of het notitie-icoon." : "Geen notities."}
         </p>
       ) : (
         <div className="invoice-list note-list">
@@ -71,7 +73,7 @@ export default function StoveNoteList({ notes }: { notes: StoveNoteWithStove[] }
           </table>
         </div>
       )}
-      <p className="form-hint muted">Afgeleverde en geannuleerde notities worden een jaar na afsluiten automatisch verwijderd.</p>
+      <p className="form-hint muted">Verkochte kachels die nog afgeleverd moeten worden staan onder Af te leveren (menu rechtsboven). Afgeleverde en geannuleerde notities worden een jaar na afsluiten automatisch verwijderd.</p>
 
       {openNote && <StoveNoteDialog stove={openNote.note.stove} note={openNote.note} status={openNote.status} onClose={() => setOpenNote(null)} />}
     </>
