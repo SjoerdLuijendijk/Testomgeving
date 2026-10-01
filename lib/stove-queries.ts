@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getOpenNotesByStove } from "./stove-note-queries";
 import { signPhotoUrls } from "./stove-photos";
 import type { Stove, StoveDetails, StoveInvoice } from "./stoves";
 
@@ -77,13 +78,14 @@ function toStoveDetails(row: DetailsRow): StoveDetails {
 
 export async function getStoves(supabase: SupabaseClient): Promise<Stove[]> {
   // Invoices are fetched separately: they only record the stove number, so they outlive a deleted stove.
-  const [stoves, invoices] = await Promise.all([
+  const [stoves, invoices, notesByStove] = await Promise.all([
     supabase
       .from("stoves")
       .select(`${DETAIL_COLUMNS}, stove_photos (id, path)`)
       .order("number", { ascending: false })
       .order("id", { referencedTable: "stove_photos", ascending: true }),
     supabase.from("invoices").select("id, invoice_number, stove_number").order("id", { ascending: true }),
+    getOpenNotesByStove(supabase),
   ]);
   if (stoves.error) throw stoves.error;
   if (invoices.error) throw invoices.error;
@@ -100,6 +102,7 @@ export async function getStoves(supabase: SupabaseClient): Promise<Stove[]> {
   return stoves.data.map((stove) => ({
     ...toStoveDetails(stove as DetailsRow),
     invoices: invoicesByStove.get(stove.number) ?? [],
+    notes: notesByStove.get(stove.number) ?? [],
     photos: stove.stove_photos.map((photo) => ({ id: photo.id, url: urlByPath.get(photo.path) ?? null })),
   }));
 }

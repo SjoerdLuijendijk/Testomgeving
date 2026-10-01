@@ -13,7 +13,7 @@ import StoveRow from "./StoveRow";
 
 const KIND_LABELS: Record<Kind, string> = { used: "Gereviseerd", new: "Nieuw", order: "Op bestelling" };
 const VIEW_TITLES: Record<StockView, string> = { available: "Voorraad", sold: "Verkocht archief" };
-const ACTION_LABELS = ["Bewerken", "Factuur", "Advertentie", "Verwijderen"];
+const ACTION_LABELS = ["Notitie", "Bewerken", "Factuur", "Advertentie", "Verwijderen"];
 
 function matchesSearch(stove: Stove, query: string) {
   if (!query) return true;

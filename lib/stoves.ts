@@ -1,3 +1,5 @@
+import type { StoveNote } from "./stove-notes";
+
 export const PHOTOS_BUCKET = "stove-photos";
 
 // Photos are resized to JPEG in the browser (lib/resize-photo.ts) before upload.
@@ -108,7 +110,9 @@ export type Stove = {
   createdAt: string;
   photos: StovePhoto[];
   invoices: StoveInvoice[];
+  /** Open sales notes: in negotiation, or sold but not yet done. */
+  notes: StoveNote[];
 };
 
-/** A stove without its photos and invoices. */
-export type StoveDetails = Omit<Stove, "photos" | "invoices">;
+/** A stove without its photos, invoices and notes. */
+export type StoveDetails = Omit<Stove, "photos" | "invoices" | "notes">;

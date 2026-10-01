@@ -6,9 +6,10 @@ import { ADMIN_SECTIONS, type AdminSection } from "../lib/admin-sections";
 import { STOCK_VIEW_HREFS } from "../lib/stock-views";
 import { signOut } from "./auth/actions";
 
-type MenuItemKey = "verkocht" | AdminSection;
+type MenuItemKey = "notities" | "verkocht" | AdminSection;
 
 const MENU_ITEMS: { key: MenuItemKey; label: string; href: string }[] = [
+  { key: "notities", label: "Notities", href: "/?tab=notities" },
   { key: "verkocht", label: "Verkocht archief", href: STOCK_VIEW_HREFS.sold },
   ...ADMIN_SECTIONS,
 ];
@@ -18,10 +19,12 @@ type AccountMenuProps = {
   /** Team members get the sold archive and management pages; others only sign out. */
   showSections: boolean;
   activeItem: MenuItemKey | null;
+  /** Number of open sales notes, shown on the button and next to "Notities". */
+  openNotes: number;
 };
 
 // Profile button top right; its dropdown opens the sold archive and management pages directly and signs out.
-export default function AccountMenu({ email, showSections, activeItem }: AccountMenuProps) {
+export default function AccountMenu({ email, showSections, activeItem, openNotes }: AccountMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -52,13 +55,14 @@ export default function AccountMenu({ email, showSections, activeItem }: Account
         className="account-button"
         aria-expanded={open}
         aria-controls={menuId}
-        aria-label="Account en beheer"
+        aria-label={openNotes > 0 ? `Account en beheer, ${openNotes} open ${openNotes === 1 ? "notitie" : "notities"}` : "Account en beheer"}
         onClick={() => setOpen((value) => !value)}
       >
         <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="8" r="4" />
           <path d="M4 21a8 8 0 0 1 16 0" />
         </svg>
+        {openNotes > 0 && <span className="count-badge" aria-hidden="true">{openNotes}</span>}
         <svg aria-hidden="true" className="account-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           <path d="m6 9 6 6 6-6" />
         </svg>
@@ -73,6 +77,7 @@ export default function AccountMenu({ email, showSections, activeItem }: Account
                 <li key={key}>
                   <Link href={href} aria-current={activeItem === key ? "page" : undefined} onClick={() => setOpen(false)}>
                     {label}
+                    {key === "notities" && openNotes > 0 && <span className="count-badge">{openNotes}</span>}
                   </Link>
                 </li>
               ))}

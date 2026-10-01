@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatPrice } from "../lib/price";
 import { formatDimensions, formatFlue, formatType, MISSING } from "../lib/stove-display";
+import type { NoteStatus, StoveNote } from "../lib/stove-notes";
 import { LISTING_CHANNELS, type ListingChannel, type Stove } from "../lib/stoves";
 import DeleteStoveDialog from "./DeleteStoveDialog";
 import EditStoveDialog from "./EditStoveDialog";
@@ -15,12 +16,17 @@ import ShopSyncStatus from "./ShopSyncStatus";
 import SoldToggle from "./SoldToggle";
 import StockControl from "./StockControl";
 import StoveInvoiceLinks from "./StoveInvoiceLinks";
+import StoveNoteBadges from "./StoveNoteBadges";
+import StoveNoteDialog from "./StoveNoteDialog";
 
 const DATE_FORMAT = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "short", year: "numeric" });
 
 // On phones the row is a compact card; "cell-detail" cells only show once the card is expanded.
 export default function StoveRow({ stove, brands }: { stove: Stove; brands: string[] }) {
   const [expanded, setExpanded] = useState(false);
+  // The note dialog: an existing note, or a new one starting with the given status.
+  const [openNote, setOpenNote] = useState<{ note: StoveNote | null; status: NoteStatus } | null>(null);
+  const sell = () => setOpenNote({ note: null, status: "sold" });
   const rowClass = [stove.soldAt && "is-sold", expanded && "is-expanded"].filter(Boolean).join(" ");
 
   return (
@@ -36,10 +42,12 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
         {stove.madeToOrder ? (
           <span className="stock-count">Op bestelling</span>
         ) : stove.condition === "new" ? (
-          <StockControl stoveNumber={stove.number} quantity={stove.stockQuantity} />
+          <StockControl stoveNumber={stove.number} quantity={stove.stockQuantity} onSell={sell} />
         ) : (
-          <SoldToggle stoveNumber={stove.number} sold={Boolean(stove.soldAt)} />
+          <SoldToggle stoveNumber={stove.number} sold={Boolean(stove.soldAt)} onSell={sell} />
         )}
+        <StoveNoteBadges notes={stove.notes} onOpen={(note) => setOpenNote({ note, status: note.status })} />
+        {openNote && <StoveNoteDialog stove={stove} note={openNote.note} initialStatus={openNote.status} onClose={() => setOpenNote(null)} />}
       </td>
       {(Object.keys(LISTING_CHANNELS) as ListingChannel[]).map((channel) => (
         <td key={channel} data-label={LISTING_CHANNELS[channel].label} className="cell-detail cell-status">
@@ -57,6 +65,14 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
         <time dateTime={stove.createdAt}>{DATE_FORMAT.format(new Date(stove.createdAt))}</time>
       </td>
       {/* Each action has its own column so the icons line up from row to row. */}
+      <td className="cell-detail cell-actions">
+        <button type="button" className="icon-button" onClick={() => setOpenNote({ note: null, status: "negotiating" })} title="Notitie toevoegen" aria-label={`Notitie toevoegen bij kachel ${stove.number}`}>
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
+            <path d="M8 9h8M8 13h5" />
+          </svg>
+        </button>
+      </td>
       <td className="cell-detail cell-actions">
         <EditStoveDialog stove={stove} brands={brands} />
       </td>
