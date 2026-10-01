@@ -53,7 +53,7 @@ export default async function Page({ searchParams }: PageProps) {
         <AccountMenu email={user.email} showSections={isMember} activeItem={menuItem} noteCounts={noteCounts} />
       </header>
 
-      <main className={activeTab === "admin" || activeTab === "toevoegen" ? "page-main" : "page-main page-main--wide"}>
+      <main className={activeTab === "toevoegen" || (activeTab === "admin" && adminSection !== "facturen") ? "page-main" : "page-main page-main--wide"}>
         {!isMember ? (
           <div className="notice" role="alert">
             <strong>Geen toegang</strong>

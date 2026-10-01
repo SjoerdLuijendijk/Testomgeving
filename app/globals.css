@@ -1158,38 +1158,31 @@ a {
   text-align: right;
 }
 
-/* Invoice list (Admin → Facturen) */
+/* Invoice list (account menu → Facturen), in the stock table layout */
 
-.invoice-list {
-  margin-top: 16px;
-  overflow-x: auto;
-}
-
-.invoice-list[aria-busy="true"] {
+.invoice-table[aria-busy="true"],
+.table-wrap[aria-busy="true"] {
   opacity: 0.6;
 }
 
-.invoice-list table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
+@media (max-width: 719px) {
+  /* Each invoice is a card with labelled lines. */
+  .stove-table.invoice-table tbody tr {
+    display: block;
+    padding: 8px 4px;
+  }
 
-.invoice-list th,
-.invoice-list td {
-  padding: 10px 8px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-  white-space: nowrap;
-}
+  .stove-table.invoice-table tbody td {
+    padding: 4px 12px;
+  }
 
-.invoice-list th {
-  color: var(--muted);
-  font-weight: 600;
-}
+  .stove-table.invoice-table tbody td::before {
+    content: attr(data-label);
+  }
 
-.invoice-list .cell-amount {
-  text-align: right;
+  .stove-table.invoice-table tbody td.cell-actions::before {
+    content: none;
+  }
 }
 
 /* Marketplace ad dialog */
