@@ -46,19 +46,28 @@ export default function StoveStatus({ stove, onOpenNote }: StoveStatusProps) {
     label: "In onderhandeling",
     tone: "negotiating",
     current: Boolean(negotiation),
-    onSelect: sold ? undefined : () => onOpenNote(negotiation ?? null, "negotiating"),
+    onSelect: sold ? undefined : () => onOpenNote(null, "negotiating"),
   };
   const soldOption: StatusOption = {
     key: "sold",
     label: sold && stove.condition === "new" ? "Uitverkocht" : "Verkocht",
     tone: "sold",
     current: sold,
-    onSelect: sold ? (sale ? () => onOpenNote(sale, "sold") : undefined) : () => onOpenNote(negotiation ?? null, "sold"),
+    onSelect: sold ? undefined : () => onOpenNote(negotiation ?? null, "sold"),
   };
   const options = [forSale, negotiating, soldOption];
   if (sale) options.push({ key: "done", label: "Afgeleverd", tone: "done", onSelect: () => closeNote(stove, sale, "done") });
 
   // A sold stove that is still to be delivered says so on its pill.
   const current = sale ? { ...soldOption, label: "Af te leveren" } : sold ? soldOption : negotiation ? negotiating : forSale;
-  return <StatusMenu label={current.label} tone={current.tone} options={options} ariaLabel={`Kachel ${stove.number}`} disabled={pending} />;
+  return (
+    <StatusMenu
+      label={current.label}
+      tone={current.tone}
+      options={options}
+      ariaLabel={`Kachel ${stove.number}`}
+      disabled={pending}
+      onEditDetails={note ? () => onOpenNote(note, note.status) : undefined}
+    />
+  );
 }
