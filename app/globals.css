@@ -2307,38 +2307,46 @@ a {
   box-shadow: var(--focus-ring);
 }
 
-/* Deliveries (account menu → Af te leveren) */
+/* Deliveries (account menu → Af te leveren), in the stock table layout */
 
-.delivery-list td {
-  vertical-align: top;
-}
-
-.delivery-list td[data-label="Adres"],
-.delivery-list .delivery-agreements {
-  min-width: 180px;
+.stove-table .cell-wrap {
+  min-width: 200px;
   white-space: pre-wrap;
 }
 
-.delivery-list .cell-due {
+.delivery-table .cell-due {
   font-weight: 700;
 }
 
-.delivery-list tfoot th,
-.delivery-list tfoot td {
-  border-top: 2px solid var(--line);
-  border-bottom: 0;
-  font-weight: 700;
-}
-
-.delivery-list tfoot .muted {
-  font-weight: 500;
-}
-
-.delivery-list tr.is-overdue td:first-child {
+.delivery-table tr.is-overdue td:first-child {
   box-shadow: inset 3px 0 0 var(--sold);
 }
 
 .delivery-overdue {
   color: var(--sold);
   font-weight: 600;
+}
+
+@media (max-width: 719px) {
+  /* Compact card: number, brand and amount due on top; date and status below. */
+  .delivery-table tbody tr {
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto 40px;
+    grid-template-areas:
+      "number brand price toggle"
+      "when when status toggle";
+  }
+
+  .delivery-table .cell-when {
+    grid-area: when;
+    font-size: 14px;
+  }
+
+  .delivery-table tr.is-overdue td:first-child {
+    box-shadow: none;
+  }
+
+  .delivery-table tfoot td[data-label]::before {
+    display: block;
+    content: attr(data-label);
+  }
 }
