@@ -32,7 +32,8 @@ export type InvoiceLine = { description: string; quantity: number; unit_price_ce
 export type Invoice = {
   number: string | null; // null for a draft preview
   issueDate: string; // yyyy-mm-dd
-  stoveNumber: number;
+  /** Null for a separate invoice that is not about a stove. */
+  stoveNumber: number | null;
   seller: Company;
   customer: Customer;
   lines: InvoiceLine[];

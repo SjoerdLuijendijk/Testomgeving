@@ -34,7 +34,7 @@ export default function InvoiceList({ invoices }: { invoices: InvoiceSummary[] }
                 <time dateTime={invoice.issueDate}>{DATE_FORMAT.format(new Date(invoice.issueDate))}</time>
               </td>
               <td data-label="Klant">{invoice.customerName}</td>
-              <td data-label="Kachel">{invoice.stoveNumber}</td>
+              <td data-label="Kachel">{invoice.stoveNumber ?? "—"}</td>
               <td data-label="Bedrag" className="cell-numeric cell-nowrap">{formatPrice(invoice.totalCents, { alwaysCents: true })}</td>
               <td className="cell-actions">
                 <button type="button" className="invoice-link" onClick={() => download(invoice.id)} disabled={pending} aria-label={`Factuur ${invoice.number} downloaden`}>

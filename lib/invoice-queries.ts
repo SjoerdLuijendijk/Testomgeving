@@ -42,7 +42,7 @@ export type InvoiceSummary = {
   id: number;
   number: string;
   issueDate: string;
-  stoveNumber: number;
+  stoveNumber: number | null;
   customerName: string;
   totalCents: number;
 };
