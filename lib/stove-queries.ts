@@ -92,6 +92,7 @@ export async function getStoves(supabase: SupabaseClient): Promise<Stove[]> {
 
   const invoicesByStove = new Map<number, StoveInvoice[]>();
   for (const invoice of invoices.data) {
+    if (invoice.stove_number === null) continue;
     const list = invoicesByStove.get(invoice.stove_number) ?? [];
     list.push({ id: invoice.id, number: invoice.invoice_number });
     invoicesByStove.set(invoice.stove_number, list);

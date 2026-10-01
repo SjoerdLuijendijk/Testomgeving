@@ -117,7 +117,8 @@ details from Admin → Bedrijfsgegevens are copied onto the invoice.
 
 Invoices cannot be changed or deleted after creation; corrections need a credit invoice. PDFs are
 generated in the browser with `pdf-lib` and can be downloaded again from the inventory or from
-Admin → Facturen, which lists all invoices, including those of deleted stoves.
+Facturen, which lists all invoices, including those of deleted stoves. "+ Losse factuur" on that
+page makes an invoice without a stove (migration `20261001170000_allow_invoices_without_stove.sql`).
 
 ## Marktplaats ad text
 

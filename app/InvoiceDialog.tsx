@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { downloadFile } from "../lib/download-file";
 import { invoiceTotals, type Company, type Invoice } from "../lib/invoice";
-import { EMPTY_CUSTOMER, stoveLine, todayIsoDate, toCustomer, toInvoiceLines, type DraftCustomer, type DraftLine } from "../lib/invoice-draft";
+import { EMPTY_CUSTOMER, emptyLine, stoveLine, todayIsoDate, toCustomer, toInvoiceLines, type DraftCustomer, type DraftLine } from "../lib/invoice-draft";
 import { formatPrice } from "../lib/price";
 import type { Stove } from "../lib/stoves";
 import CustomerFields from "./CustomerFields";
@@ -20,7 +20,9 @@ async function renderPdf(invoice: Invoice) {
   return { bytes: await createInvoicePdf(invoice), fileName: invoiceFileName(invoice) };
 }
 
-export default function InvoiceDialog({ stove }: { stove: Stove }) {
+// stove null: a separate invoice, opened with a button on the invoices page.
+export default function InvoiceDialog({ stove }: { stove: Stove | null }) {
+  const stoveNumber = stove?.number ?? null;
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [company, setCompany] = useState<Company | null | undefined>(undefined);
@@ -38,7 +40,7 @@ export default function InvoiceDialog({ stove }: { stove: Stove }) {
 
   function open() {
     setCustomer(EMPTY_CUSTOMER);
-    setLines([stoveLine(stove)]);
+    setLines([stove ? stoveLine(stove) : emptyLine()]);
     setCreated(null);
     setError(null);
     setShowLineErrors(false);
@@ -56,7 +58,7 @@ export default function InvoiceDialog({ stove }: { stove: Stove }) {
     if (!isOpen || !company || created) return;
     let cancelled = false;
     const timer = setTimeout(async () => {
-      const draft: Invoice = { number: null, issueDate: todayIsoDate(), stoveNumber: stove.number, seller: company, customer: toCustomer(customer), lines: valid };
+      const draft: Invoice = { number: null, issueDate: todayIsoDate(), stoveNumber, seller: company, customer: toCustomer(customer), lines: valid };
       const { bytes } = await renderPdf(draft);
       if (cancelled) return;
       const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: "application/pdf" }));
@@ -69,7 +71,7 @@ export default function InvoiceDialog({ stove }: { stove: Stove }) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [isOpen, company, customer, valid, created, stove.number]);
+  }, [isOpen, company, customer, valid, created, stoveNumber]);
 
   function handleClose() {
     setIsOpen(false);
@@ -100,7 +102,7 @@ export default function InvoiceDialog({ stove }: { stove: Stove }) {
     if (!confirmed) return;
 
     startTransition(async () => {
-      const result = await createInvoice(stove.number, { customer: toCustomer(customer), lines: valid });
+      const result = await createInvoice(stoveNumber, { customer: toCustomer(customer), lines: valid });
       if (!result.ok) {
         setError(result.error);
         return;
@@ -110,19 +112,25 @@ export default function InvoiceDialog({ stove }: { stove: Stove }) {
     });
   }
 
-  const titleId = `invoice-title-${stove.number}`;
+  const titleId = `invoice-title-${stoveNumber ?? "separate"}`;
   return (
     <>
-      <button type="button" className="icon-button" onClick={open} title="Factuur maken" aria-label={`Factuur maken voor kachel ${stove.number}`}>
-        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-          <path d="M14 2v6h6" />
-          <path d="M8 13h8M8 17h5" />
-        </svg>
-      </button>
+      {stove ? (
+        <button type="button" className="icon-button" onClick={open} title="Factuur maken" aria-label={`Factuur maken voor kachel ${stove.number}`}>
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+            <path d="M14 2v6h6" />
+            <path d="M8 13h8M8 17h5" />
+          </svg>
+        </button>
+      ) : (
+        <button type="button" className="sale-button" onClick={open}>
+          + Losse factuur
+        </button>
+      )}
       <dialog ref={dialogRef} className="invoice-dialog" aria-labelledby={titleId} onClose={handleClose}>
         <div className="invoice-dialog-header">
-          <h2 id={titleId}>Factuur kachel {stove.number}</h2>
+          <h2 id={titleId}>{stove ? `Factuur kachel ${stove.number}` : "Losse factuur"}</h2>
           <button type="button" className="line-remove" onClick={() => dialogRef.current?.close()} aria-label="Sluiten">×</button>
         </div>
 

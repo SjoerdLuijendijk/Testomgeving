@@ -6,6 +6,7 @@ import { getAdPrompt } from "../lib/marketplace-ad-store";
 import { countUnlinkedStoves } from "../lib/woocommerce/link";
 import AdPromptForm from "./AdPromptForm";
 import CompanySettingsForm from "./CompanySettingsForm";
+import InvoiceDialog from "./InvoiceDialog";
 import InvoiceList from "./InvoiceList";
 import ShopImportPanel from "./ShopImportPanel";
 import ShopLinkAllPanel from "./ShopLinkAllPanel";
@@ -19,6 +20,7 @@ export default async function AdminPanel({ supabase, section }: { supabase: Supa
         <div className="stock-toolbar">
           <div className="stock-title-row">
             <h1 id="admin-title">Facturen</h1>
+            <InvoiceDialog stove={null} />
           </div>
         </div>
         <InvoiceList invoices={await listInvoices(supabase)} />

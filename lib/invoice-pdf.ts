@@ -109,7 +109,7 @@ export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const fonts = { regular: await doc.embedFont(StandardFonts.Helvetica), bold: await doc.embedFont(StandardFonts.HelveticaBold) };
   const draft = invoice.number === null;
-  const title = draft ? `Conceptfactuur kachel ${invoice.stoveNumber}` : `Factuur ${invoice.number}`;
+  const title = draft ? draftName(invoice) : `Factuur ${invoice.number}`;
   doc.setTitle(title);
   doc.setAuthor(invoice.seller.name);
 
@@ -142,7 +142,7 @@ export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
     ["Factuurnummer", invoice.number ?? "wordt toegekend"],
     ["Factuurdatum", formatDate(invoice.issueDate)],
     ["Vervaldatum", formatDate(dueDate)],
-    ["Kachelnummer", String(invoice.stoveNumber)],
+    ...(invoice.stoveNumber === null ? [] : [["Kachelnummer", String(invoice.stoveNumber)] as [string, string]]),
   ];
   const endSellerY = w.y;
   w.y = startY;
@@ -237,6 +237,10 @@ export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
   return doc.save();
 }
 
+function draftName(invoice: Invoice) {
+  return invoice.stoveNumber === null ? "Conceptfactuur" : `Conceptfactuur kachel ${invoice.stoveNumber}`;
+}
+
 export function invoiceFileName(invoice: Invoice) {
-  return invoice.number ? `Factuur ${invoice.number}.pdf` : `Conceptfactuur kachel ${invoice.stoveNumber}.pdf`;
+  return invoice.number ? `Factuur ${invoice.number}.pdf` : `${draftName(invoice)}.pdf`;
 }

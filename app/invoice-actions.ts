@@ -38,8 +38,9 @@ export async function getCompanyForInvoice(): Promise<ActionResult<{ company: Co
   return { ok: true, company: await getCompany(supabase) };
 }
 
-export async function createInvoice(stoveNumber: number, input: { customer: unknown; lines: unknown }): Promise<ActionResult<{ invoice: Invoice }>> {
-  if (!isPositiveId(stoveNumber)) return { ok: false, error: "Onbekende kachel." };
+// stoveNumber null: a separate invoice that is not about a stove.
+export async function createInvoice(stoveNumber: number | null, input: { customer: unknown; lines: unknown }): Promise<ActionResult<{ invoice: Invoice }>> {
+  if (stoveNumber !== null && !isPositiveId(stoveNumber)) return { ok: false, error: "Onbekende kachel." };
   const parsed = parseInvoiceInput(input);
   if (!parsed.ok) return parsed;
 
