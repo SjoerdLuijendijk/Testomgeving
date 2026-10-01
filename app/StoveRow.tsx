@@ -27,6 +27,10 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
   // The note dialog: an existing note, or a new one starting with the given status.
   const [openNote, setOpenNote] = useState<{ note: StoveNote | null; status: NoteStatus } | null>(null);
   const sell = () => setOpenNote({ note: null, status: "sold" });
+  const openExisting = (note: StoveNote) => setOpenNote({ note, status: note.status });
+  // A used stove in negotiation shows it on its status pill instead of a separate label.
+  const usesSoldToggle = !stove.madeToOrder && stove.condition !== "new";
+  const negotiation = usesSoldToggle && !stove.soldAt ? stove.notes.find((note) => note.status === "negotiating") : undefined;
   const rowClass = [stove.soldAt && "is-sold", expanded && "is-expanded"].filter(Boolean).join(" ");
 
   return (
@@ -44,9 +48,15 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
         ) : stove.condition === "new" ? (
           <StockControl stoveNumber={stove.number} quantity={stove.stockQuantity} onSell={sell} />
         ) : (
-          <SoldToggle stoveNumber={stove.number} sold={Boolean(stove.soldAt)} onSell={sell} />
+          <SoldToggle
+            stoveNumber={stove.number}
+            sold={Boolean(stove.soldAt)}
+            negotiation={negotiation}
+            onSell={sell}
+            onOpenNegotiation={() => negotiation && openExisting(negotiation)}
+          />
         )}
-        <StoveNoteBadges notes={stove.notes} onOpen={(note) => setOpenNote({ note, status: note.status })} />
+        <StoveNoteBadges notes={stove.notes.filter((note) => note !== negotiation)} onOpen={openExisting} />
         {openNote && <StoveNoteDialog stove={stove} note={openNote.note} initialStatus={openNote.status} onClose={() => setOpenNote(null)} />}
       </td>
       {(Object.keys(LISTING_CHANNELS) as ListingChannel[]).map((channel) => (

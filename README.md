@@ -70,7 +70,8 @@ A note records a negotiation or sale of a stove: buyer, pickup or delivery with 
 price, payment (open, deposit or paid; cash, pin or bank) and further agreements. Only the status is
 required. "Te koop" and "−1 verkocht" open the note dialog with status "Verkocht"; the speech-bubble
 icon adds a note "In onderhandeling", while the stove stays for sale. Selling without filling in
-anything only lowers the stock. Open notes show as labels on the stove; the account menu has
+anything only lowers the stock. A used stove in negotiation shows "In onderhandeling" on its
+status pill instead of "Te koop"; other open notes show as labels on the stove; the account menu has
 "Notities" with all notes and the number of open ones.
 
 The status flows from "In onderhandeling" to "Verkocht" or "Geannuleerd", and from "Verkocht" to

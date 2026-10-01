@@ -1446,6 +1446,17 @@ a {
   border-color: #e8959f;
 }
 
+.status-pill--negotiating {
+  border-color: #f2d6a2;
+  background: #fdf5e6;
+  color: #8a5a00;
+  white-space: nowrap;
+}
+
+.status-pill--negotiating:not(:disabled):hover {
+  border-color: #e0b062;
+}
+
 .thumb {
   position: relative;
   display: block;
