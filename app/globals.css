@@ -1339,13 +1339,10 @@ a {
 }
 
 .stock-count {
-  min-width: 96px;
+  min-width: 28px;
   font-weight: 600;
-  white-space: nowrap;
-}
-
-.stock-count--sold {
-  color: var(--sold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .stock-button {
@@ -1356,12 +1353,6 @@ a {
   background: white;
   font-weight: 600;
   white-space: nowrap;
-}
-
-.stock-button--sell {
-  border-color: var(--available);
-  background: var(--available);
-  color: white;
 }
 
 .stock-button:disabled {
@@ -1664,7 +1655,6 @@ a {
   }
 
   .stove-table .stock-count {
-    min-width: 88px;
     font-size: 13px;
   }
 
@@ -1863,18 +1853,6 @@ a {
     font-size: 13px;
   }
 
-  /* Count on its own line above the two buttons, so the card keeps room for brand and model. */
-  .stove-table .stock-control {
-    justify-content: flex-end;
-    max-width: 150px;
-  }
-
-  .stove-table .stock-count {
-    flex-basis: 100%;
-    min-width: 0;
-    font-size: 13px;
-    text-align: right;
-  }
 
   .stove-table .stock-button {
     min-height: 32px;

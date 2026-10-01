@@ -5,19 +5,30 @@ import type { Stove } from "../lib/stoves";
 import StatusMenu, { type StatusOption } from "./StatusMenu";
 import { useNoteClosing } from "./useNoteClosing";
 
-type SoldToggleProps = {
+/**
+ * The open note a stove's status pill stands for: its negotiation, or for a sold used stove the sale
+ * still to deliver. Other open notes show as separate labels.
+ */
+export function pillNote(stove: Stove): StoveNote | undefined {
+  if (!stove.soldAt) return stove.notes.find((note) => note.status === "negotiating");
+  return stove.condition === "new" ? undefined : stove.notes.find((note) => note.status === "sold");
+}
+
+type StoveStatusProps = {
   stove: Stove;
   /** Opens the note dialog: an existing note, or a new one, with the status it moves to. */
   onOpenNote: (note: StoveNote | null, status: NoteStatus) => void;
 };
 
-// Status of a used (single-unit) stove: Te koop, In onderhandeling or Verkocht, chosen from a list
-// under the pill. Negotiating and selling open the note dialog for the (optional) details.
-export default function SoldToggle({ stove, onOpenNote }: SoldToggleProps) {
+// Status of a stove: Te koop, In onderhandeling or Verkocht, chosen from a list under the pill.
+// Negotiating and selling open the note dialog for the (optional) details; selling a stove that keeps
+// stock takes one unit. The stock itself is changed in its own column.
+export default function StoveStatus({ stove, onOpenNote }: StoveStatusProps) {
   const { closeNote, restockSoldStove, pending } = useNoteClosing();
   const sold = Boolean(stove.soldAt);
-  const negotiation = sold ? undefined : stove.notes.find((note) => note.status === "negotiating");
-  const sale = sold ? stove.notes.find((note) => note.status === "sold") : undefined;
+  const note = pillNote(stove);
+  const negotiation = note?.status === "negotiating" ? note : undefined;
+  const sale = note?.status === "sold" ? note : undefined;
 
   const forSale: StatusOption = {
     key: "available",
@@ -39,7 +50,7 @@ export default function SoldToggle({ stove, onOpenNote }: SoldToggleProps) {
   };
   const soldOption: StatusOption = {
     key: "sold",
-    label: "Verkocht",
+    label: sold && stove.condition === "new" ? "Uitverkocht" : "Verkocht",
     tone: "sold",
     current: sold,
     onSelect: sold ? (sale ? () => onOpenNote(sale, "sold") : undefined) : () => onOpenNote(negotiation ?? null, "sold"),

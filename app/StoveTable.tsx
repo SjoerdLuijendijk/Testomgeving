@@ -118,6 +118,7 @@ export default function StoveTable({ stoves, view }: { stoves: Stove[]; view: St
                 <th scope="col" className="cell-numeric">H × B × D</th>
                 <th scope="col">Rookafvoer</th>
                 {header("Prijs", "priceCents", "cell-numeric")}
+                <th scope="col">Voorraad</th>
                 {header("Status", "status")}
                 {(Object.keys(LISTING_CHANNELS) as ListingChannel[]).map((channel) => (
                   <th key={channel} scope="col">{LISTING_CHANNELS[channel].label}</th>
@@ -135,7 +136,7 @@ export default function StoveTable({ stoves, view }: { stoves: Stove[]; view: St
               <tr>
                 <td colSpan={6}>{visibleUnits} {visibleUnits === 1 ? "kachel" : "kachels"}</td>
                 <td className="cell-numeric">{formatPrice(visibleCents)}</td>
-                <td colSpan={2 + ACTION_LABELS.length + Object.keys(LISTING_CHANNELS).length} className="muted">incl. btw</td>
+                <td colSpan={3 + ACTION_LABELS.length + Object.keys(LISTING_CHANNELS).length} className="muted">incl. btw</td>
               </tr>
             </tfoot>
           </table>
