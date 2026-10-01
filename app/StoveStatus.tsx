@@ -25,8 +25,7 @@ type StoveStatusProps = {
 
 // Status of a stove: Te koop, In onderhandeling or Verkocht, chosen from a list under the pill.
 // Negotiating and selling open the note dialog for the (optional) details; selling a stove that keeps
-// stock takes one unit. The stock itself is changed in its own column. For a new stove model the pill
-// stays "Te koop" (or "Uitverkocht"): each negotiation or sale is a separate note in its own list.
+// stock takes one unit. Used stoves only: a new stove model has SaleButton instead.
 export default function StoveStatus({ stove, onOpenNote }: StoveStatusProps) {
   const { closeNote, restockSoldStove, pending } = useNoteClosing();
   const sold = Boolean(stove.soldAt);
@@ -54,8 +53,7 @@ export default function StoveStatus({ stove, onOpenNote }: StoveStatusProps) {
   };
   const soldOption: StatusOption = {
     key: "sold",
-    // A new stove model sells one unit at a time.
-    label: stove.condition === "new" ? (sold ? "Uitverkocht" : "1 verkocht") : "Verkocht",
+    label: "Verkocht",
     tone: "sold",
     current: sold,
     onSelect: sold ? undefined : () => onOpenNote(negotiation ?? null, "sold"),

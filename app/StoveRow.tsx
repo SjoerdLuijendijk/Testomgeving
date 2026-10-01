@@ -14,6 +14,7 @@ import ListingToggle from "./ListingToggle";
 import ShopLinkButton from "./ShopLinkButton";
 import ShopSyncStatus from "./ShopSyncStatus";
 import StockControl from "./StockControl";
+import SaleButton from "./SaleButton";
 import StoveStatus, { isModelStove, pillNote } from "./StoveStatus";
 import StoveInvoiceLinks from "./StoveInvoiceLinks";
 import StoveNoteBadges from "./StoveNoteBadges";
@@ -25,7 +26,8 @@ const DATE_FORMAT = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "s
 export default function StoveRow({ stove, brands }: { stove: Stove; brands: string[] }) {
   const [expanded, setExpanded] = useState(false);
   // The note dialog: an existing note or a new one, with the status it moves to.
-  const [openNote, setOpenNote] = useState<{ note: StoveNote | null; status: NoteStatus } | null>(null);
+  // Status undefined: a new note whose kind is chosen in the dialog ("Verkoop plaatsen").
+  const [openNote, setOpenNote] = useState<{ note: StoveNote | null; status?: NoteStatus } | null>(null);
   const showNote = (note: StoveNote | null, status: NoteStatus) => setOpenNote({ note, status });
   const onPill = pillNote(stove);
   const rowClass = [stove.soldAt && "is-sold", expanded && "is-expanded"].filter(Boolean).join(" ");
@@ -49,9 +51,15 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
         )}
       </td>
       <td data-label="Status" className="cell-status cell-sold">
-        <StoveStatus stove={stove} onOpenNote={showNote} />
         {/* Notes of a new stove model are only listed under In onderhandeling and Af te leveren. */}
-        {!isModelStove(stove) && <StoveNoteBadges stove={stove} notes={stove.notes.filter((note) => note !== onPill)} onOpenNote={showNote} />}
+        {isModelStove(stove) ? (
+          <SaleButton stove={stove} onPlaceSale={() => setOpenNote({ note: null })} />
+        ) : (
+          <>
+            <StoveStatus stove={stove} onOpenNote={showNote} />
+            <StoveNoteBadges stove={stove} notes={stove.notes.filter((note) => note !== onPill)} onOpenNote={showNote} />
+          </>
+        )}
         {openNote && <StoveNoteDialog stove={stove} note={openNote.note} status={openNote.status} onClose={() => setOpenNote(null)} />}
       </td>
       {(Object.keys(LISTING_CHANNELS) as ListingChannel[]).map((channel) => (

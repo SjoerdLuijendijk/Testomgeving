@@ -31,14 +31,19 @@ type StoveNoteDialogProps = {
   stove: NoteStove;
   /** Null for a new note. */
   note: StoveNote | null;
-  /** The status the note gets on saving: its own status, or the one chosen in the status list. */
-  status: NoteStatus;
+  /**
+   * The status the note gets on saving: its own status, or the one chosen in the status list.
+   * Omitted for a new note whose kind (sale or negotiation) is chosen in the dialog itself.
+   */
+  status?: NoteStatus;
   onClose: () => void;
 };
 
 // Details of a negotiation or sale: buyer, handover, price, payment and agreements, all optional. The
 // status is chosen beforehand in the status list. Rendered only while open.
-export default function StoveNoteDialog({ stove, note, status, onClose }: StoveNoteDialogProps) {
+export default function StoveNoteDialog({ stove, note, status: givenStatus, onClose }: StoveNoteDialogProps) {
+  const [chosenStatus, setChosenStatus] = useState<NoteStatus>("sold");
+  const status = givenStatus ?? chosenStatus;
   const dialogRef = useRef<HTMLDialogElement>(null);
   // Set on the first change, so a click next to the dialog never throws away typed details.
   const changedRef = useRef(false);
@@ -66,10 +71,10 @@ export default function StoveNoteDialog({ stove, note, status, onClose }: StoveN
       const choice = await choose({
         title: `Laatste kachel ${stove.number} verkocht`,
         message:
-          "Archiveren: de kachel is uitverkocht en gaat naar het Verkocht archief (menu rechtsboven). Op bestelling: de kachel blijft te koop en wordt voortaan bij de leverancier besteld.",
+          "In archief plaatsen: de kachel is uitverkocht en gaat naar het Verkocht archief (menu rechtsboven). Op bestelling: de kachel blijft te koop en wordt voortaan bij de leverancier besteld.",
         choices: [
           { value: "order", label: "Op bestelling leverbaar" },
-          { value: "archive", label: "Archiveren" },
+          { value: "archive", label: "In archief plaatsen" },
         ],
       });
       if (choice === null) return;
@@ -106,8 +111,18 @@ export default function StoveNoteDialog({ stove, note, status, onClose }: StoveN
           <h2 id={titleId}>
             Kachel {stove.number} <span className="muted">{stove.brand}</span>
           </h2>
+          {givenStatus === undefined && (
+            <div className="choice-options note-kind-options" role="radiogroup" aria-label="Soort">
+              {(["sold", "negotiating"] as const).map((value) => (
+                <label key={value} className="choice-option">
+                  <input type="radio" checked={chosenStatus === value} onChange={() => setChosenStatus(value)} />
+                  {value === "sold" ? (stove.condition === "new" ? "1 verkocht" : "Verkocht") : "In onderhandeling"}
+                </label>
+              ))}
+            </div>
+          )}
           <p className="note-dialog-status">
-            <span className={`note-badge note-badge--${status}`}>{becomesSold ? "Verkocht" : NOTE_STATUS_LABELS[status]}</span>
+            {givenStatus !== undefined && <span className={`note-badge note-badge--${status}`}>{becomesSold ? "Verkocht" : NOTE_STATUS_LABELS[status]}</span>}
             <span className="muted">
               {becomesSold && !stove.madeToOrder
                 ? stove.condition === "new"
