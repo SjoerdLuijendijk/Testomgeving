@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { ADMIN_SECTIONS, type AdminSection } from "../lib/admin-sections";
 import { STOCK_VIEW_HREFS } from "../lib/stock-views";
+import type { OpenNoteCounts } from "../lib/stove-note-queries";
 import { signOut } from "./auth/actions";
 
-type MenuItemKey = "notities" | "verkocht" | AdminSection;
+type MenuItemKey = "afleveren" | "notities" | "verkocht" | AdminSection;
 
 const MENU_ITEMS: { key: MenuItemKey; label: string; href: string }[] = [
+  { key: "afleveren", label: "Af te leveren", href: "/?tab=afleveren" },
   { key: "notities", label: "Notities", href: "/?tab=notities" },
   { key: "verkocht", label: "Verkocht archief", href: STOCK_VIEW_HREFS.sold },
   ...ADMIN_SECTIONS,
@@ -19,12 +21,14 @@ type AccountMenuProps = {
   /** Team members get the sold archive and management pages; others only sign out. */
   showSections: boolean;
   activeItem: MenuItemKey | null;
-  /** Number of open sales notes, shown on the button and next to "Notities". */
-  openNotes: number;
+  /** Open sales notes and sold stoves to deliver; the counts show on the button and the menu items. */
+  noteCounts: OpenNoteCounts;
 };
 
 // Profile button top right; its dropdown opens the sold archive and management pages directly and signs out.
-export default function AccountMenu({ email, showSections, activeItem, openNotes }: AccountMenuProps) {
+export default function AccountMenu({ email, showSections, activeItem, noteCounts }: AccountMenuProps) {
+  const openNotes = noteCounts.open;
+  const itemCounts: Partial<Record<MenuItemKey, number>> = { afleveren: noteCounts.toDeliver, notities: noteCounts.open };
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -77,7 +81,7 @@ export default function AccountMenu({ email, showSections, activeItem, openNotes
                 <li key={key}>
                   <Link href={href} aria-current={activeItem === key ? "page" : undefined} onClick={() => setOpen(false)}>
                     {label}
-                    {key === "notities" && openNotes > 0 && <span className="count-badge">{openNotes}</span>}
+                    {(itemCounts[key] ?? 0) > 0 && <span className="count-badge">{itemCounts[key]}</span>}
                   </Link>
                 </li>
               ))}

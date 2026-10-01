@@ -69,14 +69,17 @@ time, so concurrent sales cannot overwrite each other.
 A note records a negotiation or sale of a stove: buyer, pickup or delivery with date and time, sale
 price, payment (open, deposit or paid; cash, pin or bank) and further agreements. Only the status is
 required. The status pill of a used stove opens a list (Te koop, In onderhandeling, Verkocht,
-Afgehandeld); choosing negotiating or sold opens the note dialog for the details, the others apply
+Afgeleverd); choosing negotiating or sold opens the note dialog for the details, the others apply
 straight away. "−1 verkocht" of a new stove opens the dialog as a sale, and the speech-bubble icon
-adds a negotiation. Selling without filling in anything only lowers the stock. Other open notes show
+adds a negotiation. A sale is either delivered (or picked up) straight away, which closes the note
+at once, or still to be delivered: those stoves are listed with their agreements under "Af te
+leveren" in the account menu until they are marked "Afgeleverd". Selling straight away without any
+details only lowers the stock. Other open notes show
 as labels with their own status list; the account menu has "Notities" with all notes and the number
 of open ones.
 
-The status flows from "In onderhandeling" to "Verkocht" or "Geannuleerd", and from "Verkocht" to
-"Afgehandeld" or "Geannuleerd". The `stove_notes` trigger enforces this and takes one unit from the
+The status flows from "In onderhandeling" to "Af te leveren" (sold) or "Geannuleerd", and from
+"Af te leveren" to "Afgeleverd" or "Geannuleerd". The `stove_notes` trigger enforces this and takes one unit from the
 stock when a note becomes sold, in the same statement. Cancelling a sale asks whether the stove is
 back in stock. Done and cancelled notes contain personal data and are deleted one year after closing
 when the notes list is opened (migration `20261001120000_create_stove_notes.sql`).

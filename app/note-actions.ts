@@ -19,8 +19,8 @@ function isPositiveId(value: unknown): value is number {
 }
 
 // Adds a note (noteId null) or updates one. A note that becomes sold takes one unit from the stock
-// in the same database statement. Selling without filling in anything only lowers the stock, so no
-// empty note is left behind.
+// in the same database statement. A sale delivered straight away is closed as delivered at once; one
+// without any details only lowers the stock, so no empty note is left behind.
 export async function saveStoveNote(stoveNumber: number, noteId: number | null, formData: FormData): Promise<ActionResult> {
   if (!isPositiveId(stoveNumber) || (noteId !== null && !isPositiveId(noteId))) return { ok: false, error: "Onbekende notitie." };
 
@@ -35,7 +35,7 @@ export async function saveStoveNote(stoveNumber: number, noteId: number | null, 
   const { supabase, isMember } = await requireTeamMember();
   if (!isMember) return NO_ACCESS;
 
-  if (noteId === null && note.status === "sold" && isEmptyNote(note)) {
+  if (noteId === null && note.deliveredNow && isEmptyNote(note)) {
     // A made-to-order stove keeps no stock, so an empty sale leaves nothing to record.
     const { data: stove, error } = await supabase.from("stoves").select("made_to_order").eq("number", stoveNumber).maybeSingle();
     if (error) return { ok: false, error: "Er ging iets mis. Probeer het opnieuw." };
@@ -52,13 +52,23 @@ export async function saveStoveNote(stoveNumber: number, noteId: number | null, 
   if (error) return { ok: false, error: "Er ging iets mis. Probeer het opnieuw." };
   if (data.length === 0) return { ok: false, error: "Deze notitie bestaat niet meer." };
 
+  if (note.deliveredNow) {
+    // The stock already changed with the sale above; a failure here leaves the note "to deliver".
+    const delivered = await supabase.from("stove_notes").update({ status: "done" }).eq("id", data[0].id);
+    if (delivered.error) {
+      after(() => syncStoveToShop(supabase, stoveNumber));
+      revalidatePath("/");
+      return { ok: false, error: "De verkoop is opgeslagen, maar niet als afgeleverd. Zet hem via de status op Afgeleverd." };
+    }
+  }
+
   // Selling changes the stock, which the web shop shows.
   if (note.status === "sold") after(() => syncStoveToShop(supabase, stoveNumber));
   revalidatePath("/");
   return { ok: true };
 }
 
-// Closes a note without changing its details: done (sold and handled) or cancelled. Restocking after
+// Closes a note without changing its details: done (delivered) or cancelled. Restocking after
 // a cancelled sale is a separate step the user confirms.
 export async function closeStoveNote(noteId: number, status: "done" | "cancelled"): Promise<ActionResult> {
   if (!isPositiveId(noteId) || (status !== "done" && status !== "cancelled")) return { ok: false, error: "Onbekende notitie." };

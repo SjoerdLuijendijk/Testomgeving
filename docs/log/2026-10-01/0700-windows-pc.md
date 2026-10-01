@@ -13,6 +13,9 @@ Branch: `feature/stove-notes`
   required, and selling without details only lowers the stock. Open notes show as labels on the
   stove; the account menu has "Notities" with a count of open notes and a list (Open / Afgehandeld /
   Alles).
+- The status pill opens a list of statuses to choose from; the dialog only holds the details.
+- Selling asks "Direct afgeleverd" or "Nog af te leveren"; the latter shows in the new "Af te
+  leveren" list (account menu) with the agreements per stove until it is marked "Afgeleverd".
 - Released to staging.
 
 ## Decisions
@@ -24,8 +27,8 @@ Branch: `feature/stove-notes`
 - The menu item is called "Notities".
 
 ## Open items
-- Test on staging: selling with and without details, a negotiation note, the last unit of a new
-  stove (archive / made to order), cancelling a sale with restock, the Notities list and count.
+- Test on staging: the status list, selling delivered now / to deliver, a negotiation, the last unit
+  of a new stove (archive / made to order), cancelling a sale with restock, Af te leveren, Notities.
 - Then release to production.
 - Possible follow-up: prefill the invoice dialog with the buyer from a sold note.
 - This Windows computer still has a `.env.local`; per the 2026-09-30 decision it may be removed.

@@ -55,6 +55,7 @@ function toStoveNote(row: NoteRow): StoveNote {
 }
 
 export function toNoteRow(note: StoveNoteInput) {
+  // Only the database columns; extra form fields such as deliveredNow are left out.
   return {
     status: note.status,
     buyer_name: note.buyerName,
@@ -87,10 +88,13 @@ export async function getOpenNotesByStove(supabase: SupabaseClient): Promise<Map
   return byStove;
 }
 
-export async function countOpenNotes(supabase: SupabaseClient): Promise<number> {
-  const { count, error } = await supabase.from("stove_notes").select("id", { count: "exact", head: true }).is("closed_at", null);
+export type OpenNoteCounts = { open: number; toDeliver: number };
+
+// Open notes, and among them the sold stoves still to be delivered.
+export async function countOpenNotes(supabase: SupabaseClient): Promise<OpenNoteCounts> {
+  const { data, error } = await supabase.from("stove_notes").select("status").is("closed_at", null);
   if (error) throw error;
-  return count ?? 0;
+  return { open: data.length, toDeliver: data.filter((row) => row.status === "sold").length };
 }
 
 /** What the notes list and dialog need to know about the stove of a note. */

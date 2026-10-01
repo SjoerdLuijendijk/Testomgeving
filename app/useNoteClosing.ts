@@ -9,7 +9,7 @@ import { closeStoveNote } from "./note-actions";
 
 type RestockMode = "ask" | "always";
 
-// Status changes that need no details: marking a sale as done, or cancelling a negotiation or sale.
+// Status changes that need no details: marking a sale as delivered, or cancelling a negotiation or sale.
 // A cancelled sale can put the stove back in stock ("ask" asks first, "always" for a used stove set
 // back to "Te koop").
 export function useNoteClosing() {
@@ -20,7 +20,7 @@ export function useNoteClosing() {
     const cancelsSale = status === "cancelled" && note.status === "sold";
     const confirmed = await confirm(
       status === "done"
-        ? { title: `Verkoop kachel ${stove.number} afhandelen?`, message: "Betaald en opgehaald of bezorgd. De notitie verdwijnt uit de open notities.", confirmLabel: "Afgehandeld" }
+        ? { title: `Kachel ${stove.number} afgeleverd?`, message: "Opgehaald of bezorgd. De kachel verdwijnt uit de lijst Af te leveren.", confirmLabel: "Afgeleverd" }
         : cancelsSale
           ? { title: `Verkoop kachel ${stove.number} annuleren?`, confirmLabel: "Verkoop annuleren", danger: true }
           : { title: `Onderhandeling kachel ${stove.number} stoppen?`, message: "De kachel blijft te koop.", confirmLabel: "Stoppen", danger: true },
