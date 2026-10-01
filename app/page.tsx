@@ -2,11 +2,13 @@ import Link from "next/link";
 import { requireTeamMember } from "../lib/auth";
 import type { AdminSection } from "../lib/admin-sections";
 import type { StockView } from "../lib/stock-views";
+import { countOpenNotes, listNotes } from "../lib/stove-note-queries";
 import { getKnownBrands, getStoves } from "../lib/stove-queries";
 import AccountMenu from "./AccountMenu";
 import AddStoveForm from "./AddStoveForm";
 import AdminPanel from "./AdminPanel";
 import BrandLogo from "./BrandLogo";
+import StoveNoteList from "./StoveNoteList";
 import StoveTable from "./StoveTable";
 
 export const dynamic = "force-dynamic";
@@ -19,11 +21,17 @@ export default async function Page({ searchParams }: PageProps) {
   const { supabase, user, isMember } = await requireTeamMember();
   const { tab: requestedTab, sectie, weergave } = await searchParams;
   // "instellingen" is the tab's former name; its links opened the company details.
-  const activeTab = requestedTab === "voorraad" ? "voorraad" : requestedTab === "admin" || requestedTab === "instellingen" ? "admin" : "toevoegen";
+  const activeTab =
+    requestedTab === "voorraad" || requestedTab === "notities"
+      ? requestedTab
+      : requestedTab === "admin" || requestedTab === "instellingen"
+        ? "admin"
+        : "toevoegen";
   const adminSection: AdminSection =
     sectie === "bedrijf" || sectie === "advertentie" || sectie === "webshop" ? sectie : requestedTab === "instellingen" ? "bedrijf" : "facturen";
   const stockView: StockView = activeTab === "voorraad" && weergave === "verkocht" ? "sold" : "available";
-  const menuItem = activeTab === "admin" ? adminSection : stockView === "sold" ? "verkocht" : null;
+  const menuItem = activeTab === "admin" ? adminSection : activeTab === "notities" ? "notities" : stockView === "sold" ? "verkocht" : null;
+  const openNotes = isMember ? await countOpenNotes(supabase) : 0;
 
   return (
     <div className="app-shell">
@@ -40,7 +48,7 @@ export default async function Page({ searchParams }: PageProps) {
             <Link href="/?tab=voorraad" aria-current={activeTab === "voorraad" && stockView === "available" ? "page" : undefined}>Voorraad</Link>
           </nav>
         )}
-        <AccountMenu email={user.email} showSections={isMember} activeItem={menuItem} />
+        <AccountMenu email={user.email} showSections={isMember} activeItem={menuItem} openNotes={openNotes} />
       </header>
 
       <main className={activeTab === "voorraad" ? "page-main page-main--wide" : "page-main"}>
@@ -51,6 +59,11 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         ) : activeTab === "toevoegen" ? (
           <AddStoveForm brands={await getKnownBrands(supabase)} />
+        ) : activeTab === "notities" ? (
+          <section className="panel" aria-labelledby="notes-title">
+            <h1 id="notes-title">Notities</h1>
+            <StoveNoteList notes={await listNotes(supabase)} />
+          </section>
         ) : activeTab === "admin" ? (
           <AdminPanel supabase={supabase} section={adminSection} />
         ) : (

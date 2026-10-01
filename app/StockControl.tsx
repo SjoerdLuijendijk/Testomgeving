@@ -1,39 +1,26 @@
 "use client";
 
 import { useOptimistic, useTransition } from "react";
-import { adjustStoveStock, makeStoveMadeToOrder } from "./actions";
+import { adjustStoveStock } from "./actions";
 import { useDialog } from "./DialogProvider";
 
-// Stock of a new stove model: sell or restock one unit at a time.
-export default function StockControl({ stoveNumber, quantity }: { stoveNumber: number; quantity: number }) {
+type StockControlProps = {
+  stoveNumber: number;
+  quantity: number;
+  /** Opens the sale note dialog, which sells one unit when saved. */
+  onSell: () => void;
+};
+
+// Stock of a new stove model: sell (through the note dialog) or restock one unit at a time.
+export default function StockControl({ stoveNumber, quantity, onSell }: StockControlProps) {
   const [optimisticQuantity, setOptimisticQuantity] = useOptimistic(quantity);
   const [pending, startTransition] = useTransition();
-  const { choose, notify } = useDialog();
+  const { notify } = useDialog();
 
-  async function adjust(delta: -1 | 1) {
-    // Selling the last unit: archive the sold-out stove, or keep offering it made to order.
-    if (delta === -1 && optimisticQuantity === 1) {
-      const choice = await choose({
-        title: `Laatste kachel ${stoveNumber} verkocht`,
-        message:
-          "Archiveren: de kachel is uitverkocht en gaat naar het Verkocht archief (menu rechtsboven). Op bestelling: de kachel blijft te koop en wordt voortaan bij de leverancier besteld.",
-        choices: [
-          { value: "order", label: "Op bestelling leverbaar" },
-          { value: "archive", label: "Archiveren" },
-        ],
-      });
-      if (choice === null) return;
-      if (choice === "order") {
-        startTransition(async () => {
-          const result = await makeStoveMadeToOrder(stoveNumber);
-          if (!result.ok) await notify(result.error);
-        });
-        return;
-      }
-    }
+  function restock() {
     startTransition(async () => {
-      setOptimisticQuantity(optimisticQuantity + delta);
-      const result = await adjustStoveStock(stoveNumber, delta);
+      setOptimisticQuantity(optimisticQuantity + 1);
+      const result = await adjustStoveStock(stoveNumber, 1);
       if (!result.ok) await notify(result.error);
     });
   }
@@ -47,7 +34,7 @@ export default function StockControl({ stoveNumber, quantity }: { stoveNumber: n
       <button
         type="button"
         className="stock-button stock-button--sell"
-        onClick={() => adjust(-1)}
+        onClick={onSell}
         disabled={pending || soldOut}
         aria-label={`1 kachel ${stoveNumber} verkocht`}
       >
@@ -56,7 +43,7 @@ export default function StockControl({ stoveNumber, quantity }: { stoveNumber: n
       <button
         type="button"
         className="stock-button"
-        onClick={() => adjust(1)}
+        onClick={restock}
         disabled={pending}
         aria-label={`1 kachel ${stoveNumber} bij voorraad`}
       >

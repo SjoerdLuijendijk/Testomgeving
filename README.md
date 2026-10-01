@@ -64,6 +64,21 @@ sells out. The database keeps `sold_at` and `stock_quantity` consistent: a stove
 is sold exactly when its stock is 0. Stock changes go through `adjust_stove_stock()`, one unit at a
 time, so concurrent sales cannot overwrite each other.
 
+## Sales notes
+
+A note records a negotiation or sale of a stove: buyer, pickup or delivery with date and time, sale
+price, payment (open, deposit or paid; cash, pin or bank) and further agreements. Only the status is
+required. "Te koop" and "−1 verkocht" open the note dialog with status "Verkocht"; the speech-bubble
+icon adds a note "In onderhandeling", while the stove stays for sale. Selling without filling in
+anything only lowers the stock. Open notes show as labels on the stove; the account menu has
+"Notities" with all notes and the number of open ones.
+
+The status flows from "In onderhandeling" to "Verkocht" or "Geannuleerd", and from "Verkocht" to
+"Afgehandeld" or "Geannuleerd". The `stove_notes` trigger enforces this and takes one unit from the
+stock when a note becomes sold, in the same statement. Cancelling a sale asks whether the stove is
+back in stock. Done and cancelled notes contain personal data and are deleted one year after closing
+when the notes list is opened (migration `20261001120000_create_stove_notes.sql`).
+
 ## Web shop
 
 Each stove has a "Webshop" checkbox (`shop_listed`) for the WooCommerce web shop, off by default.

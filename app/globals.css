@@ -2039,3 +2039,139 @@ a {
     text-align: right;
   }
 }
+
+/* Sales notes */
+
+.note-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.note-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+button.note-badge {
+  cursor: pointer;
+}
+
+.note-badge-detail {
+  font-weight: 500;
+}
+
+.note-badge--negotiating {
+  border-color: #f2d6a2;
+  background: #fdf5e6;
+  color: #8a5a00;
+}
+
+.note-badge--sold {
+  border-color: #bcd5f0;
+  background: #eef5fd;
+  color: #1f4f86;
+}
+
+.note-badge--done {
+  border-color: #bfe3d2;
+  background: #ecf7f1;
+  color: #0b6b47;
+}
+
+.note-badge--cancelled {
+  border-color: var(--line);
+  background: var(--track);
+  color: var(--muted);
+}
+
+button.note-badge:hover {
+  filter: brightness(0.96);
+}
+
+.note-dialog {
+  width: min(620px, calc(100vw - 32px));
+}
+
+.note-dialog h2 .muted {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.note-dialog textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d6ccc5;
+  border-radius: 8px;
+  background: white;
+  font: inherit;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.note-status-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.note-status-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.note-status-option input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.note-status-option:has(input:checked) {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.note-list {
+  margin-bottom: 12px;
+}
+
+.note-list .note-agreements {
+  overflow: hidden;
+  max-width: 280px;
+  text-overflow: ellipsis;
+}
+
+.count-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: auto;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.account-button .count-badge {
+  margin: 0 2px 0 4px;
+}
