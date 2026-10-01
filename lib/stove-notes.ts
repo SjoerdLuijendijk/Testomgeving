@@ -8,7 +8,8 @@ export const NOTE_STATUS_LABELS = {
   done: "Afgeleverd",
   cancelled: "Geannuleerd",
 } as const;
-export const HANDOVER_LABELS = { pickup: "Ophalen", delivery: "Bezorgen" } as const;
+// The kind of appointment with the buyer (column "handover").
+export const HANDOVER_LABELS = { viewing: "Bezichtiging", pickup: "Ophalen", delivery: "Bezorgen" } as const;
 export const PAYMENT_STATUS_LABELS = { open: "Nog niet betaald", deposit: "Aanbetaald", paid: "Betaald" } as const;
 export const PAYMENT_METHOD_LABELS = { cash: "Contant", pin: "Pin", bank: "Bank" } as const;
 export const MAX_AGREEMENTS_LENGTH = 2000;
@@ -94,7 +95,7 @@ export function parseStoveNote(formData: FormData): Result<StoveNoteForm> {
   if (Object.values(texts).some((value) => value === undefined)) return { ok: false, error: "Een van de velden is te lang." };
 
   const handover = formData.get("handover") || null;
-  if (handover !== null && !isKeyOf(HANDOVER_LABELS, handover)) return { ok: false, error: "Kies ophalen of bezorgen." };
+  if (handover !== null && !isKeyOf(HANDOVER_LABELS, handover)) return { ok: false, error: "Kies een soort afspraak." };
 
   const handoverDate = optionalText(formData.get("handover_date"), 10);
   const handoverTime = optionalText(formData.get("handover_time"), 5);

@@ -66,7 +66,8 @@ time, so concurrent sales cannot overwrite each other.
 
 ## Sales notes
 
-A note records a negotiation or sale of a stove: buyer, pickup or delivery with date and time, sale
+A note records a negotiation or sale of a stove: buyer, an appointment (viewing, pickup or delivery)
+with date and time, sale
 price, payment (open, deposit or paid; cash, pin or bank) and further agreements. Only the status is
 required. The status pill of a used stove opens a list (Te koop, In onderhandeling, Verkocht,
 Afgeleverd); choosing negotiating or sold opens the note dialog for the details, the others apply
@@ -76,7 +77,10 @@ at once, or still to be delivered: those stoves are listed with their agreements
 leveren" in the account menu until they are marked "Afgeleverd". Selling straight away without any
 details only lowers the stock. Other open notes show
 as labels with their own status list; the account menu has "Notities" with the negotiations and
-closed notes (stoves to deliver are only under "Af te leveren").
+closed notes (stoves to deliver are only under "Af te leveren"). "Agenda" in the account menu lists
+the appointments of open notes per day from today on, with open appointments whose day has passed
+on top; the menu shows how many are planned for today (migration
+`20261001150000_add_viewing_appointment.sql` adds the viewing).
 
 The status flows from "In onderhandeling" to "Af te leveren" (sold) or "Geannuleerd", and from
 "Af te leveren" to "Afgeleverd" or "Geannuleerd". The `stove_notes` trigger enforces this and takes one unit from the

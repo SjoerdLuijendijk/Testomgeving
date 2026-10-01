@@ -149,10 +149,10 @@ export default function StoveNoteDialog({ stove, note, status, onClose }: StoveN
         </fieldset>
 
         <fieldset className="invoice-section">
-          <legend>Ophalen of bezorgen</legend>
+          <legend>Afspraak <span className="muted">(komt in de agenda)</span></legend>
           <div className="customer-grid">
             <label className="stacked-label customer-wide">
-              <span>Hoe</span>
+              <span>Soort</span>
               <select name="handover" defaultValue={note?.handover ?? ""}>
                 <option value="">Nog niet bekend</option>
                 {Object.entries(HANDOVER_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
