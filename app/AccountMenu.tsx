@@ -11,16 +11,15 @@ type MenuItemKey = "agenda" | "afleveren" | "notities" | "verkocht" | AdminSecti
 
 type MenuItem = { key: MenuItemKey; label: string; href: string };
 
-// Settings pages sit one level deeper, under "Instellingen".
-const SETTINGS_KEYS: AdminSection[] = ["bedrijf", "advertentie", "webshop"];
 const MENU_ITEMS: MenuItem[] = [
   { key: "agenda", label: "Agenda", href: "/?tab=agenda" },
   { key: "afleveren", label: "Af te leveren", href: "/?tab=afleveren" },
   { key: "notities", label: "In onderhandeling", href: "/?tab=notities" },
   { key: "verkocht", label: "Verkocht archief", href: STOCK_VIEW_HREFS.sold },
-  ...ADMIN_SECTIONS.filter(({ key }) => !SETTINGS_KEYS.includes(key)),
+  ...ADMIN_SECTIONS.filter(({ setting }) => !setting),
 ];
-const SETTINGS_ITEMS: MenuItem[] = ADMIN_SECTIONS.filter(({ key }) => SETTINGS_KEYS.includes(key));
+// Settings pages sit one level deeper, under "Instellingen".
+const SETTINGS_ITEMS: MenuItem[] = ADMIN_SECTIONS.filter(({ setting }) => setting);
 
 type AccountMenuProps = {
   email: string | undefined;

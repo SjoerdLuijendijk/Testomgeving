@@ -1,0 +1,115 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { requireTeamMember } from "../lib/auth";
+import { ARTICLE_COLUMNS, MAX_CSV_BYTES, parseArticle, readArticleCsv, toArticle, toArticleRow, type ArticleInput, type ArticleRow, type RawArticle } from "../lib/articles";
+import type { ActionResult } from "./actions";
+
+const NO_ACCESS = { ok: false, error: "Je hebt geen toegang tot de artikelen." } as const;
+const FAILED = { ok: false, error: "Er ging iets mis. Probeer het opnieuw." } as const;
+// Postgres error code for a duplicate key (here: the SKU).
+const UNIQUE_VIOLATION = "23505";
+
+function isPositiveId(value: unknown): value is number {
+  return Number.isSafeInteger(value) && (value as number) > 0;
+}
+
+function rawFromForm(formData: FormData): RawArticle {
+  const raw: RawArticle = {};
+  for (const [key, value] of formData.entries()) if (typeof value === "string") raw[key as keyof RawArticle] = value;
+  return raw;
+}
+
+// Adds an article (id null) or updates one.
+export async function saveArticle(id: number | null, formData: FormData): Promise<ActionResult> {
+  if (id !== null && !isPositiveId(id)) return { ok: false, error: "Onbekend artikel." };
+  const parsed = parseArticle(rawFromForm(formData));
+  if (!parsed.ok) return parsed;
+
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+
+  const row = { ...toArticleRow(parsed.value), updated_at: new Date().toISOString() };
+  const { data, error } = id === null
+    ? await supabase.from("articles").insert(row).select("id")
+    : await supabase.from("articles").update(row).eq("id", id).select("id");
+  if (error?.code === UNIQUE_VIOLATION) return { ok: false, error: "Er is al een artikel met dit artikelnummer." };
+  if (error) return FAILED;
+  if (data.length === 0) return { ok: false, error: "Dit artikel bestaat niet meer." };
+
+  revalidatePath("/");
+  return { ok: true };
+}
+
+export async function deleteArticle(id: number): Promise<ActionResult> {
+  if (!isPositiveId(id)) return { ok: false, error: "Onbekend artikel." };
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+
+  const { error } = await supabase.from("articles").delete().eq("id", id);
+  if (error) return FAILED;
+  revalidatePath("/");
+  return { ok: true };
+}
+
+export type ImportReport = { created: number; updated: number; skipped: { line: number; reason: string }[] };
+
+// Imports the supplier CSV. An article with the same SKU is updated, others are added. Empty cells
+// keep the value already stored, so prices entered in the app survive a new import without prices.
+// Rows without a SKU, with invalid values, or with a SKU that occurs more than once are skipped.
+export async function importArticles(csvText: string): Promise<ActionResult<{ report: ImportReport }>> {
+  if (typeof csvText !== "string" || csvText.length === 0) return { ok: false, error: "Het bestand is leeg." };
+  if (csvText.length > MAX_CSV_BYTES) return { ok: false, error: "Het bestand is groter dan 1 MB." };
+  const csv = readArticleCsv(csvText);
+  if (!csv.ok) return csv;
+
+  const report: ImportReport = { created: 0, updated: 0, skipped: [] };
+  const linesBySku = new Map<string, number[]>();
+  const valid: { line: number; article: ArticleInput; sku: string }[] = [];
+  for (const { line, raw } of csv.value) {
+    const parsed = parseArticle(raw);
+    if (!parsed.ok) {
+      report.skipped.push({ line, reason: parsed.error });
+      continue;
+    }
+    const sku = parsed.value.sku;
+    if (!sku) {
+      report.skipped.push({ line, reason: "Geen artikelnummer (sku)." });
+      continue;
+    }
+    linesBySku.set(sku, [...(linesBySku.get(sku) ?? []), line]);
+    valid.push({ line, article: parsed.value, sku });
+  }
+  const rows = valid.filter(({ line, sku }) => {
+    const lines = linesBySku.get(sku)!;
+    if (lines.length === 1) return true;
+    report.skipped.push({ line, reason: `Artikelnummer ${sku} staat meerdere keren in het bestand (regels ${lines.join(", ")}).` });
+    return false;
+  });
+
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+  if (rows.length === 0) return { ok: true, report };
+
+  const existing = await supabase.from("articles").select(ARTICLE_COLUMNS).in("sku", rows.map(({ sku }) => sku));
+  if (existing.error) return FAILED;
+  const bySku = new Map((existing.data as ArticleRow[]).map((row) => [row.sku, toArticle(row)]));
+
+  const now = new Date().toISOString();
+  const upserts = rows.map(({ article, sku }) => {
+    const stored = bySku.get(sku);
+    if (stored) report.updated += 1;
+    else report.created += 1;
+    // Empty cells keep the stored value.
+    const merged = stored
+      ? (Object.fromEntries(Object.entries(article).map(([key, value]) => [key, value ?? stored[key as keyof ArticleInput]])) as ArticleInput)
+      : article;
+    return { ...toArticleRow(merged), updated_at: now };
+  });
+
+  const { error } = await supabase.from("articles").upsert(upserts, { onConflict: "sku" });
+  if (error) return FAILED;
+
+  revalidatePath("/");
+  return { ok: true, report };
+}

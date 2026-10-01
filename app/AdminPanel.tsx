@@ -6,6 +6,10 @@ import { getAdPrompt } from "../lib/marketplace-ad-store";
 import { countUnlinkedStoves } from "../lib/woocommerce/link";
 import AdPromptForm from "./AdPromptForm";
 import CompanySettingsForm from "./CompanySettingsForm";
+import { listArticles } from "../lib/article-queries";
+import { listQuotes } from "../lib/quote-queries";
+import ArticleList from "./ArticleList";
+import QuoteList from "./QuoteList";
 import InvoiceDialog from "./InvoiceDialog";
 import InvoiceList from "./InvoiceList";
 import ShopImportPanel from "./ShopImportPanel";
@@ -13,6 +17,8 @@ import ShopLinkAllPanel from "./ShopLinkAllPanel";
 
 // One management page, opened from the account menu.
 export default async function AdminPanel({ supabase, section }: { supabase: SupabaseClient; section: AdminSection }) {
+  if (section === "artikelen") return <ArticleList articles={await listArticles(supabase)} />;
+  if (section === "offertes") return <QuoteList quotes={await listQuotes(supabase)} />;
   // The invoices are a wide table, laid out like the stock page.
   if (section === "facturen") {
     return (

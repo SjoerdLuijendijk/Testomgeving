@@ -5,9 +5,13 @@ type InvoiceLinesEditorProps = {
   lines: DraftLine[];
   invalid: number[];
   onChange: (lines: DraftLine[]) => void;
+  /** Quotes: typed lines can be saved in the article list. */
+  allowSaveAsArticle?: boolean;
+  /** Extra controls next to "Regel toevoegen", such as picking a stove or article. */
+  children?: React.ReactNode;
 };
 
-export default function InvoiceLinesEditor({ lines, invalid, onChange }: InvoiceLinesEditorProps) {
+export default function InvoiceLinesEditor({ lines, invalid, onChange, allowSaveAsArticle, children }: InvoiceLinesEditorProps) {
   const update = (key: string, patch: Partial<DraftLine>) =>
     onChange(lines.map((line) => (line.key === key ? { ...line, ...patch } : line)));
 
@@ -44,12 +48,21 @@ export default function InvoiceLinesEditor({ lines, invalid, onChange }: Invoice
             >
               ×
             </button>
+            {allowSaveAsArticle && !line.articleId && !line.stoveNumber && (
+              <label className="line-save">
+                <input type="checkbox" checked={line.saveAsArticle ?? false} onChange={(event) => update(line.key, { saveAsArticle: event.target.checked })} />
+                Opslaan in artikelen
+              </label>
+            )}
           </li>
         ))}
       </ul>
-      <button type="button" className="secondary-button" onClick={() => onChange([...lines, emptyLine()])} disabled={lines.length >= MAX_INVOICE_LINES}>
-        ＋ Regel toevoegen
-      </button>
+      <div className="line-actions">
+        {children}
+        <button type="button" className="secondary-button" onClick={() => onChange([...lines, emptyLine()])} disabled={lines.length >= MAX_INVOICE_LINES}>
+          ＋ Losse regel
+        </button>
+      </div>
     </fieldset>
   );
 }

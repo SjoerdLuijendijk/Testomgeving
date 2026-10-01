@@ -120,6 +120,24 @@ generated in the browser with `pdf-lib` and can be downloaded again from the inv
 Facturen, which lists all invoices, including those of deleted stoves. "+ Losse factuur" on that
 page makes an invoice without a stove (migration `20261001170000_allow_invoices_without_stove.sql`).
 
+## Quotes and articles
+
+Account menu → Offertes lists the quotes (O2026-0001, ...; own numbering per year). A quote has a
+customer (only the name is required), lines, a validity date (30 days by default) and an optional
+note, with a live PDF preview. Lines come from a stove on offer, an article, or are typed by hand;
+"Opslaan in artikelen" adds a typed line to the article list. Quotes stay editable and have a status
+(Concept, Verstuurd, Geaccepteerd, Afgewezen); an accepted quote offers "Factuur maken", which opens
+a concept invoice with its customer and lines. `save_quote()` stores a quote with its lines in one
+transaction.
+
+Instellingen → Artikelen holds the parts (flue pipes, roof outlets, accessories). "CSV importeren"
+reads the supplier CSV (`;`-separated; columns such as categorie, artikelnaam, diameter_mm, sku,
+verkoopprijs_ex_btw, btw_pct). The SKU is the key: an article with the same SKU is updated, empty
+cells keep the stored value, and rows without a SKU or with a SKU that occurs twice in the file are
+skipped and reported. Article prices are excluding VAT; quote lines use prices including VAT. PDFs
+show the logo top left (`lib/logo-paths.ts`, generated from `public/woonwarmer-logo.svg`).
+Migration: `20261001190000_create_articles_and_quotes.sql`.
+
 ## Marktplaats ad text
 
 When a stove is added or edited, the Server Action schedules an OpenAI call with Next.js `after()`

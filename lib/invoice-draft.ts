@@ -1,10 +1,23 @@
+import { articleDescription, salePriceInclCents, type Article } from "./articles";
 import { DEFAULT_VAT_RATE, MAX_QUANTITY, type Customer, type InvoiceLine, type VatRate } from "./invoice";
 import { formatPriceInput, parsePriceToCents } from "./price";
 import { stoveProductName } from "./stove-specs";
 import { CONDITION_LABELS, type Stove } from "./stoves";
 
-/** Invoice line as edited in the form: quantity and price are still text. */
-export type DraftLine = { key: string; description: string; quantity: string; price: string; vatRate: VatRate };
+/**
+ * Invoice or quote line as edited in the form: quantity and price are still text. Quote lines also
+ * remember the stove or article they came from, and whether a typed line goes into the article list.
+ */
+export type DraftLine = {
+  key: string;
+  description: string;
+  quantity: string;
+  price: string;
+  vatRate: VatRate;
+  stoveNumber?: number | null;
+  articleId?: number | null;
+  saveAsArticle?: boolean;
+};
 export type DraftCustomer = Record<keyof Customer, string>;
 
 export const EMPTY_CUSTOMER: DraftCustomer = { name: "", address: "", postal_code: "", city: "", email: "", phone: "" };
@@ -19,7 +32,7 @@ export function emptyLine(): DraftLine {
   return { key: nextKey(), description: "", quantity: "1", price: "", vatRate: DEFAULT_VAT_RATE };
 }
 
-export function stoveLine(stove: Stove): DraftLine {
+export function stoveLine(stove: Pick<Stove, "number" | "brand" | "stoveType" | "condition" | "priceCents">): DraftLine {
   const condition = stove.condition ? `, ${CONDITION_LABELS[stove.condition].toLowerCase()}` : "";
   return {
     key: nextKey(),
@@ -27,6 +40,19 @@ export function stoveLine(stove: Stove): DraftLine {
     quantity: "1",
     price: stove.priceCents ? formatPriceInput(stove.priceCents) : "",
     vatRate: DEFAULT_VAT_RATE,
+    stoveNumber: stove.number,
+  };
+}
+
+export function articleLine(article: Pick<Article, "id" | "name" | "diameterMm" | "lengthMm" | "salePriceExCents" | "vatRate">): DraftLine {
+  const price = salePriceInclCents(article);
+  return {
+    key: nextKey(),
+    description: articleDescription(article),
+    quantity: "1",
+    price: price === null ? "" : formatPriceInput(price),
+    vatRate: article.vatRate,
+    articleId: article.id,
   };
 }
 
