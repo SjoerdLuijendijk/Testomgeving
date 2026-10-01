@@ -172,7 +172,16 @@ export default function QuoteDialog({ quote: initialQuote, onClose }: QuoteDialo
   const addLine = (line: DraftLine) => setLines((current) => (current.length >= MAX_INVOICE_LINES ? current : [...current, line]));
 
   return (
-    <dialog ref={dialogRef} className="invoice-dialog" aria-labelledby="quote-title" onClose={onClose}>
+    <dialog
+      ref={dialogRef}
+      className="invoice-dialog"
+      aria-labelledby="quote-title"
+      // React passes the close event of the nested pick list ("Klaar") on to this dialog; only react
+      // to this dialog closing itself.
+      onClose={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
       <div className="invoice-dialog-header">
         <h2 id="quote-title" ref={titleRef} tabIndex={-1} className="dialog-title">
           {saved?.number ? `Offerte ${saved.number}` : "Nieuwe offerte"}
