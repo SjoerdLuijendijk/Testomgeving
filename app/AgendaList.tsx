@@ -113,7 +113,7 @@ export default function AgendaList({ notes }: { notes: StoveNoteWithStove[] }) {
       )}
       {undated > 0 && (
         <p className="form-hint muted agenda-undated">
-          {undated} open {undated === 1 ? "notitie heeft" : "notities hebben"} nog geen datum; die staan onder Notities en Af te leveren.
+          {undated} open {undated === 1 ? "notitie heeft" : "notities hebben"} nog geen datum; die staan onder In onderhandeling en Af te leveren.
         </p>
       )}
 

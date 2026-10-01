@@ -12,7 +12,7 @@ type MenuItemKey = "agenda" | "afleveren" | "notities" | "verkocht" | AdminSecti
 const MENU_ITEMS: { key: MenuItemKey; label: string; href: string }[] = [
   { key: "agenda", label: "Agenda", href: "/?tab=agenda" },
   { key: "afleveren", label: "Af te leveren", href: "/?tab=afleveren" },
-  { key: "notities", label: "Notities", href: "/?tab=notities" },
+  { key: "notities", label: "In onderhandeling", href: "/?tab=notities" },
   { key: "verkocht", label: "Verkocht archief", href: STOCK_VIEW_HREFS.sold },
   ...ADMIN_SECTIONS,
 ];

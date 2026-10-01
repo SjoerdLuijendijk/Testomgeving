@@ -53,7 +53,7 @@ export default async function Page({ searchParams }: PageProps) {
         <AccountMenu email={user.email} showSections={isMember} activeItem={menuItem} noteCounts={noteCounts} />
       </header>
 
-      <main className={activeTab === "voorraad" || activeTab === "afleveren" || activeTab === "agenda" ? "page-main page-main--wide" : "page-main"}>
+      <main className={activeTab === "admin" || activeTab === "toevoegen" ? "page-main" : "page-main page-main--wide"}>
         {!isMember ? (
           <div className="notice" role="alert">
             <strong>Geen toegang</strong>
@@ -80,10 +80,7 @@ export default async function Page({ searchParams }: PageProps) {
             <DeliveryList notes={await listNotes(supabase)} />
           </section>
         ) : activeTab === "notities" ? (
-          <section className="panel" aria-labelledby="notes-title">
-            <h1 id="notes-title">Notities</h1>
-            <StoveNoteList notes={await listNotes(supabase)} />
-          </section>
+          <StoveNoteList notes={await listNotes(supabase)} />
         ) : activeTab === "admin" ? (
           <AdminPanel supabase={supabase} section={adminSection} />
         ) : (
