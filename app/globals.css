@@ -2309,75 +2309,36 @@ a {
 
 /* Deliveries (account menu → Af te leveren) */
 
-.delivery-list {
-  display: grid;
-  gap: 12px;
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
+.delivery-list td {
+  vertical-align: top;
 }
 
-.delivery-card {
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-left: 4px solid #3b7bd0;
-  border-radius: var(--radius);
-  background: var(--paper);
+.delivery-list td[data-label="Adres"],
+.delivery-list .delivery-agreements {
+  min-width: 180px;
+  white-space: pre-wrap;
 }
 
-.delivery-card.is-overdue {
-  border-left-color: var(--sold);
+.delivery-list .cell-due {
+  font-weight: 700;
 }
 
-.delivery-card-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+.delivery-list tfoot th,
+.delivery-list tfoot td {
+  border-top: 2px solid var(--line);
+  border-bottom: 0;
+  font-weight: 700;
 }
 
-.delivery-card h2 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.delivery-card h2 .muted {
+.delivery-list tfoot .muted {
   font-weight: 500;
 }
 
-.delivery-when {
-  margin: 6px 0 10px;
-  font-weight: 700;
+.delivery-list tr.is-overdue td:first-child {
+  box-shadow: inset 3px 0 0 var(--sold);
 }
 
 .delivery-overdue {
   color: var(--sold);
-}
-
-.delivery-details {
-  display: grid;
-  gap: 6px;
-  margin: 0 0 8px;
-  font-size: 14px;
-}
-
-.delivery-details div {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 8px;
-}
-
-.delivery-details dt {
-  color: var(--muted);
   font-weight: 600;
-}
-
-.delivery-details dd {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.delivery-agreements {
-  white-space: pre-wrap;
 }
