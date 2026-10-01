@@ -47,7 +47,7 @@ export default async function Page({ searchParams }: PageProps) {
               </svg>
               Kachel toevoegen
             </Link>
-            <Link href="/?tab=voorraad" aria-current={activeTab === "voorraad" && stockView === "available" ? "page" : undefined}>Voorraad</Link>
+            <Link href="/?tab=voorraad" aria-current={activeTab === "voorraad" && stockView === "available" ? "page" : undefined}>Aanbod</Link>
           </nav>
         )}
         <AccountMenu email={user.email} showSections={isMember} activeItem={menuItem} noteCounts={noteCounts} />

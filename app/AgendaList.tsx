@@ -30,7 +30,6 @@ export default function AgendaList({ notes }: { notes: StoveNoteWithStove[] }) {
   const today = todayInNetherlands();
   const open = notes.filter((note) => isOpenStatus(note.status));
   const dated = open.filter((note) => note.handoverDate !== null).sort(byHandover);
-  const undated = open.length - dated.length;
 
   const days = new Map<string, StoveNoteWithStove[]>();
   for (const note of dated) {
@@ -110,11 +109,6 @@ export default function AgendaList({ notes }: { notes: StoveNoteWithStove[] }) {
             ))}
           </table>
         </div>
-      )}
-      {undated > 0 && (
-        <p className="form-hint muted agenda-undated">
-          {undated} open {undated === 1 ? "notitie heeft" : "notities hebben"} nog geen datum; die staan onder In onderhandeling en Af te leveren.
-        </p>
       )}
 
       {openNote && <StoveNoteDialog stove={openNote.note.stove} note={openNote.note} status={openNote.status} onClose={() => setOpenNote(null)} />}
