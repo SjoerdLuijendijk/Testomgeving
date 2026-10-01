@@ -8,7 +8,6 @@ import { saveArticle } from "./article-actions";
 
 const TEXT_FIELDS: { name: keyof Article; label: string; maxLength: number; wide?: boolean }[] = [
   { name: "name", label: "Naam", maxLength: 200, wide: true },
-  { name: "sku", label: "Artikelnummer", maxLength: 100 },
   { name: "category", label: "Categorie", maxLength: 100 },
   { name: "brand", label: "Merk", maxLength: 100 },
   { name: "supplier", label: "Leverancier", maxLength: 200 },
@@ -58,6 +57,8 @@ export default function ArticleDialog({ article, categories, onClose }: ArticleD
         <h2 id="article-title" ref={titleRef} tabIndex={-1} className="dialog-title">
           {article ? "Artikel bewerken" : "Nieuw artikel"}
         </h2>
+        {/* The article number is only the key for the CSV import and is not shown. */}
+        <input type="hidden" name="sku" value={article?.sku ?? ""} />
         <fieldset className="invoice-section">
           <div className="customer-grid">
             {TEXT_FIELDS.map((field) => (
