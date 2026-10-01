@@ -18,7 +18,8 @@ Branch: `feature/stove-notes`
   leveren" list (account menu) with the agreements per stove until it is marked "Afgeleverd".
 - "Af te leveren" is a table in the stock table layout with totals paid and still to pay; the notes
   list leaves those stoves out. The note dialog closes on a click outside it while unchanged.
-- "Agenda" in the account menu: appointments (Bezichtiging, Ophalen, Bezorgen) per day.
+- "Agenda" in the account menu: pickups and deliveries per day. Times are chosen per quarter of an
+  hour. A "Bezichtiging" kind was tried and removed again at the user's request.
 - Released to staging.
 
 ## Decisions
@@ -38,5 +39,5 @@ Branch: `feature/stove-notes`
 
 ## Manual steps and migrations
 - `20261001120000_create_stove_notes.sql`: applied by the user.
-- `20261001150000_add_viewing_appointment.sql`: adds the appointment kind "viewing"; must be applied
-  before a viewing can be saved.
+- The viewing migration was removed from the repository again; if it was applied, its constraint
+  change has to be undone (see the chat of this session).

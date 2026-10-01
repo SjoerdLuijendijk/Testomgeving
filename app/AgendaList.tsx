@@ -23,7 +23,7 @@ function dayTitle(isoDate: string, today: string) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-// Appointments of open notes (viewings, pickups, deliveries) grouped per day, from today on. Open
+// Appointments of open notes (pickups and deliveries) grouped per day, from today on. Open
 // appointments whose day has passed come first, so nothing is forgotten.
 export default function AgendaList({ notes }: { notes: StoveNoteWithStove[] }) {
   const [openNote, setOpenNote] = useState<{ note: StoveNoteWithStove; status: NoteStatus } | null>(null);
