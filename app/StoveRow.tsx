@@ -14,7 +14,7 @@ import ListingToggle from "./ListingToggle";
 import ShopLinkButton from "./ShopLinkButton";
 import ShopSyncStatus from "./ShopSyncStatus";
 import StockControl from "./StockControl";
-import StoveStatus, { pillNote } from "./StoveStatus";
+import StoveStatus, { isModelStove, pillNote } from "./StoveStatus";
 import StoveInvoiceLinks from "./StoveInvoiceLinks";
 import StoveNoteBadges from "./StoveNoteBadges";
 import StoveNoteDialog from "./StoveNoteDialog";
@@ -50,7 +50,8 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       </td>
       <td data-label="Status" className="cell-status cell-sold">
         <StoveStatus stove={stove} onOpenNote={showNote} />
-        <StoveNoteBadges stove={stove} notes={stove.notes.filter((note) => note !== onPill)} onOpenNote={showNote} />
+        {/* Notes of a new stove model are only listed under In onderhandeling and Af te leveren. */}
+        {!isModelStove(stove) && <StoveNoteBadges stove={stove} notes={stove.notes.filter((note) => note !== onPill)} onOpenNote={showNote} />}
         {openNote && <StoveNoteDialog stove={stove} note={openNote.note} status={openNote.status} onClose={() => setOpenNote(null)} />}
       </td>
       {(Object.keys(LISTING_CHANNELS) as ListingChannel[]).map((channel) => (

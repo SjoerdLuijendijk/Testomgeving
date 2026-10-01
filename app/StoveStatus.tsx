@@ -5,13 +5,16 @@ import type { Stove } from "../lib/stoves";
 import StatusMenu, { type StatusOption } from "./StatusMenu";
 import { useNoteClosing } from "./useNoteClosing";
 
+/** A new stove model has several units: its row only shows availability, its notes have their own lists. */
+export const isModelStove = (stove: Stove) => stove.condition === "new";
+
 /**
- * The open note a stove's status pill stands for: its negotiation, or for a sold used stove the sale
- * still to deliver. Other open notes show as separate labels.
+ * The open note a used stove's status pill stands for: its negotiation, or the sale still to deliver.
+ * Other open notes of a used stove show as separate labels.
  */
 export function pillNote(stove: Stove): StoveNote | undefined {
-  if (!stove.soldAt) return stove.notes.find((note) => note.status === "negotiating");
-  return stove.condition === "new" ? undefined : stove.notes.find((note) => note.status === "sold");
+  if (isModelStove(stove)) return undefined;
+  return stove.notes.find((note) => note.status === (stove.soldAt ? "sold" : "negotiating"));
 }
 
 type StoveStatusProps = {
@@ -22,7 +25,8 @@ type StoveStatusProps = {
 
 // Status of a stove: Te koop, In onderhandeling or Verkocht, chosen from a list under the pill.
 // Negotiating and selling open the note dialog for the (optional) details; selling a stove that keeps
-// stock takes one unit. The stock itself is changed in its own column.
+// stock takes one unit. The stock itself is changed in its own column. For a new stove model the pill
+// stays "Te koop" (or "Uitverkocht"): each negotiation or sale is a separate note in its own list.
 export default function StoveStatus({ stove, onOpenNote }: StoveStatusProps) {
   const { closeNote, restockSoldStove, pending } = useNoteClosing();
   const sold = Boolean(stove.soldAt);
