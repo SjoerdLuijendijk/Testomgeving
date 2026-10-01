@@ -27,7 +27,7 @@ export default function NoteStatusMenu({ stove, note, onOpenNote, showHandover }
 
   const options =
     note.status === "negotiating"
-      ? [option("negotiating"), option("sold", () => onOpenNote(note, "sold")), option("cancelled", () => closeNote(stove, note, "cancelled"))]
+      ? [option("negotiating"), { ...option("sold", () => onOpenNote(note, "sold")), label: "Verkocht" }, option("cancelled", () => closeNote(stove, note, "cancelled"))]
       : note.status === "sold"
         ? [option("sold"), option("done", () => closeNote(stove, note, "done")), option("cancelled", () => closeNote(stove, note, "cancelled"))]
         : [option(note.status)];
