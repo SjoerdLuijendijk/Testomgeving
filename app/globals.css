@@ -2071,13 +2071,7 @@ a {
   white-space: nowrap;
 }
 
-button.note-badge {
-  cursor: pointer;
-}
 
-.note-badge-detail {
-  font-weight: 500;
-}
 
 .note-badge--negotiating {
   border-color: #f2d6a2;
@@ -2103,9 +2097,6 @@ button.note-badge {
   color: var(--muted);
 }
 
-button.note-badge:hover {
-  filter: brightness(0.96);
-}
 
 .note-dialog {
   width: min(620px, calc(100vw - 32px));
@@ -2127,35 +2118,133 @@ button.note-badge:hover {
   resize: vertical;
 }
 
-.note-status-options {
+.note-dialog-status {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-}
-
-.note-status-option {
-  display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 40px;
-  padding: 6px 14px;
-  border: 1px solid var(--field-border);
-  border-radius: 999px;
+  margin: 8px 0 0;
   font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
 }
 
-.note-status-option input {
-  width: auto;
-  min-height: 0;
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.status-pill--compact {
+  min-width: 0;
+  min-height: 28px;
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+.status-pill--done {
+  border-color: #bfe3d2;
+  background: #ecf7f1;
+  color: #0b6b47;
+}
+
+.status-pill--cancelled {
+  border-color: var(--line);
+  background: var(--track);
+  color: var(--muted);
+}
+
+.status-pill--sold.status-pill--compact {
+  border-color: #bcd5f0;
+  background: #eef5fd;
+  color: #1f4f86;
+}
+
+/* The list of statuses under a status pill, shown as a popover in the top layer. */
+.status-menu {
+  position: fixed;
+  inset: auto;
+  width: 220px;
   margin: 0;
-  accent-color: var(--accent);
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 4px 12px rgb(42 33 29 / 8%), 0 16px 40px rgb(42 33 29 / 12%);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  white-space: normal;
 }
 
-.note-status-option:has(input:checked) {
-  border-color: var(--accent);
-  box-shadow: var(--focus-ring);
+.status-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.status-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+
+.status-menu button:not(:disabled):hover,
+.status-menu button:focus-visible {
+  background: var(--row-hover);
+}
+
+.status-menu button[aria-current="true"] {
+  font-weight: 700;
+}
+
+.status-menu button:disabled {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.status-menu button[aria-current="true"]:disabled {
+  opacity: 1;
+}
+
+.status-menu-hint {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.status-dot--available,
+.status-dot--done {
+  background: var(--available);
+}
+
+.status-dot--negotiating {
+  background: #e0a030;
+}
+
+.status-dot--sold {
+  background: #3b7bd0;
+}
+
+.status-dot--cancelled {
+  background: #b8aca5;
 }
 
 .note-list {

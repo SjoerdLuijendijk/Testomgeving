@@ -68,11 +68,12 @@ time, so concurrent sales cannot overwrite each other.
 
 A note records a negotiation or sale of a stove: buyer, pickup or delivery with date and time, sale
 price, payment (open, deposit or paid; cash, pin or bank) and further agreements. Only the status is
-required. "Te koop" and "−1 verkocht" open the note dialog with status "Verkocht"; the speech-bubble
-icon adds a note "In onderhandeling", while the stove stays for sale. Selling without filling in
-anything only lowers the stock. A used stove in negotiation shows "In onderhandeling" on its
-status pill instead of "Te koop"; other open notes show as labels on the stove; the account menu has
-"Notities" with all notes and the number of open ones.
+required. The status pill of a used stove opens a list (Te koop, In onderhandeling, Verkocht,
+Afgehandeld); choosing negotiating or sold opens the note dialog for the details, the others apply
+straight away. "−1 verkocht" of a new stove opens the dialog as a sale, and the speech-bubble icon
+adds a negotiation. Selling without filling in anything only lowers the stock. Other open notes show
+as labels with their own status list; the account menu has "Notities" with all notes and the number
+of open ones.
 
 The status flows from "In onderhandeling" to "Verkocht" or "Geannuleerd", and from "Verkocht" to
 "Afgehandeld" or "Geannuleerd". The `stove_notes` trigger enforces this and takes one unit from the

@@ -1,44 +1,52 @@
 "use client";
 
-import { useTransition } from "react";
-import type { StoveNote } from "../lib/stove-notes";
-import { adjustStoveStock } from "./actions";
-import { useDialog } from "./DialogProvider";
+import type { NoteStatus, StoveNote } from "../lib/stove-notes";
+import type { Stove } from "../lib/stoves";
+import StatusMenu, { type StatusOption } from "./StatusMenu";
+import { useNoteClosing } from "./useNoteClosing";
 
 type SoldToggleProps = {
-  stoveNumber: number;
-  sold: boolean;
-  /** An open negotiation: the pill then reads "In onderhandeling" and opens that note. */
-  negotiation?: StoveNote;
-  /** Opens the sale note dialog, which sells the stove when saved. */
-  onSell: () => void;
-  onOpenNegotiation: () => void;
+  stove: Stove;
+  /** Opens the note dialog: an existing note, or a new one, with the status it moves to. */
+  onOpenNote: (note: StoveNote | null, status: NoteStatus) => void;
 };
 
-// Sold status of a used (single-unit) stove: selling (through the note dialog) or restocking its one unit.
-export default function SoldToggle({ stoveNumber, sold, negotiation, onSell, onOpenNegotiation }: SoldToggleProps) {
-  const [pending, startTransition] = useTransition();
-  const { confirm, notify } = useDialog();
+// Status of a used (single-unit) stove: Te koop, In onderhandeling or Verkocht, chosen from a list
+// under the pill. Negotiating and selling open the note dialog for the (optional) details.
+export default function SoldToggle({ stove, onOpenNote }: SoldToggleProps) {
+  const { closeNote, restockSoldStove, pending } = useNoteClosing();
+  const sold = Boolean(stove.soldAt);
+  const negotiation = sold ? undefined : stove.notes.find((note) => note.status === "negotiating");
+  const sale = sold ? stove.notes.find((note) => note.status === "sold") : undefined;
 
-  async function toggle() {
-    if (!sold) return negotiation ? onOpenNegotiation() : onSell();
-    const confirmed = await confirm({ title: `Kachel ${stoveNumber} weer te koop zetten?`, confirmLabel: "Te koop zetten" });
-    if (!confirmed) return;
-    startTransition(async () => {
-      const result = await adjustStoveStock(stoveNumber, 1);
-      if (!result.ok) await notify(result.error);
-    });
-  }
+  const forSale: StatusOption = {
+    key: "available",
+    label: "Te koop",
+    tone: "available",
+    current: !sold && !negotiation,
+    onSelect: sold
+      ? () => (sale ? closeNote(stove, sale, "cancelled", "always") : restockSoldStove(stove.number))
+      : negotiation
+        ? () => closeNote(stove, negotiation, "cancelled")
+        : undefined,
+  };
+  const negotiating: StatusOption = {
+    key: "negotiating",
+    label: "In onderhandeling",
+    tone: "negotiating",
+    current: Boolean(negotiation),
+    onSelect: sold ? undefined : () => onOpenNote(negotiation ?? null, "negotiating"),
+  };
+  const soldOption: StatusOption = {
+    key: "sold",
+    label: "Verkocht",
+    tone: "sold",
+    current: sold,
+    onSelect: sold ? (sale ? () => onOpenNote(sale, "sold") : undefined) : () => onOpenNote(negotiation ?? null, "sold"),
+  };
+  const options = [forSale, negotiating, soldOption];
+  if (sale) options.push({ key: "done", label: "Afgehandeld (betaald en opgehaald)", tone: "done", onSelect: () => closeNote(stove, sale, "done") });
 
-  const [label, className, title] = sold
-    ? ["Verkocht", "status-pill status-pill--sold", "Klik om weer te koop te zetten"]
-    : negotiation
-      ? ["In onderhandeling", "status-pill status-pill--negotiating", "Klik om de onderhandeling te openen of de kachel te verkopen"]
-      : ["Te koop", "status-pill", "Klik om op verkocht te zetten"];
-
-  return (
-    <button type="button" className={className} onClick={toggle} disabled={pending} aria-pressed={sold} title={title}>
-      {label}
-    </button>
-  );
+  const current = sold ? soldOption : negotiation ? negotiating : forSale;
+  return <StatusMenu label={current.label} tone={current.tone} options={options} ariaLabel={`Kachel ${stove.number}`} disabled={pending} />;
 }
