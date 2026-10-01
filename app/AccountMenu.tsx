@@ -28,7 +28,7 @@ type AccountMenuProps = {
 // Profile button top right; its dropdown opens the sold archive and management pages directly and signs out.
 export default function AccountMenu({ email, showSections, activeItem, noteCounts }: AccountMenuProps) {
   const openNotes = noteCounts.open;
-  const itemCounts: Partial<Record<MenuItemKey, number>> = { afleveren: noteCounts.toDeliver, notities: noteCounts.open };
+  const itemCounts: Partial<Record<MenuItemKey, number>> = { afleveren: noteCounts.toDeliver, notities: noteCounts.open - noteCounts.toDeliver };
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);

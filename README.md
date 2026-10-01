@@ -75,8 +75,8 @@ adds a negotiation. A sale is either delivered (or picked up) straight away, whi
 at once, or still to be delivered: those stoves are listed with their agreements under "Af te
 leveren" in the account menu until they are marked "Afgeleverd". Selling straight away without any
 details only lowers the stock. Other open notes show
-as labels with their own status list; the account menu has "Notities" with all notes and the number
-of open ones.
+as labels with their own status list; the account menu has "Notities" with the negotiations and
+closed notes (stoves to deliver are only under "Af te leveren").
 
 The status flows from "In onderhandeling" to "Af te leveren" (sold) or "Geannuleerd", and from
 "Af te leveren" to "Afgeleverd" or "Geannuleerd". The `stove_notes` trigger enforces this and takes one unit from the
