@@ -71,14 +71,6 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       </td>
       {/* Each action has its own column so the icons line up from row to row. */}
       <td className="cell-detail cell-actions">
-        <button type="button" className="icon-button" onClick={() => showNote(null, "negotiating")} title="Notitie toevoegen" aria-label={`Notitie toevoegen bij kachel ${stove.number}`}>
-          <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
-            <path d="M8 9h8M8 13h5" />
-          </svg>
-        </button>
-      </td>
-      <td className="cell-detail cell-actions">
         <EditStoveDialog stove={stove} brands={brands} />
       </td>
       <td className="cell-detail cell-actions">
