@@ -2201,6 +2201,32 @@ a {
   font-weight: 500;
 }
 
+.sale-status {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-pill--static {
+  cursor: default;
+}
+
+.stove-table .sale-status .status-pill {
+  width: auto;
+}
+
+.sale-button {
+  min-height: 28px;
+  padding: 3px 10px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.note-kind-options {
+  margin-top: 10px;
+}
+
 .status-menu-extra {
   margin-top: 4px;
   padding-top: 4px;
