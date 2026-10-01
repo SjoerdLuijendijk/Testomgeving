@@ -64,9 +64,6 @@ export default function StoveNoteList({ notes }: { notes: StoveNoteWithStove[] }
           </table>
         </div>
       )}
-      <p className="form-hint muted note-list-hint">
-        Verkochte kachels die nog afgeleverd moeten worden staan onder Af te leveren. Afgeleverde en geannuleerde notities worden een jaar na afsluiten automatisch verwijderd.
-      </p>
 
       {openNote && <StoveNoteDialog stove={openNote.note.stove} note={openNote.note} status={openNote.status} onClose={() => setOpenNote(null)} />}
     </section>
