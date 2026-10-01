@@ -17,13 +17,12 @@ type NoteStatusMenuProps = {
 // The status of one note, changed from a list under the pill.
 export default function NoteStatusMenu({ stove, note, onOpenNote, showHandover }: NoteStatusMenuProps) {
   const { closeNote, pending } = useNoteClosing();
-  const view = () => onOpenNote(note, note.status);
   const option = (status: NoteStatus, onSelect?: () => void): StatusOption => ({
     key: status,
     label: NOTE_STATUS_LABELS[status],
     tone: status,
     current: note.status === status,
-    onSelect: note.status === status ? view : onSelect,
+    onSelect,
   });
 
   const options =
@@ -42,6 +41,7 @@ export default function NoteStatusMenu({ stove, note, onOpenNote, showHandover }
       ariaLabel={`Notitie kachel ${stove.number}`}
       disabled={pending}
       compact
+      onEditDetails={() => onOpenNote(note, note.status)}
     />
   );
 }

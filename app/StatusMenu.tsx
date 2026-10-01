@@ -8,7 +8,7 @@ export type StatusOption = {
   key: string;
   label: string;
   tone: StatusTone;
-  /** The status the item is in now; choosing it opens its details, if any. */
+  /** The status the item is in now: marked, and never chosen again. */
   current?: boolean;
   /** Omitted: the option is shown but cannot be chosen. */
   onSelect?: () => void;
@@ -22,11 +22,13 @@ type StatusMenuProps = {
   disabled?: boolean;
   /** Smaller pill, for labels next to other controls. */
   compact?: boolean;
+  /** Adds "Gegevens bewerken" below the statuses, for an item with a note. */
+  onEditDetails?: () => void;
 };
 
 // A status pill that opens the statuses below it to choose from. The list is a popover in the top
 // layer, so the table's scroll container does not clip it.
-export default function StatusMenu({ label, tone, options, ariaLabel, disabled, compact }: StatusMenuProps) {
+export default function StatusMenu({ label, tone, options, ariaLabel, disabled, compact, onEditDetails }: StatusMenuProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -44,9 +46,9 @@ export default function StatusMenu({ label, tone, options, ariaLabel, disabled, 
     menu.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus();
   }
 
-  function choose(option: StatusOption) {
+  function choose(action: (() => void) | undefined) {
     menuRef.current?.hidePopover();
-    option.onSelect?.();
+    action?.();
   }
 
   return (
@@ -79,13 +81,20 @@ export default function StatusMenu({ label, tone, options, ariaLabel, disabled, 
         <ul>
           {options.map((option) => (
             <li key={option.key}>
-              <button type="button" onClick={() => choose(option)} disabled={!option.onSelect} aria-current={option.current || undefined}>
+              <button type="button" onClick={() => choose(option.onSelect)} disabled={option.current || !option.onSelect} aria-current={option.current || undefined}>
                 <span className={`status-dot status-dot--${option.tone}`} aria-hidden="true" />
                 {option.label}
-                {option.current && option.onSelect && <span className="status-menu-hint">gegevens</span>}
+                {option.current && <span className="status-menu-hint">huidige status</span>}
               </button>
             </li>
           ))}
+          {onEditDetails && (
+            <li className="status-menu-extra">
+              <button type="button" onClick={() => choose(onEditDetails)}>
+                Gegevens bewerken
+              </button>
+            </li>
+          )}
         </ul>
       </div>
     </>

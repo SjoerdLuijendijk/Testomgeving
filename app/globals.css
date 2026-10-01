@@ -2201,6 +2201,17 @@ a {
   font-weight: 500;
 }
 
+.status-menu-extra {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.status-menu-extra button {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .status-dot {
   flex: none;
   width: 10px;
