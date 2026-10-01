@@ -71,8 +71,7 @@ quarter of an hour, sale
 price, payment (open, deposit or paid; cash, pin or bank) and further agreements. Only the status is
 required. The status pill of a used stove opens a list (Te koop, In onderhandeling, Verkocht,
 Afgeleverd); choosing negotiating or sold opens the note dialog for the details, the others apply
-straight away. "−1 verkocht" of a new stove opens the dialog as a sale, and the speech-bubble icon
-adds a negotiation. A sale is either delivered (or picked up) straight away, which closes the note
+straight away. "−1 verkocht" of a new stove opens the dialog as a sale. A sale is either delivered (or picked up) straight away, which closes the note
 at once, or still to be delivered: those stoves are listed with their agreements under "Af te
 leveren" in the account menu until they are marked "Afgeleverd". Selling straight away without any
 details only lowers the stock. Other open notes show
