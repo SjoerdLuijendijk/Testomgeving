@@ -70,7 +70,7 @@ time, so concurrent sales cannot overwrite each other.
 A note records a negotiation or sale of a stove: buyer, pickup or delivery with date and a time per
 quarter of an hour, sale
 price, payment (open, deposit or paid; cash, pin or bank) and further agreements. Only the status is
-required. A new stove model shows its availability (Te koop, Uitverkocht, Op bestelling) and a
+required. A new stove model has no status of its own (its stock shows availability) but a green
 "Verkoop plaatsen" button, which opens the dialog with the choice "1 verkocht" or "In
 onderhandeling"; its notes are only listed under In onderhandeling and Af te leveren. The status
 pill of a used stove opens a list (Te koop, In onderhandeling, Verkocht, Afgeleverd); choosing negotiating or sold opens the note dialog for the details, the others apply
