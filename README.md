@@ -76,7 +76,7 @@ adds a negotiation. A sale is either delivered (or picked up) straight away, whi
 at once, or still to be delivered: those stoves are listed with their agreements under "Af te
 leveren" in the account menu until they are marked "Afgeleverd". Selling straight away without any
 details only lowers the stock. Other open notes show
-as labels with their own status list; the account menu has "Notities" with the negotiations and
+as labels with their own status list; the account menu has "In onderhandeling" with the negotiations and
 closed notes (stoves to deliver are only under "Af te leveren"). "Agenda" in the account menu lists
 the appointments of open notes per day from today on, with open appointments whose day has passed
 on top; the menu shows how many are planned for today.

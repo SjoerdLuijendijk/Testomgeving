@@ -35,7 +35,7 @@ export default function DeliveryList({ notes }: { notes: StoveNoteWithStove[] })
   return (
     <>
       <div className="table-wrap">
-        <table className="stove-table delivery-table">
+        <table className="stove-table note-table">
           <thead>
             <tr>
               <th scope="col" className="cell-number">Nr.</th>
