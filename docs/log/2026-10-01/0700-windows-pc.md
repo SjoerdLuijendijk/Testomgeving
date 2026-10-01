@@ -16,6 +16,9 @@ Branch: `feature/stove-notes`
 - The status pill opens a list of statuses to choose from; the dialog only holds the details.
 - Selling asks "Direct afgeleverd" or "Nog af te leveren"; the latter shows in the new "Af te
   leveren" list (account menu) with the agreements per stove until it is marked "Afgeleverd".
+- "Af te leveren" is a table in the stock table layout with totals paid and still to pay; the notes
+  list leaves those stoves out. The note dialog closes on a click outside it while unchanged.
+- "Agenda" in the account menu: appointments (Bezichtiging, Ophalen, Bezorgen) per day.
 - Released to staging.
 
 ## Decisions
@@ -34,5 +37,6 @@ Branch: `feature/stove-notes`
 - This Windows computer still has a `.env.local`; per the 2026-09-30 decision it may be removed.
 
 ## Manual steps and migrations
-- `20261001120000_create_stove_notes.sql` must be applied before the staging deployment works (all
-  environments share one database; the migration is additive and safe for production code).
+- `20261001120000_create_stove_notes.sql`: applied by the user.
+- `20261001150000_add_viewing_appointment.sql`: adds the appointment kind "viewing"; must be applied
+  before a viewing can be saved.

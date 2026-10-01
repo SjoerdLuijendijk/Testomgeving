@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Condition } from "./stoves";
+import { todayInNetherlands } from "./today";
 import { CLOSED_NOTE_RETENTION_DAYS, type StoveNote, type StoveNoteInput } from "./stove-notes";
 
 const NOTE_COLUMNS =
@@ -88,13 +89,18 @@ export async function getOpenNotesByStove(supabase: SupabaseClient): Promise<Map
   return byStove;
 }
 
-export type OpenNoteCounts = { open: number; toDeliver: number };
+export type OpenNoteCounts = { open: number; toDeliver: number; today: number };
 
-// Open notes, and among them the sold stoves still to be delivered.
+// Open notes, the sold stoves among them still to be delivered, and the appointments for today.
 export async function countOpenNotes(supabase: SupabaseClient): Promise<OpenNoteCounts> {
-  const { data, error } = await supabase.from("stove_notes").select("status").is("closed_at", null);
+  const { data, error } = await supabase.from("stove_notes").select("status, handover_date").is("closed_at", null);
   if (error) throw error;
-  return { open: data.length, toDeliver: data.filter((row) => row.status === "sold").length };
+  const today = todayInNetherlands();
+  return {
+    open: data.length,
+    toDeliver: data.filter((row) => row.status === "sold").length,
+    today: data.filter((row) => row.handover_date === today).length,
+  };
 }
 
 /** What the notes list and dialog need to know about the stove of a note. */

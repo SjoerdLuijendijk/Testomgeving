@@ -2350,3 +2350,104 @@ a {
     content: attr(data-label);
   }
 }
+
+/* Agenda (account menu → Agenda): appointments grouped per day, in the stock table layout */
+
+.agenda-table .agenda-day th {
+  padding-top: 18px;
+  border-bottom: 1px solid var(--line);
+  background: #fbf9f7;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.agenda-table .agenda-day.is-today th {
+  color: var(--accent);
+}
+
+.agenda-table .agenda-day.is-overdue th {
+  color: var(--sold);
+}
+
+.agenda-day-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--track);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.agenda-time {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.agenda-kind {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.agenda-kind--viewing {
+  background: #fdf5e6;
+  color: #8a5a00;
+}
+
+.agenda-kind--pickup {
+  background: #f1ecf9;
+  color: #5b3a8c;
+}
+
+.agenda-kind--delivery {
+  background: #eef5fd;
+  color: #1f4f86;
+}
+
+.agenda-undated {
+  margin-top: 12px;
+}
+
+@media (max-width: 719px) {
+  /* Each appointment is a card with labelled lines; the day is a heading above its cards. */
+  .stove-table.agenda-table tbody tr {
+    display: block;
+    padding: 8px 4px;
+  }
+
+  .agenda-table tbody td {
+    padding: 4px 12px;
+  }
+
+  .stove-table.agenda-table tbody td::before {
+    content: attr(data-label);
+  }
+
+  .stove-table.agenda-table tbody td.cell-actions::before {
+    content: none;
+  }
+
+  .agenda-table .agenda-day {
+    margin: 16px 0 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .agenda-table .agenda-day th {
+    display: block;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    font-size: 15px;
+  }
+}

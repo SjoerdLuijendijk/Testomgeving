@@ -8,6 +8,7 @@ import AccountMenu from "./AccountMenu";
 import AddStoveForm from "./AddStoveForm";
 import AdminPanel from "./AdminPanel";
 import BrandLogo from "./BrandLogo";
+import AgendaList from "./AgendaList";
 import DeliveryList from "./DeliveryList";
 import StoveNoteList from "./StoveNoteList";
 import StoveTable from "./StoveTable";
@@ -23,7 +24,7 @@ export default async function Page({ searchParams }: PageProps) {
   const { tab: requestedTab, sectie, weergave } = await searchParams;
   // "instellingen" is the tab's former name; its links opened the company details.
   const activeTab =
-    requestedTab === "voorraad" || requestedTab === "notities" || requestedTab === "afleveren"
+    requestedTab === "voorraad" || requestedTab === "notities" || requestedTab === "afleveren" || requestedTab === "agenda"
       ? requestedTab
       : requestedTab === "admin" || requestedTab === "instellingen"
         ? "admin"
@@ -31,8 +32,8 @@ export default async function Page({ searchParams }: PageProps) {
   const adminSection: AdminSection =
     sectie === "bedrijf" || sectie === "advertentie" || sectie === "webshop" ? sectie : requestedTab === "instellingen" ? "bedrijf" : "facturen";
   const stockView: StockView = activeTab === "voorraad" && weergave === "verkocht" ? "sold" : "available";
-  const menuItem = activeTab === "admin" ? adminSection : activeTab === "notities" || activeTab === "afleveren" ? activeTab : stockView === "sold" ? "verkocht" : null;
-  const noteCounts = isMember ? await countOpenNotes(supabase) : { open: 0, toDeliver: 0 };
+  const menuItem = activeTab === "admin" ? adminSection : activeTab === "notities" || activeTab === "afleveren" || activeTab === "agenda" ? activeTab : stockView === "sold" ? "verkocht" : null;
+  const noteCounts = isMember ? await countOpenNotes(supabase) : { open: 0, toDeliver: 0, today: 0 };
 
   return (
     <div className="app-shell">
@@ -52,7 +53,7 @@ export default async function Page({ searchParams }: PageProps) {
         <AccountMenu email={user.email} showSections={isMember} activeItem={menuItem} noteCounts={noteCounts} />
       </header>
 
-      <main className={activeTab === "voorraad" || activeTab === "afleveren" ? "page-main page-main--wide" : "page-main"}>
+      <main className={activeTab === "voorraad" || activeTab === "afleveren" || activeTab === "agenda" ? "page-main page-main--wide" : "page-main"}>
         {!isMember ? (
           <div className="notice" role="alert">
             <strong>Geen toegang</strong>
@@ -60,6 +61,15 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         ) : activeTab === "toevoegen" ? (
           <AddStoveForm brands={await getKnownBrands(supabase)} />
+        ) : activeTab === "agenda" ? (
+          <section aria-labelledby="agenda-title">
+            <div className="stock-toolbar">
+              <div className="stock-title-row">
+                <h1 id="agenda-title">Agenda</h1>
+              </div>
+            </div>
+            <AgendaList notes={await listNotes(supabase)} />
+          </section>
         ) : activeTab === "afleveren" ? (
           <section aria-labelledby="delivery-title">
             <div className="stock-toolbar">

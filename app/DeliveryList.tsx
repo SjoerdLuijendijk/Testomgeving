@@ -3,11 +3,10 @@
 import { useState } from "react";
 import type { StoveNoteWithStove } from "../lib/stove-note-queries";
 import { byHandover, type NoteStatus } from "../lib/stove-notes";
+import { todayInNetherlands } from "../lib/today";
 import DeliveryRow, { formatAmount, type DeliveryAmounts } from "./DeliveryRow";
 import StoveNoteDialog from "./StoveNoteDialog";
 
-// Today in the Netherlands as YYYY-MM-DD, to flag deliveries whose date has passed.
-const todayIsoDate = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Amsterdam" }).format(new Date());
 
 function amountsOf(note: StoveNoteWithStove): DeliveryAmounts {
   const priceCents = note.priceCents ?? note.stove.priceCents;
@@ -22,7 +21,7 @@ const sum = (values: (number | null)[]) => values.reduce<number>((total, value) 
 // stock, with the totals paid and still to pay.
 export default function DeliveryList({ notes }: { notes: StoveNoteWithStove[] }) {
   const [openNote, setOpenNote] = useState<{ note: StoveNoteWithStove; status: NoteStatus } | null>(null);
-  const today = todayIsoDate();
+  const today = todayInNetherlands();
   const rows = notes
     .filter((note) => note.status === "sold")
     .sort(byHandover)
