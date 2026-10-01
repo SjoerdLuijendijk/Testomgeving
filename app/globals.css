@@ -33,8 +33,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Form controls do not inherit the page font by default (a textarea even falls back to monospace). */
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
   color: inherit;
 }
@@ -340,6 +343,8 @@ a {
   padding: 12px 20px;
   border-radius: var(--radius);
   font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
   text-decoration: none;
   transition: background-color 0.15s, border-color 0.15s;
 }
@@ -1450,6 +1455,8 @@ a {
   background: #ecf7f1;
   color: #0b6b47;
   font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -2115,14 +2122,20 @@ a {
   font-weight: 500;
 }
 
+/* Fields in the note dialog: selects and the textarea match the text inputs next to them. */
+.note-dialog .invoice-section select,
 .note-dialog textarea {
   width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #d6ccc5;
-  border-radius: 8px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius);
   background: white;
-  font: inherit;
-  font-size: 15px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.note-dialog textarea {
   resize: vertical;
 }
 
@@ -2307,37 +2320,6 @@ a {
 
 .account-button .count-badge {
   margin: 0 2px 0 4px;
-}
-
-.choice-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.choice-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 6px 14px;
-  border: 1px solid var(--field-border);
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.invoice-section .choice-option input {
-  width: auto;
-  min-height: 0;
-  margin: 0;
-  accent-color: var(--accent);
-}
-
-.choice-option:has(input:checked) {
-  border-color: var(--accent);
-  box-shadow: var(--focus-ring);
 }
 
 /* Negotiations and deliveries (account menu), in the stock table layout */

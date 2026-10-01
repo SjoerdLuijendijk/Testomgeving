@@ -114,9 +114,9 @@ export default function StoveNoteDialog({ stove, note, status: givenStatus, onCl
           {givenStatus === undefined && (
             <div className="choice-options note-kind-options" role="radiogroup" aria-label="Soort">
               {(["sold", "negotiating"] as const).map((value) => (
-                <label key={value} className="choice-option">
+                <label key={value}>
                   <input type="radio" checked={chosenStatus === value} onChange={() => setChosenStatus(value)} />
-                  {value === "sold" ? (stove.condition === "new" ? "1 verkocht" : "Verkocht") : "In onderhandeling"}
+                  <span>{value === "sold" ? (stove.condition === "new" ? "1 verkocht" : "Verkocht") : "In onderhandeling"}</span>
                 </label>
               ))}
             </div>
@@ -139,13 +139,13 @@ export default function StoveNoteDialog({ stove, note, status: givenStatus, onCl
           <fieldset className="invoice-section">
             <legend>Afleveren</legend>
             <div className="choice-options">
-              <label className="choice-option">
+              <label>
                 <input type="radio" name="delivery" value="now" required />
-                Direct afgeleverd of meegenomen
+                <span>Direct afgeleverd</span>
               </label>
-              <label className="choice-option">
+              <label>
                 <input type="radio" name="delivery" value="later" required />
-                Nog af te leveren
+                <span>Nog af te leveren</span>
               </label>
             </div>
             <p className="form-hint muted">Nog af te leveren: de kachel komt in de lijst Af te leveren (menu rechtsboven) tot je hem op Afgeleverd zet.</p>
