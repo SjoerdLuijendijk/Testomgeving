@@ -57,3 +57,20 @@ export async function saveStoveNote(stoveNumber: number, noteId: number | null, 
   revalidatePath("/");
   return { ok: true };
 }
+
+// Closes a note without changing its details: done (sold and handled) or cancelled. Restocking after
+// a cancelled sale is a separate step the user confirms.
+export async function closeStoveNote(noteId: number, status: "done" | "cancelled"): Promise<ActionResult> {
+  if (!isPositiveId(noteId) || (status !== "done" && status !== "cancelled")) return { ok: false, error: "Onbekende notitie." };
+
+  const { supabase, isMember } = await requireTeamMember();
+  if (!isMember) return NO_ACCESS;
+
+  const { data, error } = await supabase.from("stove_notes").update({ status }).eq("id", noteId).select("id");
+  if (error?.code === RAISED_EXCEPTION) return { ok: false, error: "Deze statuswijziging is niet mogelijk. Ververs de pagina en probeer het opnieuw." };
+  if (error) return { ok: false, error: "Er ging iets mis. Probeer het opnieuw." };
+  if (data.length === 0) return { ok: false, error: "Deze notitie bestaat niet meer." };
+
+  revalidatePath("/");
+  return { ok: true };
+}

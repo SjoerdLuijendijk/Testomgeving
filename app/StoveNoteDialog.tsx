@@ -6,7 +6,6 @@ import type { NoteStove } from "../lib/stove-note-queries";
 import {
   HANDOVER_LABELS,
   MAX_AGREEMENTS_LENGTH,
-  NEXT_STATUSES,
   NOTE_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
   PAYMENT_STATUS_LABELS,
@@ -14,7 +13,7 @@ import {
   type PaymentStatus,
   type StoveNote,
 } from "../lib/stove-notes";
-import { adjustStoveStock, makeStoveMadeToOrder } from "./actions";
+import { makeStoveMadeToOrder } from "./actions";
 import { useDialog } from "./DialogProvider";
 import { saveStoveNote } from "./note-actions";
 
@@ -31,30 +30,27 @@ type StoveNoteDialogProps = {
   stove: NoteStove;
   /** Null for a new note. */
   note: StoveNote | null;
-  /** Status a new note starts with. */
-  initialStatus?: NoteStatus;
+  /** The status the note gets on saving: its own status, or the one chosen in the status list. */
+  status: NoteStatus;
   onClose: () => void;
 };
 
-// Negotiation or sale of a stove: buyer, handover, price, payment and agreements. Every field but the
-// status is optional. Rendered only while open.
-export default function StoveNoteDialog({ stove, note, initialStatus = "negotiating", onClose }: StoveNoteDialogProps) {
+// Details of a negotiation or sale: buyer, handover, price, payment and agreements, all optional. The
+// status is chosen beforehand in the status list. Rendered only while open.
+export default function StoveNoteDialog({ stove, note, status, onClose }: StoveNoteDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [status, setStatus] = useState<NoteStatus>(note?.status ?? initialStatus);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(note?.paymentStatus ?? "open");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const { choose, confirm } = useDialog();
+  const { choose } = useDialog();
 
   useEffect(() => {
     // Development runs effects twice; showModal throws on a dialog that is already open.
     if (!dialogRef.current?.open) dialogRef.current?.showModal();
   }, []);
 
-  const statuses: NoteStatus[] = note ? NEXT_STATUSES[note.status] : ["negotiating", "sold"];
   const becomesSold = status === "sold" && note?.status !== "sold";
   const sellsLastUnit = becomesSold && stove.condition === "new" && !stove.madeToOrder && stove.stockQuantity === 1;
-  const cancelsSale = note?.status === "sold" && status === "cancelled";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -76,10 +72,6 @@ export default function StoveNoteDialog({ stove, note, initialStatus = "negotiat
       if (choice === null) return;
       keepMadeToOrder = choice === "order";
     }
-    const restock =
-      cancelsSale &&
-      !stove.madeToOrder &&
-      (await confirm({ title: `Kachel ${stove.number} weer op voorraad?`, message: "De verkoop is geannuleerd. Zet de kachel terug in de voorraad als hij weer te koop is.", confirmLabel: "Weer op voorraad" }));
 
     startTransition(async () => {
       // Made to order first, so the sale does not take the last unit from the stock.
@@ -89,10 +81,6 @@ export default function StoveNoteDialog({ stove, note, initialStatus = "negotiat
       }
       const result = await saveStoveNote(stove.number, note?.id ?? null, formData);
       if (!result.ok) return setError(result.error);
-      if (restock) {
-        const restocked = await adjustStoveStock(stove.number, 1);
-        if (!restocked.ok) return setError(`De notitie is opgeslagen, maar: ${restocked.error}`);
-      }
       dialogRef.current?.close();
     });
   }
@@ -101,29 +89,24 @@ export default function StoveNoteDialog({ stove, note, initialStatus = "negotiat
   return (
     <dialog ref={dialogRef} className="edit-dialog note-dialog" aria-labelledby={titleId} onClose={onClose}>
       <form onSubmit={handleSubmit} className="form-stack">
-        <h2 id={titleId}>
-          {note ? "Notitie" : "Nieuwe notitie"} · kachel {stove.number} <span className="muted">{stove.brand}</span>
-        </h2>
-
-        <fieldset className="invoice-section">
-          <legend>Status</legend>
-          <div className="note-status-options">
-            {statuses.map((value) => (
-              <label key={value} className={`note-status-option note-status-option--${value}`}>
-                <input type="radio" name="status" value={value} checked={status === value} onChange={() => setStatus(value)} />
-                {NOTE_STATUS_LABELS[value]}
-              </label>
-            ))}
-          </div>
-          {becomesSold && !stove.madeToOrder && (
-            <p className="form-hint muted">
-              {stove.condition === "new"
-                ? "Bij opslaan gaat de voorraad 1 omlaag."
-                : "Bij opslaan gaat de kachel naar het Verkocht archief (menu rechtsboven) en wordt hij nergens meer aangeboden."}
-            </p>
-          )}
-          {status === "negotiating" && <p className="form-hint muted">De kachel blijft gewoon te koop.</p>}
-        </fieldset>
+        <input type="hidden" name="status" value={status} />
+        <div>
+          <h2 id={titleId}>
+            Kachel {stove.number} <span className="muted">{stove.brand}</span>
+          </h2>
+          <p className="note-dialog-status">
+            <span className={`note-badge note-badge--${status}`}>{NOTE_STATUS_LABELS[status]}</span>
+            <span className="muted">
+              {becomesSold && !stove.madeToOrder
+                ? stove.condition === "new"
+                  ? "Bij opslaan gaat de voorraad 1 omlaag."
+                  : "Bij opslaan gaat de kachel naar het Verkocht archief en wordt hij nergens meer aangeboden."
+                : status === "negotiating"
+                  ? "De kachel blijft gewoon te koop."
+                  : "Alle velden zijn optioneel."}
+            </span>
+          </p>
+        </div>
 
         <fieldset className="invoice-section">
           <legend>Koper <span className="muted">(optioneel)</span></legend>

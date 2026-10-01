@@ -24,13 +24,14 @@ const DATE_FORMAT = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "s
 // On phones the row is a compact card; "cell-detail" cells only show once the card is expanded.
 export default function StoveRow({ stove, brands }: { stove: Stove; brands: string[] }) {
   const [expanded, setExpanded] = useState(false);
-  // The note dialog: an existing note, or a new one starting with the given status.
+  // The note dialog: an existing note or a new one, with the status it moves to.
   const [openNote, setOpenNote] = useState<{ note: StoveNote | null; status: NoteStatus } | null>(null);
-  const sell = () => setOpenNote({ note: null, status: "sold" });
-  const openExisting = (note: StoveNote) => setOpenNote({ note, status: note.status });
-  // A used stove in negotiation shows it on its status pill instead of a separate label.
+  const showNote = (note: StoveNote | null, status: NoteStatus) => setOpenNote({ note, status });
+  // A used stove shows its negotiation or sale on its status pill instead of a separate label.
   const usesSoldToggle = !stove.madeToOrder && stove.condition !== "new";
-  const negotiation = usesSoldToggle && !stove.soldAt ? stove.notes.find((note) => note.status === "negotiating") : undefined;
+  const onPill = usesSoldToggle
+    ? stove.notes.find((note) => note.status === (stove.soldAt ? "sold" : "negotiating"))
+    : undefined;
   const rowClass = [stove.soldAt && "is-sold", expanded && "is-expanded"].filter(Boolean).join(" ");
 
   return (
@@ -46,18 +47,12 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
         {stove.madeToOrder ? (
           <span className="stock-count">Op bestelling</span>
         ) : stove.condition === "new" ? (
-          <StockControl stoveNumber={stove.number} quantity={stove.stockQuantity} onSell={sell} />
+          <StockControl stoveNumber={stove.number} quantity={stove.stockQuantity} onSell={() => showNote(null, "sold")} />
         ) : (
-          <SoldToggle
-            stoveNumber={stove.number}
-            sold={Boolean(stove.soldAt)}
-            negotiation={negotiation}
-            onSell={sell}
-            onOpenNegotiation={() => negotiation && openExisting(negotiation)}
-          />
+          <SoldToggle stove={stove} onOpenNote={showNote} />
         )}
-        <StoveNoteBadges notes={stove.notes.filter((note) => note !== negotiation)} onOpen={openExisting} />
-        {openNote && <StoveNoteDialog stove={stove} note={openNote.note} initialStatus={openNote.status} onClose={() => setOpenNote(null)} />}
+        <StoveNoteBadges stove={stove} notes={stove.notes.filter((note) => note !== onPill)} onOpenNote={showNote} />
+        {openNote && <StoveNoteDialog stove={stove} note={openNote.note} status={openNote.status} onClose={() => setOpenNote(null)} />}
       </td>
       {(Object.keys(LISTING_CHANNELS) as ListingChannel[]).map((channel) => (
         <td key={channel} data-label={LISTING_CHANNELS[channel].label} className="cell-detail cell-status">
@@ -76,7 +71,7 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       </td>
       {/* Each action has its own column so the icons line up from row to row. */}
       <td className="cell-detail cell-actions">
-        <button type="button" className="icon-button" onClick={() => setOpenNote({ note: null, status: "negotiating" })} title="Notitie toevoegen" aria-label={`Notitie toevoegen bij kachel ${stove.number}`}>
+        <button type="button" className="icon-button" onClick={() => showNote(null, "negotiating")} title="Notitie toevoegen" aria-label={`Notitie toevoegen bij kachel ${stove.number}`}>
           <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
             <path d="M8 9h8M8 13h5" />

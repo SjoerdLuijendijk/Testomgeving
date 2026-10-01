@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { formatPrice } from "../lib/price";
 import type { StoveNoteWithStove } from "../lib/stove-note-queries";
-import { formatHandover, isOpenStatus, NOTE_STATUS_LABELS, PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS, type StoveNote } from "../lib/stove-notes";
+import { formatHandover, isOpenStatus, PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS, type NoteStatus, type StoveNote } from "../lib/stove-notes";
+import NoteStatusMenu from "./NoteStatusMenu";
 import StoveNoteDialog from "./StoveNoteDialog";
 
 const FILTERS = { open: "Open", closed: "Afgehandeld", all: "Alles" } as const;
@@ -29,7 +30,7 @@ function paymentText(note: StoveNote) {
 // All sales notes in a row, from the account menu.
 export default function StoveNoteList({ notes }: { notes: StoveNoteWithStove[] }) {
   const [filter, setFilter] = useState<Filter>("open");
-  const [openNote, setOpenNote] = useState<StoveNoteWithStove | null>(null);
+  const [openNote, setOpenNote] = useState<{ note: StoveNoteWithStove; status: NoteStatus } | null>(null);
 
   const visible = notes.filter((note) => matchesFilter(note, filter));
   if (filter === "open") visible.sort(byHandover);
@@ -66,11 +67,13 @@ export default function StoveNoteList({ notes }: { notes: StoveNoteWithStove[] }
               {visible.map((note) => (
                 <tr key={note.id}>
                   <td data-label="Kachel">
-                    <button type="button" className="invoice-link" onClick={() => setOpenNote(note)} aria-label={`Notitie bij kachel ${note.stoveNumber} openen`}>
+                    <button type="button" className="invoice-link" onClick={() => setOpenNote({ note, status: note.status })} aria-label={`Notitie bij kachel ${note.stoveNumber} openen`}>
                       {note.stoveNumber} {note.stove.brand}
                     </button>
                   </td>
-                  <td data-label="Status"><span className={`note-badge note-badge--${note.status}`}>{NOTE_STATUS_LABELS[note.status]}</span></td>
+                  <td data-label="Status">
+                    <NoteStatusMenu stove={note.stove} note={note} onOpenNote={(_, status) => setOpenNote({ note, status })} />
+                  </td>
                   <td data-label="Koper">{[note.buyerName, note.buyerPhone].filter(Boolean).join(" · ") || "—"}</td>
                   <td data-label="Ophalen / bezorgen">{formatHandover(note) ?? "—"}</td>
                   <td data-label="Prijs" className="cell-amount">{note.priceCents != null ? formatPrice(note.priceCents) : "—"}</td>
@@ -84,7 +87,7 @@ export default function StoveNoteList({ notes }: { notes: StoveNoteWithStove[] }
       )}
       <p className="form-hint muted">Afgehandelde en geannuleerde notities worden een jaar na afsluiten automatisch verwijderd.</p>
 
-      {openNote && <StoveNoteDialog stove={openNote.stove} note={openNote} onClose={() => setOpenNote(null)} />}
+      {openNote && <StoveNoteDialog stove={openNote.note.stove} note={openNote.note} status={openNote.status} onClose={() => setOpenNote(null)} />}
     </>
   );
 }

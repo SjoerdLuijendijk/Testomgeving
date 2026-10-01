@@ -19,14 +19,6 @@ export type Handover = keyof typeof HANDOVER_LABELS;
 export type PaymentStatus = keyof typeof PAYMENT_STATUS_LABELS;
 export type PaymentMethod = keyof typeof PAYMENT_METHOD_LABELS;
 
-/** The statuses a note can move to from its current status (the database enforces the same flow). */
-export const NEXT_STATUSES: Record<NoteStatus, NoteStatus[]> = {
-  negotiating: ["negotiating", "sold", "cancelled"],
-  sold: ["sold", "done", "cancelled"],
-  done: ["done"],
-  cancelled: ["cancelled"],
-};
-
 export const isOpenStatus = (status: NoteStatus) => status === "negotiating" || status === "sold";
 
 export type StoveNoteInput = {
