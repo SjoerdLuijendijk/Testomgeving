@@ -45,7 +45,7 @@ export default function StoveNoteList({ notes }: { notes: StoveNoteWithStove[] }
                 <th scope="col">Kachel</th>
                 <th scope="col">Status</th>
                 <th scope="col">Koper</th>
-                <th scope="col">Afspraak</th>
+                <th scope="col">Ophalen / bezorgen</th>
                 <th scope="col" className="cell-amount">Prijs</th>
                 <th scope="col">Betaling</th>
                 <th scope="col">Afspraken</th>
@@ -63,7 +63,7 @@ export default function StoveNoteList({ notes }: { notes: StoveNoteWithStove[] }
                     <NoteStatusMenu stove={note.stove} note={note} onOpenNote={(_, status) => setOpenNote({ note, status })} />
                   </td>
                   <td data-label="Koper">{[note.buyerName, note.buyerPhone].filter(Boolean).join(" · ") || "—"}</td>
-                  <td data-label="Afspraak">{formatHandover(note) ?? "—"}</td>
+                  <td data-label="Ophalen / bezorgen">{formatHandover(note) ?? "—"}</td>
                   <td data-label="Prijs" className="cell-amount">{note.priceCents != null ? formatPrice(note.priceCents) : "—"}</td>
                   <td data-label="Betaling">{formatPayment(note)}</td>
                   <td data-label="Afspraken" className="note-agreements" title={note.agreements ?? undefined}>{note.agreements ?? "—"}</td>

@@ -2398,11 +2398,6 @@ a {
   font-weight: 600;
 }
 
-.agenda-kind--viewing {
-  background: #fdf5e6;
-  color: #8a5a00;
-}
-
 .agenda-kind--pickup {
   background: #f1ecf9;
   color: #5b3a8c;

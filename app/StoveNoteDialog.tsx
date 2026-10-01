@@ -5,6 +5,7 @@ import { formatPrice, formatPriceInput } from "../lib/price";
 import type { NoteStove } from "../lib/stove-note-queries";
 import {
   HANDOVER_LABELS,
+  HANDOVER_TIMES,
   MAX_AGREEMENTS_LENGTH,
   NOTE_STATUS_LABELS,
   PAYMENT_METHOD_LABELS,
@@ -149,10 +150,10 @@ export default function StoveNoteDialog({ stove, note, status, onClose }: StoveN
         </fieldset>
 
         <fieldset className="invoice-section">
-          <legend>Afspraak <span className="muted">(komt in de agenda)</span></legend>
+          <legend>Ophalen of bezorgen <span className="muted">(met datum in de agenda)</span></legend>
           <div className="customer-grid">
             <label className="stacked-label customer-wide">
-              <span>Soort</span>
+              <span>Hoe</span>
               <select name="handover" defaultValue={note?.handover ?? ""}>
                 <option value="">Nog niet bekend</option>
                 {Object.entries(HANDOVER_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
@@ -164,7 +165,12 @@ export default function StoveNoteDialog({ stove, note, status, onClose }: StoveN
             </label>
             <label className="stacked-label">
               <span>Tijd</span>
-              <input name="handover_time" type="time" defaultValue={note?.handoverTime ?? ""} />
+              <select name="handover_time" defaultValue={note?.handoverTime ?? ""}>
+                <option value="">—</option>
+                {/* A time saved earlier that is not on a quarter stays selectable. */}
+                {note?.handoverTime && !HANDOVER_TIMES.includes(note.handoverTime) && <option value={note.handoverTime}>{note.handoverTime}</option>}
+                {HANDOVER_TIMES.map((time) => <option key={time} value={time}>{time}</option>)}
+              </select>
             </label>
           </div>
         </fieldset>
