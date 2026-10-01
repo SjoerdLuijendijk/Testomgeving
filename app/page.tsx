@@ -52,7 +52,7 @@ export default async function Page({ searchParams }: PageProps) {
         <AccountMenu email={user.email} showSections={isMember} activeItem={menuItem} noteCounts={noteCounts} />
       </header>
 
-      <main className={activeTab === "voorraad" ? "page-main page-main--wide" : "page-main"}>
+      <main className={activeTab === "voorraad" || activeTab === "afleveren" ? "page-main page-main--wide" : "page-main"}>
         {!isMember ? (
           <div className="notice" role="alert">
             <strong>Geen toegang</strong>
@@ -61,8 +61,12 @@ export default async function Page({ searchParams }: PageProps) {
         ) : activeTab === "toevoegen" ? (
           <AddStoveForm brands={await getKnownBrands(supabase)} />
         ) : activeTab === "afleveren" ? (
-          <section className="panel" aria-labelledby="delivery-title">
-            <h1 id="delivery-title">Af te leveren</h1>
+          <section aria-labelledby="delivery-title">
+            <div className="stock-toolbar">
+              <div className="stock-title-row">
+                <h1 id="delivery-title">Af te leveren</h1>
+              </div>
+            </div>
             <DeliveryList notes={await listNotes(supabase)} />
           </section>
         ) : activeTab === "notities" ? (
