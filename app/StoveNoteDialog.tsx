@@ -39,6 +39,8 @@ type StoveNoteDialogProps = {
 // status is chosen beforehand in the status list. Rendered only while open.
 export default function StoveNoteDialog({ stove, note, status, onClose }: StoveNoteDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  // Set on the first change, so a click next to the dialog never throws away typed details.
+  const changedRef = useRef(false);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(note?.paymentStatus ?? "open");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -85,10 +87,19 @@ export default function StoveNoteDialog({ stove, note, status, onClose }: StoveN
     });
   }
 
+  // A click on the backdrop (outside the dialog box) closes it while nothing has been changed.
+  function handleBackdropClick(event: React.MouseEvent<HTMLDialogElement>) {
+    const dialog = dialogRef.current;
+    if (!dialog || event.target !== dialog || changedRef.current || pending) return;
+    const rect = dialog.getBoundingClientRect();
+    const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+    if (!inside) dialog.close();
+  }
+
   const titleId = `note-title-${stove.number}-${note?.id ?? "new"}`;
   return (
-    <dialog ref={dialogRef} className="edit-dialog note-dialog" aria-labelledby={titleId} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="form-stack">
+    <dialog ref={dialogRef} className="edit-dialog note-dialog" aria-labelledby={titleId} onClose={onClose} onClick={handleBackdropClick}>
+      <form onSubmit={handleSubmit} onChange={() => (changedRef.current = true)} className="form-stack">
         <input type="hidden" name="status" value={status} />
         <div>
           <h2 id={titleId}>
