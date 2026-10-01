@@ -45,8 +45,9 @@ export default function SoldToggle({ stove, onOpenNote }: SoldToggleProps) {
     onSelect: sold ? (sale ? () => onOpenNote(sale, "sold") : undefined) : () => onOpenNote(negotiation ?? null, "sold"),
   };
   const options = [forSale, negotiating, soldOption];
-  if (sale) options.push({ key: "done", label: "Afgehandeld (betaald en opgehaald)", tone: "done", onSelect: () => closeNote(stove, sale, "done") });
+  if (sale) options.push({ key: "done", label: "Afgeleverd", tone: "done", onSelect: () => closeNote(stove, sale, "done") });
 
-  const current = sold ? soldOption : negotiation ? negotiating : forSale;
+  // A sold stove that is still to be delivered says so on its pill.
+  const current = sale ? { ...soldOption, label: "Af te leveren" } : sold ? soldOption : negotiation ? negotiating : forSale;
   return <StatusMenu label={current.label} tone={current.tone} options={options} ariaLabel={`Kachel ${stove.number}`} disabled={pending} />;
 }

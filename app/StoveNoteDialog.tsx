@@ -95,7 +95,7 @@ export default function StoveNoteDialog({ stove, note, status, onClose }: StoveN
             Kachel {stove.number} <span className="muted">{stove.brand}</span>
           </h2>
           <p className="note-dialog-status">
-            <span className={`note-badge note-badge--${status}`}>{NOTE_STATUS_LABELS[status]}</span>
+            <span className={`note-badge note-badge--${status}`}>{becomesSold ? "Verkocht" : NOTE_STATUS_LABELS[status]}</span>
             <span className="muted">
               {becomesSold && !stove.madeToOrder
                 ? stove.condition === "new"
@@ -107,6 +107,23 @@ export default function StoveNoteDialog({ stove, note, status, onClose }: StoveN
             </span>
           </p>
         </div>
+
+        {becomesSold && (
+          <fieldset className="invoice-section">
+            <legend>Afleveren</legend>
+            <div className="choice-options">
+              <label className="choice-option">
+                <input type="radio" name="delivery" value="now" required />
+                Direct afgeleverd of meegenomen
+              </label>
+              <label className="choice-option">
+                <input type="radio" name="delivery" value="later" required />
+                Nog af te leveren
+              </label>
+            </div>
+            <p className="form-hint muted">Nog af te leveren: de kachel komt in de lijst Af te leveren (menu rechtsboven) tot je hem op Afgeleverd zet.</p>
+          </fieldset>
+        )}
 
         <fieldset className="invoice-section">
           <legend>Koper <span className="muted">(optioneel)</span></legend>

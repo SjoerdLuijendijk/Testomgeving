@@ -1,10 +1,11 @@
-import { MAX_PRICE_CENTS, parsePriceToCents } from "./price";
+import { formatPrice, MAX_PRICE_CENTS, parsePriceToCents } from "./price";
 
 // Sales notes per stove (table stove_notes). Keep in sync with the stove notes migration.
 export const NOTE_STATUS_LABELS = {
   negotiating: "In onderhandeling",
-  sold: "Verkocht",
-  done: "Afgehandeld",
+  // A sold note stays open until the stove is delivered (or picked up).
+  sold: "Af te leveren",
+  done: "Afgeleverd",
   cancelled: "Geannuleerd",
 } as const;
 export const HANDOVER_LABELS = { pickup: "Ophalen", delivery: "Bezorgen" } as const;
@@ -41,6 +42,9 @@ export type StoveNoteInput = {
   agreements: string | null;
 };
 
+/** Input of the note dialog: a sale can be delivered (or picked up) straight away. */
+export type StoveNoteForm = StoveNoteInput & { deliveredNow: boolean };
+
 export type StoveNote = StoveNoteInput & {
   id: number;
   stoveNumber: number;
@@ -74,7 +78,7 @@ function isIsoDate(value: string) {
 }
 
 // Validates untrusted input from the note dialog. Only the status is required.
-export function parseStoveNote(formData: FormData): Result<StoveNoteInput> {
+export function parseStoveNote(formData: FormData): Result<StoveNoteForm> {
   const status = formData.get("status");
   if (!isKeyOf(NOTE_STATUS_LABELS, status)) return { ok: false, error: "Kies een status." };
 
@@ -124,6 +128,7 @@ export function parseStoveNote(formData: FormData): Result<StoveNoteInput> {
       paymentMethod,
       // An amount paid only matters for a deposit; "paid" means the full price.
       paidCents: paymentStatus === "deposit" ? paidCents : null,
+      deliveredNow: status === "sold" && formData.get("delivery") === "now",
     },
   };
 }
@@ -142,10 +147,26 @@ export function formatHandover(note: Pick<StoveNote, "handover" | "handoverDate"
 }
 
 /** True when nothing but the status and the default payment status was filled in. */
-export function isEmptyNote(note: StoveNoteInput) {
+export function isEmptyNote(note: StoveNoteForm) {
   return (
     note.paymentStatus === "open" &&
     [note.buyerName, note.buyerPhone, note.buyerEmail, note.buyerAddress, note.buyerPostalCode, note.buyerCity, note.handover,
       note.handoverDate, note.priceCents, note.paymentMethod, note.agreements].every((value) => value === null)
   );
+}
+
+// Open notes with the nearest handover first; notes without a date after them, newest first.
+export function byHandover(a: StoveNote, b: StoveNote) {
+  const keyA = a.handoverDate ? `${a.handoverDate} ${a.handoverTime ?? ""}` : null;
+  const keyB = b.handoverDate ? `${b.handoverDate} ${b.handoverTime ?? ""}` : null;
+  if (keyA && keyB && keyA !== keyB) return keyA < keyB ? -1 : 1;
+  if (keyA !== keyB) return keyA ? -1 : 1;
+  return b.id - a.id;
+}
+
+/** "Aanbetaald € 250 (contant)" */
+export function formatPayment(note: Pick<StoveNote, "paymentStatus" | "paidCents" | "paymentMethod">) {
+  const amount = note.paymentStatus === "deposit" && note.paidCents != null ? ` ${formatPrice(note.paidCents)}` : "";
+  const method = note.paymentMethod ? ` (${PAYMENT_METHOD_LABELS[note.paymentMethod].toLowerCase()})` : "";
+  return `${PAYMENT_STATUS_LABELS[note.paymentStatus]}${amount}${method}`;
 }
