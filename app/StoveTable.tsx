@@ -12,6 +12,9 @@ import StockPrintList from "./StockPrintList";
 import StoveRow from "./StoveRow";
 
 const KIND_LABELS: Record<Kind, string> = { used: "Gereviseerd", new: "Nieuw", order: "Op bestelling" };
+// For the empty message: "Geen gereviseerde kachels in het verkocht archief."
+const KIND_NOUNS: Record<Kind, string> = { used: "gereviseerde kachels", new: "nieuwe kachels", order: "kachels op bestelling" };
+const VIEW_PLACES: Record<StockView, string> = { available: "het aanbod", sold: "het verkocht archief" };
 const VIEW_TITLES: Record<StockView, string> = { available: "Aanbod", sold: "Verkocht archief" };
 const ACTION_LABELS = ["Bewerken", "Factuur", "Advertentie", "Verwijderen"];
 
@@ -25,19 +28,19 @@ const inView = (stove: Stove, view: StockView) => (view === "sold") === Boolean(
 // The current stock by default; the sold archive (opened from the account menu) shows sold stoves.
 export default function StoveTable({ stoves, view }: { stoves: Stove[]; view: StockView }) {
   const [search, setSearch] = useState("");
-  const [selectedKind, setKind] = useState<Kind>("used");
+  // Null until a tab is clicked: the first tab with stoves is shown.
+  const [selectedKind, setKind] = useState<Kind | null>(null);
   const [sort, setSort] = useState(DEFAULT_SORT);
 
   // Made-to-order stoves never sell out, so the archive has no tab for them.
   const kinds = (Object.keys(KIND_LABELS) as Kind[]).filter((key) => view === "available" || key !== "order");
-  const kind = kinds.includes(selectedKind) ? selectedKind : kinds[0];
-
   const stovesInView = useMemo(() => stoves.filter((stove) => inView(stove, view)), [stoves, view]);
   const kindCounts = useMemo(() => {
     const result: Record<Kind, number> = { used: 0, new: 0, order: 0 };
     for (const stove of stovesInView) result[kindOf(stove)] += 1;
     return result;
   }, [stovesInView]);
+  const kind = selectedKind && kinds.includes(selectedKind) ? selectedKind : (kinds.find((key) => kindCounts[key] > 0) ?? kinds[0]);
 
   const brands = useMemo(() => [...new Set(stoves.map((stove) => stove.brand))].sort((a, b) => a.localeCompare(b, "nl")), [stoves]);
 
@@ -98,7 +101,7 @@ export default function StoveTable({ stoves, view }: { stoves: Stove[]; view: St
       ) : visible.length === 0 ? (
         <div className="notice">
           <p>
-            Geen kachels gevonden bij {KIND_LABELS[kind].toLowerCase()} · {VIEW_TITLES[view].toLowerCase()}.
+            Geen {KIND_NOUNS[kind]} {query ? "gevonden " : ""}in {VIEW_PLACES[view]}.
           </p>
           {otherMatches > 0 && (
             <Link className="text-button" href={STOCK_VIEW_HREFS[otherView]}>
