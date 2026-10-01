@@ -57,8 +57,8 @@ when no type is chosen. The model is no longer entered (migration `2026093024000
 ## Stock
 
 The inventory has three tabs: used, new and made to order ("Op bestelling"). A used stove is a
-single unit with a "sold" toggle. A new stove model from stock has one stove number with a stock
-quantity (set when adding it) and "−1 verkocht" / "+1" buttons. A made-to-order stove is a new
+single unit. A new stove model from stock has one stove number with a stock quantity (set when
+adding it), corrected with "−" / "+" in the "Voorraad" column; every stove sells through its status. A made-to-order stove is a new
 model sold without stock and ordered from the supplier once sold: it keeps no stock and never
 sells out. The database keeps `sold_at` and `stock_quantity` consistent: a stove
 is sold exactly when its stock is 0. Stock changes go through `adjust_stove_stock()`, one unit at a
@@ -69,9 +69,9 @@ time, so concurrent sales cannot overwrite each other.
 A note records a negotiation or sale of a stove: buyer, pickup or delivery with date and a time per
 quarter of an hour, sale
 price, payment (open, deposit or paid; cash, pin or bank) and further agreements. Only the status is
-required. The status pill of a used stove opens a list (Te koop, In onderhandeling, Verkocht,
+required. The status pill of every stove opens a list (Te koop, In onderhandeling, Verkocht,
 Afgeleverd); choosing negotiating or sold opens the note dialog for the details, the others apply
-straight away. "−1 verkocht" of a new stove opens the dialog as a sale. A sale is either delivered (or picked up) straight away, which closes the note
+straight away. Selling a new stove takes one unit from its stock. A sale is either delivered (or picked up) straight away, which closes the note
 at once, or still to be delivered: those stoves are listed with their agreements under "Af te
 leveren" in the account menu until they are marked "Afgeleverd". Selling straight away without any
 details only lowers the stock. Other open notes show

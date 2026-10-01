@@ -13,8 +13,8 @@ import PhotoCell from "./PhotoCell";
 import ListingToggle from "./ListingToggle";
 import ShopLinkButton from "./ShopLinkButton";
 import ShopSyncStatus from "./ShopSyncStatus";
-import SoldToggle from "./SoldToggle";
 import StockControl from "./StockControl";
+import StoveStatus, { pillNote } from "./StoveStatus";
 import StoveInvoiceLinks from "./StoveInvoiceLinks";
 import StoveNoteBadges from "./StoveNoteBadges";
 import StoveNoteDialog from "./StoveNoteDialog";
@@ -27,11 +27,7 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
   // The note dialog: an existing note or a new one, with the status it moves to.
   const [openNote, setOpenNote] = useState<{ note: StoveNote | null; status: NoteStatus } | null>(null);
   const showNote = (note: StoveNote | null, status: NoteStatus) => setOpenNote({ note, status });
-  // A used stove shows its negotiation or sale on its status pill instead of a separate label.
-  const usesSoldToggle = !stove.madeToOrder && stove.condition !== "new";
-  const onPill = usesSoldToggle
-    ? stove.notes.find((note) => note.status === (stove.soldAt ? "sold" : "negotiating"))
-    : undefined;
+  const onPill = pillNote(stove);
   const rowClass = [stove.soldAt && "is-sold", expanded && "is-expanded"].filter(Boolean).join(" ");
 
   return (
@@ -43,14 +39,17 @@ export default function StoveRow({ stove, brands }: { stove: Stove; brands: stri
       <td data-label="H × B × D" className="cell-detail cell-nowrap cell-numeric">{formatDimensions(stove)}</td>
       <td data-label="Rookafvoer" className="cell-detail cell-nowrap">{formatFlue(stove)}</td>
       <td data-label="Prijs" className="cell-price cell-nowrap cell-numeric">{stove.priceCents ? formatPrice(stove.priceCents) : MISSING}</td>
-      <td data-label="Status" className="cell-status cell-sold">
+      <td data-label="Voorraad" className="cell-detail cell-nowrap cell-stock">
         {stove.madeToOrder ? (
-          <span className="stock-count">Op bestelling</span>
+          <span className="muted">Op bestelling</span>
         ) : stove.condition === "new" ? (
-          <StockControl stoveNumber={stove.number} quantity={stove.stockQuantity} onSell={() => showNote(null, "sold")} />
+          <StockControl stoveNumber={stove.number} quantity={stove.stockQuantity} />
         ) : (
-          <SoldToggle stove={stove} onOpenNote={showNote} />
+          stove.stockQuantity
         )}
+      </td>
+      <td data-label="Status" className="cell-status cell-sold">
+        <StoveStatus stove={stove} onOpenNote={showNote} />
         <StoveNoteBadges stove={stove} notes={stove.notes.filter((note) => note !== onPill)} onOpenNote={showNote} />
         {openNote && <StoveNoteDialog stove={stove} note={openNote.note} status={openNote.status} onClose={() => setOpenNote(null)} />}
       </td>
