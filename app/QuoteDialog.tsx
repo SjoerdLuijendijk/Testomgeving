@@ -6,8 +6,8 @@ import type { Article } from "../lib/articles";
 import { downloadFile } from "../lib/download-file";
 import { invoiceTotals, MAX_INVOICE_LINES, MAX_QUANTITY, type Company } from "../lib/invoice";
 import { EMPTY_CUSTOMER, toInvoiceLines, type DraftCustomer, type DraftLine } from "../lib/invoice-draft";
-import { formatPrice, formatPriceInput } from "../lib/price";
-import { DEFAULT_VALID_DAYS, MAX_NOTES_LENGTH, type Quote, type QuoteCustomer } from "../lib/quote";
+import { formatPrice, formatPriceInput, parsePriceToCents } from "../lib/price";
+import { DEFAULT_VALID_DAYS, MAX_NOTES_LENGTH, type Quote, type QuoteCustomer, type QuoteLine } from "../lib/quote";
 import type { QuoteStoveOption } from "../lib/quote-queries";
 import { todayInNetherlands } from "../lib/today";
 import CustomerFields from "./CustomerFields";
@@ -52,6 +52,25 @@ const toDraftLines = (quote: Quote): DraftLine[] =>
     stoveNumber: line.stove_number,
     articleId: line.article_id,
   }));
+
+// Every line with a description shows in the preview, also while its price or quantity is missing
+// (as 0 and 1), so a picked article without a price is visible straight away. Saving still requires
+// complete lines.
+function previewLines(lines: DraftLine[]): QuoteLine[] {
+  return lines
+    .filter((line) => line.description.trim())
+    .map((line) => {
+      const quantity = Number.parseInt(line.quantity, 10);
+      return {
+        description: line.description.trim(),
+        quantity: Number.isInteger(quantity) && quantity >= 1 && quantity <= MAX_QUANTITY ? quantity : 1,
+        unit_price_cents: parsePriceToCents(line.price, { allowZero: true }) ?? 0,
+        vat_rate: line.vatRate,
+        stove_number: line.stoveNumber ?? null,
+        article_id: line.articleId ?? null,
+      };
+    });
+}
 
 // pdf-lib is only loaded once a quote is opened.
 async function renderPdf(quote: Quote, company: Company) {
@@ -106,9 +125,9 @@ export default function QuoteDialog({ quote: initialQuote, onClose }: QuoteDialo
       validUntil,
       customer: toQuoteCustomer(customer),
       notes: notes.trim() || null,
-      lines: valid.map((line, index) => ({ ...line, stove_number: lines[index]?.stoveNumber ?? null, article_id: lines[index]?.articleId ?? null })),
+      lines: previewLines(lines),
     }),
-    [saved, today, validUntil, customer, notes, valid, lines],
+    [saved, today, validUntil, customer, notes, lines],
   );
 
   // Live preview, rebuilt shortly after the last change.
