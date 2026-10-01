@@ -50,7 +50,8 @@ export default function StoveStatus({ stove, onOpenNote }: StoveStatusProps) {
   };
   const soldOption: StatusOption = {
     key: "sold",
-    label: sold && stove.condition === "new" ? "Uitverkocht" : "Verkocht",
+    // A new stove model sells one unit at a time.
+    label: stove.condition === "new" ? (sold ? "Uitverkocht" : "1 verkocht") : "Verkocht",
     tone: "sold",
     current: sold,
     onSelect: sold ? undefined : () => onOpenNote(negotiation ?? null, "sold"),
