@@ -1078,6 +1078,29 @@ a {
   grid-column: 1 / -1;
 }
 
+.line-save {
+  display: inline-flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.invoice-section .line-save input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.line-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .line-remove {
   width: 36px;
   height: 36px;
@@ -2490,4 +2513,121 @@ a {
     background: none;
     font-size: 15px;
   }
+}
+
+/* Toolbar with several actions next to the page title (Artikelen, Offertes). */
+.toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-button {
+  min-height: 34px;
+  padding: 6px 14px;
+  font-size: 13.5px;
+}
+
+.filter-select {
+  flex: 0 1 260px;
+  min-height: var(--control-height);
+  padding: 8px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius);
+  background: white;
+  font-size: 15px;
+}
+
+.import-report {
+  flex-basis: 100%;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.import-report ul {
+  max-height: 200px;
+  margin: 8px 0;
+  padding-left: 18px;
+  overflow-y: auto;
+  color: var(--muted);
+}
+
+/* Search box that adds a stove or article as a quote line. */
+.line-picker {
+  position: relative;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.line-picker .search-input {
+  width: 100%;
+}
+
+.line-picker-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  z-index: 5;
+  max-height: 320px;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: 0 4px 12px rgb(42 33 29 / 8%), 0 16px 40px rgb(42 33 29 / 12%);
+  list-style: none;
+}
+
+.line-picker-results button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  text-align: left;
+}
+
+.line-picker-results button:hover,
+.line-picker-results button:focus-visible {
+  background: var(--row-hover);
+}
+
+.line-picker-kind {
+  grid-row: span 2;
+  align-self: start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.line-picker-kind--stove {
+  background: #fcefe9;
+  color: var(--accent-dark);
+}
+
+.line-picker-kind--article {
+  background: #eef5fd;
+  color: #1f4f86;
+}
+
+.line-picker-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.line-picker-detail {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.line-picker-empty {
+  padding: 8px 10px;
+  font-size: 14px;
 }

@@ -1,5 +1,7 @@
 import { degrees, PDFDocument, rgb, StandardFonts, type PDFFont, type PDFPage } from "pdf-lib";
-import { invoiceTotals, lineTotalCents, type Invoice } from "./invoice";
+import { invoiceTotals, lineTotalCents, type Company, type Invoice, type InvoiceLine } from "./invoice";
+import { LOGO_PATHS, LOGO_VIEWBOX } from "./logo-paths";
+import type { Quote } from "./quote";
 
 const PAGE_WIDTH = 595.28; // A4 in points
 const PAGE_HEIGHT = 841.89;
@@ -105,22 +107,58 @@ class Writer {
   }
 }
 
-export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
+/** What a document (invoice or quote) shows; the layout is shared. */
+type PdfDocument = {
+  title: string;
+  heading: string;
+  /** "CONCEPT" watermark. */
+  draft: boolean;
+  seller: Company;
+  details: [string, string][];
+  customerHeading: string;
+  customerLines: (string | null)[];
+  lines: InvoiceLine[];
+  /** Small print below the totals. */
+  closing: string[];
+};
+
+// The white logo on a rounded badge in the brand colour, as in the app header. Returns its height.
+function drawLogo(page: PDFPage, x: number, top: number) {
+  const logoHeight = 54;
+  const scale = logoHeight / LOGO_VIEWBOX.height;
+  const padX = 10;
+  const padY = 6;
+  const width = LOGO_VIEWBOX.width * scale + 2 * padX;
+  const height = logoHeight + 2 * padY;
+  const r = 6;
+  page.drawSvgPath(
+    `M${r},0 H${width - r} Q${width},0 ${width},${r} V${height - r} Q${width},${height} ${width - r},${height} H${r} Q0,${height} 0,${height - r} V${r} Q0,0 ${r},0 Z`,
+    { x, y: top, color: ACCENT, borderWidth: 0 },
+  );
+  for (const path of LOGO_PATHS) page.drawSvgPath(path, { x: x + padX, y: top - padY, scale, color: rgb(1, 1, 1), borderWidth: 0 });
+  return height;
+}
+
+async function renderDocument(input: PdfDocument): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const fonts = { regular: await doc.embedFont(StandardFonts.Helvetica), bold: await doc.embedFont(StandardFonts.HelveticaBold) };
-  const draft = invoice.number === null;
-  const title = draft ? draftName(invoice) : `Factuur ${invoice.number}`;
+  const { title, seller } = input;
   doc.setTitle(title);
-  doc.setAuthor(invoice.seller.name);
+  doc.setAuthor(seller.name);
 
-  const w = new Writer(doc, fonts, draft);
-  const { seller, customer } = invoice;
+  const w = new Writer(doc, fonts, input.draft);
 
-  // Header: seller name and document title.
-  w.text(seller.name, MARGIN, { size: 20, bold: true, color: ACCENT });
-  w.text(draft ? "CONCEPTFACTUUR" : "FACTUUR", PAGE_WIDTH - MARGIN, { size: 16, bold: true, align: "right" });
-  w.y -= 22;
+  // Header: logo top left, document title top right.
+  const top = PAGE_HEIGHT - MARGIN + 14;
+  const logoHeight = drawLogo(w.page, MARGIN, top);
+  w.y = top - 20;
+  w.text(input.heading, PAGE_WIDTH - MARGIN, { size: 16, bold: true, align: "right" });
+  w.y = top - logoHeight - 22;
 
+  // Seller below the logo, document details on the right.
+  const startY = w.y;
+  w.text(seller.name, MARGIN, { size: 11, bold: true });
+  w.y -= 14;
   const sellerLines = [
     seller.address,
     `${seller.postal_code} ${seller.city}`,
@@ -130,23 +168,14 @@ export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
     `Btw ${seller.vat_number}`,
     `IBAN ${seller.iban}`,
   ].filter((line): line is string => Boolean(line));
-  const startY = w.y;
   for (const line of sellerLines) {
     w.text(line, MARGIN, { size: 9, color: MUTED });
     w.y -= 12;
   }
 
-  // Invoice details on the right.
-  const dueDate = addDays(invoice.issueDate, seller.payment_term_days);
-  const details: [string, string][] = [
-    ["Factuurnummer", invoice.number ?? "wordt toegekend"],
-    ["Factuurdatum", formatDate(invoice.issueDate)],
-    ["Vervaldatum", formatDate(dueDate)],
-    ...(invoice.stoveNumber === null ? [] : [["Kachelnummer", String(invoice.stoveNumber)] as [string, string]]),
-  ];
   const endSellerY = w.y;
   w.y = startY;
-  for (const [label, value] of details) {
+  for (const [label, value] of input.details) {
     w.text(label, 360, { size: 9, color: MUTED });
     w.text(value, PAGE_WIDTH - MARGIN, { size: 9, bold: true, align: "right" });
     w.y -= 14;
@@ -154,13 +183,13 @@ export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
   w.y = Math.min(w.y, endSellerY) - 20;
 
   // Customer.
-  w.text("Factuur aan", MARGIN, { size: 9, bold: true, color: MUTED });
+  w.text(input.customerHeading, MARGIN, { size: 9, bold: true, color: MUTED });
   w.y -= 14;
-  for (const line of [customer.name, customer.address, `${customer.postal_code} ${customer.city}`, customer.email, customer.phone]) {
-    if (!line) continue;
-    w.text(line, MARGIN, { size: 10, bold: line === customer.name });
+  input.customerLines.forEach((line, index) => {
+    if (!line?.trim()) return;
+    w.text(line, MARGIN, { size: 10, bold: index === 0 });
     w.y -= 13;
-  }
+  });
   w.y -= 22;
 
   // Lines table.
@@ -176,7 +205,7 @@ export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
   };
   tableHeader();
 
-  for (const line of invoice.lines) {
+  for (const line of input.lines) {
     const descriptionLines = wrap(fonts.regular, line.description, 10, COLUMNS.quantity - COLUMNS.description - 50);
     const rowHeight = descriptionLines.length * 13 + 8;
     if (w.y - rowHeight < MARGIN + 40) {
@@ -199,7 +228,7 @@ export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
   w.y -= 20;
 
   // Totals with VAT per rate.
-  const totals = invoiceTotals(invoice.lines);
+  const totals = invoiceTotals(input.lines);
   w.ensureSpace(40 + totals.groups.length * 14 + 80);
   const labelX = 330;
   const totalRow = (label: string, amount: number, bold = false) => {
@@ -213,17 +242,15 @@ export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
   w.page.drawLine({ start: { x: labelX, y: w.y + 12 }, end: { x: PAGE_WIDTH - MARGIN, y: w.y + 12 }, thickness: 0.75, color: LINE });
   totalRow("Totaal incl. btw", totals.inclCents, true);
 
-  // Payment instruction.
+  // Small print, paragraph by paragraph.
   w.y -= 24;
-  for (const text of wrap(
-    fonts.regular,
-    `Graag het totaalbedrag van ${formatAmount(totals.inclCents)} vóór ${formatDate(dueDate)} overmaken op ${seller.iban} ten name van ${seller.name}, onder vermelding van ${invoice.number ? `factuurnummer ${invoice.number}` : "het factuurnummer"}.`,
-    9,
-    PAGE_WIDTH - 2 * MARGIN,
-  )) {
-    w.ensureSpace(12);
-    w.text(text, MARGIN, { size: 9, color: MUTED });
-    w.y -= 12;
+  for (const paragraph of input.closing) {
+    for (const text of paragraph.split("\n").flatMap((part) => wrap(fonts.regular, part, 9, PAGE_WIDTH - 2 * MARGIN))) {
+      w.ensureSpace(12);
+      w.text(text, MARGIN, { size: 9, color: MUTED });
+      w.y -= 12;
+    }
+    w.y -= 8;
   }
 
   // Page numbers, once the page count is known.
@@ -237,10 +264,61 @@ export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
   return doc.save();
 }
 
+export async function createInvoicePdf(invoice: Invoice): Promise<Uint8Array> {
+  const draft = invoice.number === null;
+  const dueDate = addDays(invoice.issueDate, invoice.seller.payment_term_days);
+  const totals = invoiceTotals(invoice.lines);
+  const { customer, seller } = invoice;
+  return renderDocument({
+    title: draft ? draftName(invoice) : `Factuur ${invoice.number}`,
+    heading: draft ? "CONCEPTFACTUUR" : "FACTUUR",
+    draft,
+    seller,
+    details: [
+      ["Factuurnummer", invoice.number ?? "wordt toegekend"],
+      ["Factuurdatum", formatDate(invoice.issueDate)],
+      ["Vervaldatum", formatDate(dueDate)],
+      ...(invoice.stoveNumber === null ? [] : [["Kachelnummer", String(invoice.stoveNumber)] as [string, string]]),
+    ],
+    customerHeading: "Factuur aan",
+    customerLines: [customer.name, customer.address, `${customer.postal_code} ${customer.city}`, customer.email, customer.phone],
+    lines: invoice.lines,
+    closing: [
+      `Graag het totaalbedrag van ${formatAmount(totals.inclCents)} vóór ${formatDate(dueDate)} overmaken op ${seller.iban} ten name van ${seller.name}, onder vermelding van ${invoice.number ? `factuurnummer ${invoice.number}` : "het factuurnummer"}.`,
+    ],
+  });
+}
+
+export async function createQuotePdf(quote: Quote, seller: Company): Promise<Uint8Array> {
+  const { customer } = quote;
+  return renderDocument({
+    title: quote.number ? `Offerte ${quote.number}` : "Conceptofferte",
+    heading: "OFFERTE",
+    draft: quote.number === null,
+    seller,
+    details: [
+      ["Offertenummer", quote.number ?? "wordt toegekend"],
+      ["Datum", formatDate(quote.issueDate)],
+      ["Geldig tot", formatDate(quote.validUntil)],
+    ],
+    customerHeading: "Offerte voor",
+    customerLines: [customer.name, customer.address, [customer.postalCode, customer.city].filter(Boolean).join(" "), customer.email, customer.phone],
+    lines: quote.lines,
+    closing: [
+      ...(quote.notes ? [quote.notes] : []),
+      `Deze offerte is geldig tot en met ${formatDate(quote.validUntil)}. Alle prijzen zijn inclusief btw.`,
+    ],
+  });
+}
+
 function draftName(invoice: Invoice) {
   return invoice.stoveNumber === null ? "Conceptfactuur" : `Conceptfactuur kachel ${invoice.stoveNumber}`;
 }
 
 export function invoiceFileName(invoice: Invoice) {
   return invoice.number ? `Factuur ${invoice.number}.pdf` : `${draftName(invoice)}.pdf`;
+}
+
+export function quoteFileName(quote: Pick<Quote, "number">) {
+  return quote.number ? `Offerte ${quote.number}.pdf` : "Conceptofferte.pdf";
 }

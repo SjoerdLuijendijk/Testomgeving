@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import { downloadFile } from "../lib/download-file";
 import { invoiceTotals, type Company, type Invoice } from "../lib/invoice";
 import { EMPTY_CUSTOMER, emptyLine, stoveLine, todayIsoDate, toCustomer, toInvoiceLines, type DraftCustomer, type DraftLine } from "../lib/invoice-draft";
@@ -20,9 +20,19 @@ async function renderPdf(invoice: Invoice) {
   return { bytes: await createInvoicePdf(invoice), fileName: invoiceFileName(invoice) };
 }
 
-// stove null: a separate invoice, opened with a button on the invoices page.
-export default function InvoiceDialog({ stove }: { stove: Stove | null }) {
-  const stoveNumber = stove?.number ?? null;
+/** A concept invoice filled in beforehand, for example from an accepted quote. */
+export type InvoicePrefill = { customer: DraftCustomer; lines: DraftLine[]; stoveNumber: number | null };
+
+type InvoiceDialogProps = {
+  /** Null: a separate invoice, opened with a button on the invoices page. */
+  stove: Stove | null;
+  /** Loads customer and lines when the dialog opens; the button then reads "Factuur maken". */
+  loadPrefill?: () => Promise<InvoicePrefill | null>;
+};
+
+export default function InvoiceDialog({ stove, loadPrefill }: InvoiceDialogProps) {
+  const [prefillStove, setPrefillStove] = useState<number | null>(null);
+  const stoveNumber = stove?.number ?? prefillStove;
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [company, setCompany] = useState<Company | null | undefined>(undefined);
@@ -38,9 +48,12 @@ export default function InvoiceDialog({ stove }: { stove: Stove | null }) {
   const { valid, invalid } = useMemo(() => toInvoiceLines(lines), [lines]);
   const totals = invoiceTotals(valid);
 
-  function open() {
-    setCustomer(EMPTY_CUSTOMER);
-    setLines([stove ? stoveLine(stove) : emptyLine()]);
+  async function open() {
+    const prefill = loadPrefill ? await loadPrefill() : null;
+    if (loadPrefill && !prefill) return;
+    setCustomer(prefill?.customer ?? EMPTY_CUSTOMER);
+    setLines(prefill?.lines ?? [stove ? stoveLine(stove) : emptyLine()]);
+    setPrefillStove(prefill?.stoveNumber ?? null);
     setCreated(null);
     setError(null);
     setShowLineErrors(false);
@@ -112,7 +125,7 @@ export default function InvoiceDialog({ stove }: { stove: Stove | null }) {
     });
   }
 
-  const titleId = `invoice-title-${stoveNumber ?? "separate"}`;
+  const titleId = useId();
   return (
     <>
       {stove ? (
@@ -123,6 +136,10 @@ export default function InvoiceDialog({ stove }: { stove: Stove | null }) {
             <path d="M8 13h8M8 17h5" />
           </svg>
         </button>
+      ) : loadPrefill ? (
+        <button type="button" className="invoice-link" onClick={open} title="Conceptfactuur maken van deze offerte">
+          Factuur maken
+        </button>
       ) : (
         <button type="button" className="sale-button" onClick={open}>
           + Losse factuur
@@ -130,7 +147,7 @@ export default function InvoiceDialog({ stove }: { stove: Stove | null }) {
       )}
       <dialog ref={dialogRef} className="invoice-dialog" aria-labelledby={titleId} onClose={handleClose}>
         <div className="invoice-dialog-header">
-          <h2 id={titleId}>{stove ? `Factuur kachel ${stove.number}` : "Losse factuur"}</h2>
+          <h2 id={titleId}>{stove ? `Factuur kachel ${stove.number}` : loadPrefill ? "Factuur van offerte" : "Losse factuur"}</h2>
           <button type="button" className="line-remove" onClick={() => dialogRef.current?.close()} aria-label="Sluiten">×</button>
         </div>
 

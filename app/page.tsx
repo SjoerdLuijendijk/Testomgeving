@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireTeamMember } from "../lib/auth";
-import type { AdminSection } from "../lib/admin-sections";
+import { isWideSection, parseAdminSection, type AdminSection } from "../lib/admin-sections";
 import type { StockView } from "../lib/stock-views";
 import { countOpenNotes, listNotes } from "../lib/stove-note-queries";
 import { getKnownBrands, getStoves } from "../lib/stove-queries";
@@ -29,8 +29,7 @@ export default async function Page({ searchParams }: PageProps) {
       : requestedTab === "admin" || requestedTab === "instellingen"
         ? "admin"
         : "toevoegen";
-  const adminSection: AdminSection =
-    sectie === "bedrijf" || sectie === "advertentie" || sectie === "webshop" ? sectie : requestedTab === "instellingen" ? "bedrijf" : "facturen";
+  const adminSection: AdminSection = parseAdminSection(sectie) ?? (requestedTab === "instellingen" ? "bedrijf" : "facturen");
   const stockView: StockView = activeTab === "voorraad" && weergave === "verkocht" ? "sold" : "available";
   const menuItem = activeTab === "admin" ? adminSection : activeTab === "notities" || activeTab === "afleveren" || activeTab === "agenda" ? activeTab : stockView === "sold" ? "verkocht" : null;
   const noteCounts = isMember ? await countOpenNotes(supabase) : { open: 0, toDeliver: 0, today: 0 };
@@ -53,7 +52,7 @@ export default async function Page({ searchParams }: PageProps) {
         <AccountMenu email={user.email} showSections={isMember} activeItem={menuItem} noteCounts={noteCounts} />
       </header>
 
-      <main className={activeTab === "toevoegen" || (activeTab === "admin" && adminSection !== "facturen") ? "page-main" : "page-main page-main--wide"}>
+      <main className={activeTab === "toevoegen" || (activeTab === "admin" && !isWideSection(adminSection)) ? "page-main" : "page-main page-main--wide"}>
         {!isMember ? (
           <div className="notice" role="alert">
             <strong>Geen toegang</strong>
