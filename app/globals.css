@@ -1034,10 +1034,16 @@ a {
   font-weight: 600;
 }
 
+/* minmax(0, 1fr): fields shrink with the dialog instead of pushing it wider than the screen. */
 .customer-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.customer-grid input,
+.customer-grid select {
+  min-width: 0;
 }
 
 .customer-wide {
@@ -2119,8 +2125,26 @@ a {
 }
 
 
+/* Only scrolls up and down: nothing in it may make it wider than the screen. */
 .note-dialog {
   width: min(620px, calc(100vw - 32px));
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+.note-dialog .form-stack,
+.note-dialog fieldset {
+  min-width: 0;
+}
+
+@media (max-width: 479px) {
+  .note-dialog {
+    padding: 20px 16px;
+  }
+
+  .note-dialog .customer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .dialog-title:focus {
