@@ -1,37 +1,119 @@
 "use client";
 
-import { useId, useState } from "react";
-import { articleDescription, salePriceInclCents, type Article } from "../lib/articles";
+import { useEffect, useRef, useState } from "react";
+import { articleDescription, compareArticles, groupArticles, salePriceInclCents, type Article } from "../lib/articles";
 import { articleLine, stoveLine, type DraftLine } from "../lib/invoice-draft";
 import { formatPrice } from "../lib/price";
 import type { QuoteStoveOption } from "../lib/quote-queries";
 import { stoveProductName } from "../lib/stove-specs";
-import { CONDITION_LABELS } from "../lib/stoves";
+import { CONDITION_LABELS, type Condition } from "../lib/stoves";
 
-const MAX_RESULTS = 12;
+type Item = { key: string; label: string; detail: string; line: () => DraftLine };
+type Group = { key: string; title: string; items: Item[] };
 
-type Option = { key: string; kind: string; label: string; detail: string; line: () => DraftLine };
+const CONDITION_ORDER: (Condition | null)[] = ["used", "new", null];
 
-function stoveOption(stove: QuoteStoveOption): Option {
-  const condition = stove.condition ? CONDITION_LABELS[stove.condition] : null;
-  return {
-    key: `stove-${stove.number}`,
-    kind: "Kachel",
-    label: `${stove.number} · ${stoveProductName(stove)}`,
-    detail: [condition, stove.priceCents ? formatPrice(stove.priceCents) : null].filter(Boolean).join(" · "),
-    line: () => stoveLine(stove),
-  };
+function stoveGroups(stoves: QuoteStoveOption[]): Group[] {
+  return CONDITION_ORDER.map((condition) => ({
+    key: condition ?? "other",
+    title: condition ? CONDITION_LABELS[condition] : "Overig",
+    items: stoves
+      .filter((stove) => stove.condition === condition)
+      .map((stove) => ({
+        key: `stove-${stove.number}`,
+        label: `${stove.number} · ${stoveProductName(stove)}`,
+        detail: stove.priceCents ? formatPrice(stove.priceCents) : "geen prijs",
+        line: () => stoveLine(stove),
+      })),
+  })).filter((group) => group.items.length > 0);
 }
 
-function articleOption(article: Article): Option {
-  const price = salePriceInclCents(article);
-  return {
-    key: `article-${article.id}`,
-    kind: "Artikel",
-    label: articleDescription(article),
-    detail: [article.sku, price === null ? "geen prijs" : `${formatPrice(price)} incl.`].filter(Boolean).join(" · "),
-    line: () => articleLine(article),
-  };
+function articleGroups(articles: Article[]): Group[] {
+  return groupArticles([...articles].sort(compareArticles)).map((group) => ({
+    key: group.key,
+    title: group.category ?? "Zonder categorie",
+    items: group.articles.map((article) => {
+      const price = salePriceInclCents(article);
+      return {
+        key: `article-${article.id}`,
+        label: articleDescription(article),
+        detail: price === null ? "geen prijs" : `${formatPrice(price)} incl.`,
+        line: () => articleLine(article),
+      };
+    }),
+  }));
+}
+
+type LineBrowserProps = {
+  title: string;
+  groups: Group[];
+  onPick: (line: DraftLine) => void;
+  onClose: () => void;
+};
+
+// A scrollable list in groups to pick quote lines from; stays open to add several. Rendered only while open.
+function LineBrowser({ title, groups, onPick, onClose }: LineBrowserProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [open, setOpen] = useState<Set<string>>(() => new Set(groups.length === 1 ? [groups[0].key] : []));
+  const [added, setAdded] = useState(0);
+
+  useEffect(() => {
+    if (!dialogRef.current?.open) dialogRef.current?.showModal();
+  }, []);
+
+  function toggle(key: string) {
+    setOpen((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function pick(item: Item) {
+    onPick(item.line());
+    setAdded((count) => count + 1);
+  }
+
+  return (
+    <dialog ref={dialogRef} className="edit-dialog line-browser" aria-labelledby="line-browser-title" onClose={onClose}>
+      <div className="invoice-dialog-header">
+        <h2 id="line-browser-title">{title}</h2>
+        <button type="button" className="line-remove" onClick={() => dialogRef.current?.close()} aria-label="Sluiten">×</button>
+      </div>
+      <div className="line-browser-list">
+        {groups.length === 0 && <p className="muted">Er is niets om toe te voegen.</p>}
+        {groups.map((group) => (
+          <section key={group.key} className="line-browser-group">
+            <button type="button" className="line-browser-group-title" aria-expanded={open.has(group.key)} onClick={() => toggle(group.key)}>
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+              {group.title}
+              <span className="agenda-day-count">{group.items.length}</span>
+            </button>
+            {open.has(group.key) && (
+              <ul>
+                {group.items.map((item) => (
+                  <li key={item.key}>
+                    <button type="button" onClick={() => pick(item)}>
+                      <span className="line-picker-label">{item.label}</span>
+                      <span className="line-picker-detail">{item.detail}</span>
+                      <span className="line-browser-add" aria-hidden="true">＋</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
+      </div>
+      <div className="button-row dialog-actions">
+        {added > 0 && <span className="muted line-browser-added" role="status">{added} toegevoegd</span>}
+        <button type="button" className="primary-button" onClick={() => dialogRef.current?.close()}>Klaar</button>
+      </div>
+    </dialog>
+  );
 }
 
 type QuoteLinePickerProps = {
@@ -41,62 +123,26 @@ type QuoteLinePickerProps = {
   disabled?: boolean;
 };
 
-// Search box that adds a stove on offer or an article from the article list as a quote line.
+// "Kachel toevoegen" and "Artikel toevoegen": each opens a list to scroll through and pick from.
 export default function QuoteLinePicker({ stoves, articles, onPick, disabled }: QuoteLinePickerProps) {
-  const [query, setQuery] = useState("");
-  const listId = useId();
-  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-
-  const results =
-    words.length === 0
-      ? []
-      : [...stoves.map(stoveOption), ...articles.map(articleOption)]
-          .filter((option) => {
-            const haystack = `${option.kind} ${option.label} ${option.detail}`.toLowerCase();
-            return words.every((word) => haystack.includes(word));
-          })
-          .slice(0, MAX_RESULTS);
-
-  function pick(option: Option) {
-    onPick(option.line());
-    setQuery("");
-  }
+  const [browsing, setBrowsing] = useState<"stove" | "article" | null>(null);
 
   return (
-    <div className="line-picker">
-      <input
-        type="search"
-        className="search-input"
-        placeholder="Kachel of artikel zoeken (nummer, merk, naam, Ø)"
-        aria-label="Kachel of artikel zoeken"
-        aria-controls={listId}
-        value={query}
-        disabled={disabled}
-        onChange={(event) => setQuery(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            if (results[0]) pick(results[0]);
-          }
-        }}
-      />
-      {words.length > 0 && (
-        <ul id={listId} className="line-picker-results">
-          {results.length === 0 ? (
-            <li className="muted line-picker-empty">Niets gevonden.</li>
-          ) : (
-            results.map((option) => (
-              <li key={option.key}>
-                <button type="button" onClick={() => pick(option)}>
-                  <span className={`line-picker-kind line-picker-kind--${option.kind === "Kachel" ? "stove" : "article"}`}>{option.kind}</span>
-                  <span className="line-picker-label">{option.label}</span>
-                  <span className="line-picker-detail">{option.detail}</span>
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
+    <>
+      <button type="button" className="secondary-button" onClick={() => setBrowsing("stove")} disabled={disabled}>
+        ＋ Kachel toevoegen
+      </button>
+      <button type="button" className="secondary-button" onClick={() => setBrowsing("article")} disabled={disabled}>
+        ＋ Artikel toevoegen
+      </button>
+      {browsing && (
+        <LineBrowser
+          title={browsing === "stove" ? "Kachel toevoegen" : "Artikel toevoegen"}
+          groups={browsing === "stove" ? stoveGroups(stoves) : articleGroups(articles)}
+          onPick={onPick}
+          onClose={() => setBrowsing(null)}
+        />
       )}
-    </div>
+    </>
   );
 }

@@ -250,3 +250,29 @@ export function readArticleCsv(text: string): Result<CsvRow[]> {
   if (rows.length > MAX_CSV_ROWS) return { ok: false, error: `Het bestand heeft meer dan ${MAX_CSV_ROWS} regels.` };
   return { ok: true, value: rows };
 }
+
+const firstNumber = (value: string | null) => (value === null ? Infinity : Number.parseInt(value, 10));
+
+/** By category, then name, then diameter and length as numbers (130 before 1000). */
+export function compareArticles(a: Article, b: Article) {
+  return (
+    (a.category ?? "\uffff").localeCompare(b.category ?? "\uffff", "nl") ||
+    a.name.localeCompare(b.name, "nl") ||
+    firstNumber(a.diameterMm) - firstNumber(b.diameterMm) ||
+    (a.lengthMm ?? Infinity) - (b.lengthMm ?? Infinity) ||
+    a.id - b.id
+  );
+}
+
+export type ArticleGroup = { key: string; category: string | null; articles: Article[] };
+
+/** Consecutive articles of the same category as one group; expects articles sorted by category. */
+export function groupArticles(articles: Article[]): ArticleGroup[] {
+  const groups: ArticleGroup[] = [];
+  for (const article of articles) {
+    const last = groups.at(-1);
+    if (last && last.category === article.category) last.articles.push(article);
+    else groups.push({ key: article.category ?? "", category: article.category, articles: [article] });
+  }
+  return groups;
+}

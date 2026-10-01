@@ -1,6 +1,6 @@
 # 2026-10-01 07:00 – windows-pc
 
-Branch: `feature/stove-notes`
+Branches: `feature/stove-notes`, `feature/quotes`
 
 ## Done
 - Brought this computer up to date with GitHub (`bf0314f`). Stale uncommitted changes from an older
@@ -27,6 +27,10 @@ Branch: `feature/stove-notes`
   Instellingen (Bedrijfsgegevens, Prompt instellen, Webshop). The stock page is called "Aanbod".
 - Facturen and all note lists use the stock table layout; rows in the note lists open the note.
 - Form fixes: selects and textareas inherit the page font; note dialog fields match in size.
+- Separate invoices without a stove ("+ Losse factuur" on Facturen).
+- Quotes (menu → Offertes, numbering O2026-0001): lines from stoves, articles or typed (optionally
+  saved as article), status Concept/Verstuurd/Geaccepteerd/Afgewezen, an accepted quote opens a
+  concept invoice. Articles (Instellingen → Artikelen) with CSV import keyed on SKU. Logo on PDFs.
 - Released to staging and production.
 
 ## Decisions
@@ -47,7 +51,14 @@ Branch: `feature/stove-notes`
 - Possible follow-up: prefill the invoice dialog with the buyer from a sold note.
 - This Windows computer still has a `.env.local`; per the 2026-09-30 decision it may be removed.
 
+- Supplier CSV (kachelwinkel_artikelen.csv): 12 roof outlets for tiled roofs share a SKU per
+  diameter (DD-130-PANNENDAK etc.) and are skipped on import until they get their own SKU; the file
+  has no prices yet.
+- Not yet tested in the browser: quotes, articles, CSV import, invoice from a quote.
+
 ## Manual steps and migrations
 - `20261001120000_create_stove_notes.sql`: applied by the user.
+- `20261001170000_allow_invoices_without_stove.sql` and `20261001190000_create_articles_and_quotes.sql`:
+  applied by the user.
 - The viewing migration was removed from the repository again; if it was applied, its constraint
   change has to be undone (see the chat of this session).
